@@ -250,10 +250,28 @@ test("public and application pages have no serious accessibility violations and 
       invitation + "/card",
     ]) {
       await page.goto(route);
-      const overflow = await page.evaluate(
-        () => document.documentElement.scrollWidth > innerWidth,
-      );
-      expect(overflow, `${route} at ${width}px`).toBe(false);
+      await expect(page.locator("h1")).toBeVisible();
+      await page.evaluate(() => document.fonts.ready);
+      const layout = await page.evaluate(() => ({
+        width: innerWidth,
+        scrollWidth: document.documentElement.scrollWidth,
+        offenders: [...document.querySelectorAll("body *")]
+          .map((element) => {
+            const rect = element.getBoundingClientRect();
+            return {
+              tag: element.tagName,
+              class: element.getAttribute("class"),
+              left: rect.left,
+              right: rect.right,
+            };
+          })
+          .filter((rect) => rect.right > innerWidth + 0.5 || rect.left < -0.5)
+          .slice(0, 12),
+      }));
+      expect(
+        layout.scrollWidth <= layout.width,
+        `${route} at ${width}px: ${JSON.stringify(layout)}`,
+      ).toBe(true);
     }
   }
 });

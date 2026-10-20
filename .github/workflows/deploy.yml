@@ -40,6 +40,14 @@ jobs:
         run: npm run test:ui
       - name: Verify connected host and guest workflow
         run: npm run test:connected
+      - name: Preserve browser failure screenshots
+        if: failure()
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
+        with:
+          name: browser-failures-${{ github.run_id }}
+          path: test-results/**/*.png
+          if-no-files-found: ignore
+          retention-days: 7
       - id: plan
         name: Select deployment from branch
         run: node scripts/deployment-plan.mjs

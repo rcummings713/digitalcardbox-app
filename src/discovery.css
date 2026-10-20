@@ -64,12 +64,15 @@
 }
 .discovery-home {
   display: grid;
-  grid-template-columns: 0.85fr 1.15fr;
+  grid-template-columns: minmax(0, 0.85fr) minmax(0, 1.15fr);
   grid-template-areas: "intro card" "create card" "value card";
   column-gap: 48px;
   row-gap: 22px;
   align-items: center;
   padding: 20px 0 12px;
+}
+.discovery-home > * {
+  min-width: 0;
 }
 .discovery-intro {
   grid-area: intro;
@@ -269,10 +272,14 @@
   height: 340px;
   perspective: 1200px;
   isolation: isolate;
+  /* Keep the rotating cover’s projected bounds inside its stage on all engines.
+     Card pages retain their own scrollports; focus rings have an 8px allowance. */
+  overflow: clip;
+  overflow-clip-margin: 8px;
 }
 .little-star-spread {
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   height: 100%;
   border-radius: 3px 6px 6px 3px;
   box-shadow:
@@ -335,6 +342,8 @@
   background-size: 24px 24px;
 }
 .little-star-inner {
+  min-width: 0;
+  max-width: 100%;
   min-height: 100%;
   background: #f5e5c9;
   border: 1px solid #c5a36e;
@@ -568,7 +577,7 @@
     height: 13px;
   }
   .discovery-home {
-    grid-template-columns: 1fr;
+    grid-template-columns: minmax(0, 1fr);
     grid-template-areas: "intro" "card" "create" "value";
     row-gap: 8px;
     padding: 2px 0 0;
