@@ -151,6 +151,13 @@ test("gift service changes reset review and a guest report cannot confirm receip
   ).toBeDisabled();
   await acknowledgment.check();
   await page.getByRole("button", { name: "Save gift details" }).click();
+  await expect(
+    page.getByRole("heading", { name: "Continue with Cash App", exact: true }),
+  ).toBeVisible();
+  await page.getByRole("button", { name: "Preview Cash App handoff" }).click();
+  await page
+    .getByRole("button", { name: "Finish without sending money" })
+    .click();
   await expect(page.getByText(/Your gift is unconfirmed/)).toBeVisible();
   await page.goto(host + "/gifts");
   await page.getByLabel("Find a gift").fill("Alex Review");
@@ -387,4 +394,46 @@ test("both book styles preserve the same consented cards and remember the event 
     "Jordan Lee",
   );
   await expect(page.locator(".book-editorial .keepsake-card")).toHaveCount(0);
+});
+
+test("a host-confirmed real Venmo recipient opens its exact profile without payment parameters", async ({
+  page,
+}) => {
+  await page.goto(host + "/settings");
+  const form = page
+    .locator(".destination-form")
+    .filter({ has: page.getByRole("heading", { name: "Venmo", exact: true }) });
+  await form
+    .getByLabel("Exact account identifier", { exact: true })
+    .fill("@owner-reviewed");
+  await form
+    .getByLabel("Enter it again", { exact: true })
+    .fill("@owner-reviewed");
+  await form.getByLabel(/Preview only:/).uncheck();
+  await form.getByLabel(/I checked this exact recipient/).check();
+  await form.getByRole("button", { name: "Save & confirm service" }).click();
+  await page.goto(invitation + "/gift");
+  await page
+    .getByLabel("The name your host knows you by")
+    .fill("Real route review");
+  await page
+    .getByRole("checkbox", { name: /I will check the exact recipient/ })
+    .check();
+  await page.getByRole("button", { name: "Save gift details" }).click();
+  await expect(page.locator(".route-address")).toHaveText(
+    "Destination: https://venmo.com/u/owner-reviewed",
+  );
+  const outbound: string[] = [];
+  await page.route("https://venmo.com/**", async (route) => {
+    outbound.push(route.request().url());
+    await route.fulfill({
+      contentType: "text/html",
+      body: "<h1>Intercepted provider handoff</h1>",
+    });
+  });
+  await page.getByRole("button", { name: "Open Venmo" }).click();
+  await expect(
+    page.getByRole("heading", { name: "Intercepted provider handoff" }),
+  ).toBeVisible();
+  expect(outbound).toEqual(["https://venmo.com/u/owner-reviewed"]);
 });

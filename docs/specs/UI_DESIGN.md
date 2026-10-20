@@ -1,6 +1,6 @@
 # TheDigitalCardBox application UI
 
-**Updated:** 13 October 2026. **Stage:** owner design review, before backend implementation.
+**Updated:** 18 October 2026. **Stage:** local design review with a persistent test backend (ADR 0008); production integration remains open.
 
 ## Visual direction
 
@@ -8,13 +8,13 @@ Retain the current branch's founder logo, `public/theme.css` palette and locally
 hosted Forum, Montserrat and Hanken Grotesk fonts. La Belle Aurore remains the
 documented decorative fallback until a licensed Miss Noteworthy webfont is
 supplied. Public pages use generous spacing, white panels, blush backgrounds,
-editorial photography and direct occasion-specific creation calls to action.
+direct occasion-specific creation calls to action. The latest home page replaces stock photography with an opening card and the owner-supplied before/after artwork.
 
 The composer includes a guided relationship/tone/length/memory writing panel
 with three editable prepared choices. Live AI is explicitly unconnected;
 manual notes always remain available.
 
-Cards use six original code-native vector directions: Pressed Peony, Golden
+Cards include the opening A Little Star baby card, plus six original code-native vector directions: Pressed Peony, Golden
 Hour, Written in the Stars, With Love, Wildflower Letter and A Moment to Keep.
 Do not add generated background art to the core collection. The founder's logo
 stays in the shared header/footer, not on guest cards or book entries. Long text
@@ -32,7 +32,7 @@ the selected style per card box in the browser adapter. Changing event details
 must preserve that choice. Detailed artwork polish and actual device review
 remain open; automated checks do not certify visual quality.
 
-## Account-free design review
+## Browser-only design review (`npm run dev:ui`)
 
 All records are fictional. No authentication, private server storage, message
 delivery, checkout, provider transaction import, live AI or licensed GIF API is
@@ -48,7 +48,7 @@ buttons retain this account-choice step before event setup. Provider buttons exp
 unconnected state rather than simulate authentication. This is an intentional
 review affordance, not an account or access-control implementation.
 
-The review build sets noindex/nofollow/noarchive and same-origin referrers.
+The review build sets noindex/nofollow/noarchive and no-referrer.
 These prevent ordinary indexing/referrer disclosure and are not authorization.
 Before public launch, make indexing policy route-specific on the server.
 
@@ -80,6 +80,7 @@ MVP_ACCEPTANCE.md. Keep this work off PROD until the owner chooses a release.
 | `/g/:opaqueToken/card` | Template, note, optional photo/GIF, explicit book consent |
 | `/g/:opaqueToken/review` | Full card and text review, local send action |
 | `/g/:opaqueToken/gift` | Independent optional gift, exact recipient, matching reference |
+| `/g/:opaqueToken/handoff` | Recipient/service instructions, exact HTTPS route, copy helpers, safe preview or explicit service navigation, return without receipt claims |
 | `/g/:opaqueToken/thanks` | Card/gift outcome with honest unconfirmed status |
 | `/admin/overview` | Aggregate fictional workspace metrics, no private card text |
 | `/admin/features` | Device-only switches for creation, gifts, GIFs, prompts and books |
@@ -88,8 +89,7 @@ MVP_ACCEPTANCE.md. Keep this work off PROD until the owner chooses a release.
 Unknown or draft invitation tokens reveal no event. Scheduled, paused, expired
 and gift-only states have distinct routes/actions. Public navigation has no
 event guest link; the host's share panel supplies preview and QR. Rotating the
-token invalidates old local links. Custom event links work only in the same
-browser until connected storage exists. Legacy `/prototype/index.html` and
+token invalidates old local links. In browser-only mode, custom event links work only in the same browser. In connected local mode, published invitations work across browsers/devices through the API. Legacy `/prototype/index.html` and
 `/host` lead to the host workspace; `/guest` no longer opens a public event.
 
 ## Gift matching and media boundaries
@@ -99,8 +99,10 @@ an opaque per-contribution matching reference that may be copied into a memo.
 These are clues, not a provider transaction ID. The host must check their own
 account before marking **host confirmed**, and can undo the mark. Changing
 services or destination versions resets recipient acknowledgment. Disabled and
-unconfirmed destinations do not appear to guests. No payment app or transfer is
-opened by this review build.
+unconfirmed destinations do not appear to guests. As authorized on 20 October,
+verified host-configured recipients can open Cash App/Venmo profiles; Zelle uses
+bank-app guidance and its bank finder. Fictional recipients stay in preview.
+No payment is executed or automatically confirmed. See GIFT_ROUTING.md.
 
 Do not assume peer-to-peer transaction data is available. Cash App's documented
 Pay integrations describe approved merchant/platform arrangements, not generic
@@ -134,3 +136,85 @@ honest receipt states, switches, closed/revoked links, keyboard navigation and
 320/375/768/1280 px layouts. Automated success does not establish ADA compliance
 or replace assistive-technology, real-phone and owner review. Backend acceptance
 criteria remain open even when their UI is reviewable.
+
+## Compact handheld layout — local proposal
+
+**Requested:** 16 October 2026. **Branch:** `feature/compact-mobile-layout`.
+**Review state:** commit/push to the isolated DEV preview authorized on 20 October; TEST/PROD promotion remains separate.
+
+`src/compact-mobile.css` applies below 900 CSS pixels and preserves the existing
+larger-screen presentation. Reduce header/logo size, heading scale, decorative
+spacing and image height. Use multiple columns for occasions, card-box lists,
+card collections and book spreads so a phone shows more useful content at once.
+Keep the palette, fonts, logo, complete page content and existing functionality.
+
+The guest composer puts card choices beside a compact live preview, followed by
+full-width writing and attachment controls. Its labeled preview region is
+keyboard-focusable and scrolls for long notes; the review screen still shows the
+complete note. Inputs remain 16 px, controls keep usable hit areas, and ordinary
+browser zoom is preserved. No viewport shrinking or whole-page transform is used.
+
+The proposed home page at 375 px is roughly 59% shorter than the previous mobile
+layout, with all four occasion choices visible in a 375 × 844 px viewport. Before
+the logo treatment below, five 1440 px desktop page screenshots were pixel-identical
+to the baseline. These measurements support local review; they do not replace
+approval on an actual phone.
+
+The shared header and footer logo now uses a non-destructive display treatment:
+normalize its embedded cream background to white, then multiply the image into
+the page surface. This removes the visible rectangular panel on blush and white
+backgrounds while retaining the supplied artwork, lettering, tagline, accessible
+name and home link. The source PNG is unchanged. This presentation adjustment
+also applies on larger screens and remains part of the local proposal.
+
+The logo adjustment passes the production build and the existing responsive
+accessibility test. Visual checks cover public, host and guest headers at 320,
+375, 768 and 1440 px; the logo remains linked to home and keeps its accessible
+name. The source bitmap SHA-256 is unchanged.
+
+
+## October 18 public pages and connected local review
+
+Target one screen on common phones with greatly reduced scrolling, rather than
+making desktop density the limit. Home combines the shared blended logo, one
+opening baby card, four creation choices and the supplied before/after artwork.
+Remove the previous roses, table and other stock photos from that page. Desktop
+uses a two-column editorial arrangement; mobile stacks the compact card and
+product explanation. Every public tab keeps its own route. Browser zoom and
+expanded forms/details may scroll; content is never hidden by locking the body.
+
+About reproduces the owner’s entire supplied paragraph word for word, including
+“The Digital Card box” capitalization. Instagram points to
+`https://www.instagram.com/thedigitalcardbox/` in the shared footer and contact
+page, with an accessible label and noreferrer protection. Card text is live HTML;
+the photographed reference’s English note, Spanish verse and Norma signature
+are retained in the A Little Star preview. A sleeping baby on the right has a
+warm starlight glow. The card opens once with gentle motion; its initial GIF
+play stops within five seconds. Open/close and play/pause remain explicit,
+keyboard-accessible controls. Reduced motion leaves a still card/poster.
+
+The guest composer includes the same card design and a searchable seven-item
+same-origin GIF catalog. Still posters appear in search; selecting, replacing,
+removing and playing a GIF are separate actions. The space GIF is a byte-for-byte
+copy of the supplied `tmp.gif`; no external API or arbitrary media URL is loaded.
+Server validation accepts only catalog IDs. Private photo upload is not yet
+connected and is labeled unavailable in server mode.
+
+`npm run dev` now runs a persistent API plus Vite. Host sign-in/skip-account-setup
+uses a published fictional test identity, while Apple/Google/Amazon choices remain
+unconnected. An opaque invitation grants only guest actions. Host ownership,
+operator role, event windows/revisions, consent, moderation, link rotation and
+feature controls are enforced on the server. Book layout choices persist there.
+A guest sees acceptance only after the API confirms it; failed sends retain the
+draft. Gift matching and reviewed handoffs are persisted separately from cards;
+operator controls can pause them. Payment execution remains absent.
+See LOCAL_API.md, ADR 0008 and planning/UI_REVIEW.md for test access and boundaries.
+
+
+Verification on 18 October: all ten public routes fit both 375 × 667 and
+375 × 812 phone viewports at default text size, including Contact and account
+choices. Short-screen layouts remove repeated decorative headings, place account
+providers together and expose optional pricing detail through a disclosure. The
+complete About wording stays visible. Ordinary scrolling remains for expanded
+details, browser text zoom and smaller viewports. Header/card typography, input
+sizes and motion controls are preserved without page-scale transforms.

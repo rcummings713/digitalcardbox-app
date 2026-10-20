@@ -21,7 +21,7 @@
   font-synthesis: none;
 }
 
-/* Display the supplied artwork intact, with the screenshot framing outside the viewport. */
+/* Crop the screenshot frame and blend the normalized logo into its page surface. */
 .brand-logo {
   display: inline-block;
   position: relative;
@@ -29,6 +29,11 @@
   aspect-ratio: 900 / 445;
   overflow: hidden;
   vertical-align: middle;
+  mix-blend-mode: multiply;
+}
+.brand-logo-treatment {
+  position: absolute;
+  pointer-events: none;
 }
 .brand-logo img {
   display: block;

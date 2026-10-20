@@ -1,5 +1,7 @@
 # Documentation map
 
+- `specs/LOCAL_API.md`: local persistent host/guest API and test boundaries.
+- `adr/0008-local-backend-review.md`: isolated local backend while production adapters remain open.
 - `specs/UI_DESIGN.md`: current application pages and UI-first review boundaries.
 - `../planning/UI_REVIEW.md`: owner review sequence, decisions and issue mapping.
 - `adr/0007-ui-first-design-review.md`: account-free UI before backend implementation.
@@ -12,3 +14,5 @@
 - `reference/`: the current Word financial, system, timeline, executive, journey and question documents. Keep these files in version control and revise them when the product decisions change.
 
 When an implementation detail changes, update the relevant spec, ADR, affected reference document and GitHub issue in the same pull request.
+
+- [Reviewed provider gift handoffs](specs/GIFT_ROUTING.md) — actual Cash App/Venmo profile navigation, Zelle bank guidance, fictional recipient previews and matching boundaries.

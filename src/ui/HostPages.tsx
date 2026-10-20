@@ -1,3 +1,4 @@
+import { validIdentifier, fictionalIdentifier } from "../modules/gifts/routing";
 import { useEffect, useState } from "react";
 import type { FormEvent } from "react";
 import {
@@ -73,15 +74,17 @@ export function Workspace() {
   );
 }
 export function EventForm({ event }: { event?: Occasion }) {
-  const { data, setData, notify } = useStore();
+  const { data, actions, notify, busy } = useStore();
   const [type, setType] = useState(
     event?.type ||
       new URLSearchParams(location.search).get("occasion") ||
       "Wedding",
   );
   const [error, setError] = useState("");
-  const locked = !!event && data.entries.some((x) => x.eventId === event.id);
-  function submit(e: FormEvent<HTMLFormElement>) {
+  const locked =
+    !!event &&
+    (!!event.locked || data.entries.some((x) => x.eventId === event.id));
+  async function submit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
     const f = new FormData(e.currentTarget);
     const date = String(f.get("date") || event?.date);
@@ -110,7 +113,7 @@ export function EventForm({ event }: { event?: Occasion }) {
       hosts,
       type: locked ? event!.type : type,
       date,
-      timezone: String(f.get("timezone")),
+      timezone: String(f.get("timezone") || event?.timezone),
       location: String(f.get("location")).trim(),
       welcome: String(f.get("welcome")).trim(),
       cover: String(f.get("cover")),
@@ -118,18 +121,14 @@ export function EventForm({ event }: { event?: Occasion }) {
       bookLayout: event?.bookLayout,
       destinations: event?.destinations || [],
     };
-    setData((d) => ({
-      ...d,
-      events: event
-        ? d.events.map((x) => (x.id === event.id ? created : x))
-        : [created, ...d.events],
-    }));
+    const saved = await actions.saveEvent(created);
+    if (!saved) return;
     notify(
       event
         ? "Your event details have been saved."
         : "Your card box is ready to make your own.",
     );
-    go(`/workspace/events/${created.id}/overview`);
+    go(`/workspace/events/${saved.id}/overview`);
   }
   if (!event && !data.flags.newEvents)
     return (
@@ -205,6 +204,7 @@ export function EventForm({ event }: { event?: Occasion }) {
             <select
               id="event-timezone"
               name="timezone"
+              disabled={locked}
               defaultValue={event?.timezone || "America/New_York"}
             >
               {[
@@ -276,8 +276,12 @@ export function EventForm({ event }: { event?: Occasion }) {
           </p>
         )}
         <div className="buttons">
-          <button className="primary">
-            {event ? "Save event details" : "Create card box"}
+          <button className="primary" disabled={busy}>
+            {busy
+              ? "Saving…"
+              : event
+                ? "Save event details"
+                : "Create card box"}
           </button>
           <Link
             className="secondary"
@@ -451,16 +455,15 @@ function Overview({ event }: { event: Occasion }) {
   );
 }
 function Share({ event }: { event: Occasion }) {
-  const { setData, notify } = useStore();
+  const { actions, notify, mode, busy } = useStore();
   const url = location.origin + "/g/" + event.token;
-  function publish() {
-    setData((d) => ({
-      ...d,
-      events: d.events.map((x) =>
-        x.id === event.id ? { ...x, status: "published" } : x,
-      ),
-    }));
-    notify("Your guest link is available in this browser.");
+  async function publish() {
+    if (await actions.updateEvent(event.id, { status: "published" }))
+      notify(
+        mode === "server"
+          ? "Your guest link is ready to share."
+          : "Your guest link is available in this browser.",
+      );
   }
   return (
     <>
@@ -479,7 +482,7 @@ function Share({ event }: { event: Occasion }) {
             <Notice>
               Review the event details before making your invitation available.
             </Notice>
-            <button className="primary" onClick={publish}>
+            <button className="primary" onClick={publish} disabled={busy}>
               Publish guest link
             </button>
           </>
@@ -517,8 +520,9 @@ function Share({ event }: { event: Occasion }) {
                   same guest invitation as your link.
                 </p>
                 <p className="small">
-                  For this design review, open the link in the same browser and
-                  device. Custom card boxes are stored on this device.
+                  {mode === "server"
+                    ? "Open this link on another device or in a private browser to test the guest experience. The invitation grants guest access only."
+                    : "For this design review, open the link in the same browser and device. Custom card boxes are stored on this device."}
                 </p>
               </div>
             </div>
@@ -529,7 +533,7 @@ function Share({ event }: { event: Occasion }) {
   );
 }
 function CardsInbox({ event }: { event: Occasion }) {
-  const { data, setData, notify } = useStore();
+  const { data, actions, notify, busy } = useStore();
   const [query, setQuery] = useState("");
   const [filter, setFilter] = useState("all");
   const [opened, setOpened] = useState("");
@@ -620,31 +624,27 @@ function CardsInbox({ event }: { event: Occasion }) {
                   <div className="buttons">
                     <button
                       className="secondary"
+                      disabled={busy}
                       onClick={() =>
-                        setData((d) => ({
-                          ...d,
-                          entries: d.entries.map((x) =>
-                            x.id === entry.id ? { ...x, hidden: !x.hidden } : x,
-                          ),
-                        }))
+                        actions.moderateCard(
+                          entry.id,
+                          entry.hidden ? "restore" : "hide",
+                        )
                       }
                     >
                       {entry.hidden ? "Restore card" : "Hide from book"}
                     </button>
                     <button
                       className="text-link danger"
-                      onClick={() => {
+                      disabled={busy}
+                      onClick={async () => {
                         if (
                           window.confirm(
-                            "Remove this card from this device? This cannot be undone.",
-                          )
-                        ) {
-                          setData((d) => ({
-                            ...d,
-                            entries: d.entries.filter((x) => x.id !== entry.id),
-                          }));
+                            "Remove this card? This cannot be undone.",
+                          ) &&
+                          (await actions.moderateCard(entry.id, "remove"))
+                        )
                           notify("The card was removed.");
-                        }
                       }}
                     >
                       Remove card
@@ -664,7 +664,7 @@ function CardsInbox({ event }: { event: Occasion }) {
   );
 }
 function Gifts({ event }: { event: Occasion }) {
-  const { data, setData, notify } = useStore();
+  const { data, actions, notify } = useStore();
   const [query, setQuery] = useState("");
   const [filter, setFilter] = useState("all");
   const [checking, setChecking] = useState("");
@@ -767,19 +767,8 @@ function Gifts({ event }: { event: Occasion }) {
                   <button
                     className="primary"
                     disabled={!checked}
-                    onClick={() => {
-                      setData((d) => ({
-                        ...d,
-                        gifts: d.gifts.map((x) =>
-                          x.id === gift.id
-                            ? { ...x, status: "host-confirmed" }
-                            : x,
-                        ),
-                        audit: [
-                          `Host marked gift ${gift.reference} received.`,
-                          ...d.audit,
-                        ],
-                      }));
+                    onClick={async () => {
+                      if (!(await actions.confirmGift(gift.id, true))) return;
                       setChecking("");
                       notify(
                         "Recorded as host confirmed. This is your confirmation, not a provider verification.",
@@ -806,14 +795,7 @@ function Gifts({ event }: { event: Occasion }) {
             ) : (
               <button
                 className="text-link"
-                onClick={() =>
-                  setData((d) => ({
-                    ...d,
-                    gifts: d.gifts.map((x) =>
-                      x.id === gift.id ? { ...x, status: "unconfirmed" } : x,
-                    ),
-                  }))
-                }
+                onClick={() => actions.confirmGift(gift.id, false)}
               >
                 Undo host confirmation
               </button>
@@ -851,32 +833,38 @@ function DestinationForm({
   event: Occasion;
   destination: Destination;
 }) {
-  const { setData, notify } = useStore();
+  const { actions, notify, busy } = useStore();
   const [identifier, setIdentifier] = useState(destination.identifier);
   const [recipient, setRecipient] = useState(destination.recipient);
   const [repeat, setRepeat] = useState("");
   const [confirm, setConfirm] = useState(false);
+  const [previewOnly, setPreviewOnly] = useState(
+    destination.previewOnly !== false,
+  );
   const [error, setError] = useState("");
   useEffect(() => {
     setIdentifier(destination.identifier);
     setRecipient(destination.recipient);
     setRepeat("");
     setConfirm(false);
-  }, [destination.identifier, destination.recipient]);
-  function save(e: FormEvent<HTMLFormElement>) {
+    setPreviewOnly(destination.previewOnly !== false);
+  }, [destination.identifier, destination.recipient, destination.version]);
+  async function save(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
     if (!identifier.trim() || identifier !== repeat) {
       setError("The two identifiers must match exactly.");
       return;
     }
-    const valid =
-      destination.service === "Venmo"
-        ? /^@[A-Za-z0-9_-]{3,30}$/.test(identifier)
-        : destination.service === "Cash App"
-          ? /^\$[A-Za-z0-9]{1,30}$/.test(identifier)
-          : /^([^\s@]+@[^\s@]+\.[^\s@]+|\+?[0-9 ()-]{10,20})$/.test(identifier);
-    if (!valid) {
-      setError("Enter a valid " + destination.service + " identifier.");
+    if (!validIdentifier(destination.service, identifier)) {
+      setError(
+        "Enter a valid " +
+          destination.service +
+          " identifier. For a Zelle phone number, use 10 U.S. digits, optionally prefixed with +1.",
+      );
+      return;
+    }
+    if (!previewOnly && fictionalIdentifier(identifier)) {
+      setError("Keep fictional recipients in preview mode.");
       return;
     }
     if (!confirm) {
@@ -885,30 +873,24 @@ function DestinationForm({
       );
       return;
     }
-    setData((d) => ({
-      ...d,
-      events: d.events.map((x) =>
-        x.id === event.id
-          ? {
-              ...x,
-              destinations: x.destinations.map((r) =>
-                r.service === destination.service
-                  ? {
-                      ...r,
-                      recipient: recipient.trim(),
-                      identifier,
-                      confirmed: true,
-                      enabled: true,
-                      version: r.version + 1,
-                    }
-                  : r,
-              ),
-            }
-          : x,
-      ),
-    }));
-    setError("");
-    notify(destination.service + " details saved and host confirmed.");
+    if (
+      await actions.saveDestination(
+        event.id,
+        {
+          ...destination,
+          recipient: recipient.trim(),
+          identifier,
+          previewOnly,
+          confirmed: true,
+          enabled: true,
+        },
+        repeat,
+        confirm,
+      )
+    ) {
+      setError("");
+      notify(destination.service + " details saved and host confirmed.");
+    }
   }
   return (
     <form className="panel destination-form" onSubmit={save}>
@@ -965,40 +947,50 @@ function DestinationForm({
           {destination.service}.
         </span>
       </label>
+      <label className="check">
+        <input
+          type="checkbox"
+          checked={previewOnly}
+          onChange={(e) => {
+            setPreviewOnly(e.target.checked);
+            setConfirm(false);
+          }}
+        />
+        <span>
+          Preview only: keep this fictional recipient inside the website.
+        </span>
+      </label>
+      <p className="small">
+        Uncheck only for your own real recipient, verified in{" "}
+        {destination.service}. Guests may then open the service. No money is
+        sent by this website.
+      </p>
       {error && (
         <p role="alert" className="field-error">
           {error}
         </p>
       )}
       <div className="buttons">
-        <button className="primary">Save & confirm service</button>
+        <button className="primary" disabled={busy}>
+          Save & confirm service
+        </button>
         <button
           type="button"
           className="secondary"
-          onClick={() => {
-            setData((d) => ({
-              ...d,
-              events: d.events.map((x) =>
-                x.id === event.id
-                  ? {
-                      ...x,
-                      destinations: x.destinations.map((r) =>
-                        r.service === destination.service
-                          ? {
-                              ...r,
-                              enabled: false,
-                              confirmed: false,
-                              version: r.version + 1,
-                            }
-                          : r,
-                      ),
-                    }
-                  : x,
-              ),
-            }));
-            notify(
-              destination.service + " is paused. Other services are unchanged.",
-            );
+          disabled={busy || !destination.enabled}
+          onClick={async () => {
+            if (
+              await actions.saveDestination(
+                event.id,
+                { ...destination, enabled: false },
+                "",
+                false,
+              )
+            )
+              notify(
+                destination.service +
+                  " is paused. Other services are unchanged.",
+              );
           }}
         >
           Pause service
@@ -1011,7 +1003,7 @@ function DestinationForm({
   );
 }
 function EventSettings({ event }: { event: Occasion }) {
-  const { setData, notify } = useStore();
+  const { actions, notify, busy } = useStore();
   const services: Service[] = ["Venmo", "Cash App", "Zelle"];
   return (
     <>
@@ -1028,18 +1020,11 @@ function EventSettings({ event }: { event: Occasion }) {
         <div className="buttons">
           <button
             className="secondary"
+            disabled={busy}
             onClick={() =>
-              setData((d) => ({
-                ...d,
-                events: d.events.map((x) =>
-                  x.id === event.id
-                    ? {
-                        ...x,
-                        status: x.status === "paused" ? "published" : "paused",
-                      }
-                    : x,
-                ),
-              }))
+              actions.updateEvent(event.id, {
+                status: event.status === "paused" ? "published" : "paused",
+              })
             }
           >
             {event.status === "paused"
@@ -1048,22 +1033,17 @@ function EventSettings({ event }: { event: Occasion }) {
           </button>
           <button
             className="secondary"
-            onClick={() => {
+            disabled={busy}
+            onClick={async () => {
               if (
                 window.confirm(
                   "Replace this guest link? The previous link and QR will stop opening this event.",
-                )
-              ) {
-                setData((d) => ({
-                  ...d,
-                  events: d.events.map((x) =>
-                    x.id === event.id ? { ...x, token: uid() } : x,
-                  ),
-                }));
+                ) &&
+                (await actions.rotateLink(event.id))
+              )
                 notify(
                   "Your previous guest link has been replaced. Share the new invitation.",
                 );
-              }
             }}
           >
             Rotate guest link
@@ -1072,59 +1052,32 @@ function EventSettings({ event }: { event: Occasion }) {
       </section>
       <h2>Optional external gifts</h2>
       <p>
-        Enable only the services you use. TheDigitalCardBox does not process or
-        independently verify transfers.
+        Choose the services you use. Keep fictional recipients in preview mode.
+        TheDigitalCardBox does not process or independently verify transfers.
       </p>
-      {services.map((service) => {
-        const destination = event.destinations.find(
-          (x) => x.service === service,
-        );
-        return destination ? (
-          <DestinationForm
-            key={service}
-            event={event}
-            destination={destination}
-          />
-        ) : (
-          <section key={service} className="panel row-between">
-            <h3>{service}</h3>
-            <button
-              className="secondary"
-              onClick={() =>
-                setData((d) => ({
-                  ...d,
-                  events: d.events.map((x) =>
-                    x.id === event.id
-                      ? {
-                          ...x,
-                          destinations: [
-                            ...x.destinations,
-                            {
-                              service,
-                              recipient: event.hosts,
-                              identifier: "",
-                              enabled: false,
-                              confirmed: false,
-                              version: 1,
-                            },
-                          ],
-                        }
-                      : x,
-                  ),
-                }))
-              }
-            >
-              Set up {service}
-            </button>
-          </section>
-        );
-      })}
+      {services.map((service) => (
+        <DestinationForm
+          key={service}
+          event={event}
+          destination={
+            event.destinations.find((x) => x.service === service) || {
+              service,
+              recipient: event.hosts,
+              identifier: "",
+              enabled: false,
+              confirmed: false,
+              version: 0,
+              previewOnly: true,
+            }
+          }
+        />
+      ))}
     </>
   );
 }
 export function Account() {
-  const { data, setData, notify } = useStore();
-  function save(e: FormEvent<HTMLFormElement>) {
+  const { data, setData, actions, notify, mode, busy, account } = useStore();
+  async function save(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
     const f = new FormData(e.currentTarget);
     const name = String(f.get("name")).trim();
@@ -1132,11 +1085,14 @@ export function Account() {
       notify("Please add a name.");
       return;
     }
-    setData((d) => ({
-      ...d,
-      profile: { ...d.profile, name, email: String(f.get("email")).trim() },
-    }));
-    notify("Your device preferences are saved.");
+    if (
+      await actions.saveProfile({
+        ...data.profile,
+        name,
+        email: String(f.get("email")).trim(),
+      })
+    )
+      notify("Your preferences are saved.");
   }
   return (
     <>
@@ -1158,61 +1114,97 @@ export function Account() {
             name="email"
             defaultValue={data.profile.email}
             type="email"
+            readOnly={mode === "server"}
             required
           />
           <p className="small">
-            Saved on this device. This does not create or update a connected
-            account.
+            {mode === "server"
+              ? "Your name and motion preference are saved on the test server. This test account email cannot be changed."
+              : "Saved on this device. This does not create or update a connected account."}
           </p>
-          <button className="primary">Save preferences</button>
+          <button className="primary" disabled={busy}>
+            Save preferences
+          </button>
         </form>
         <section className="panel">
           <h2>A comfortable experience</h2>
           <label className="check">
             <input
               type="checkbox"
+              disabled={busy}
               checked={data.profile.reducedMotion}
               onChange={(e) =>
-                setData((d) => ({
-                  ...d,
-                  profile: { ...d.profile, reducedMotion: e.target.checked },
-                }))
+                actions.saveProfile({
+                  ...data.profile,
+                  reducedMotion: e.target.checked,
+                })
               }
             />
             <span>Reduce motion and keep GIFs still</span>
           </label>
           <p>
-            Cards can always be read as text, and animated stickers start only
-            when you choose to play them.
+            Cards can always be read as text. Animations respect your motion
+            preference.
           </p>
           <Link className="text-link" to="/accessibility">
             Accessibility statement ↗
           </Link>
           <hr />
-          <h3>Design workspace</h3>
-          <p className="small">
-            All records are fictional and editable without signing in. Resetting
-            restores the original fictional events and removes your local
-            changes.
-          </p>
-          <button
-            className="secondary danger"
-            onClick={() => {
-              if (
-                window.confirm("Reset all workspace changes on this device?")
-              ) {
-                setData(initialStore());
-                notify("The design workspace was reset.");
-              }
-            }}
-          >
-            Reset workspace
-          </button>
-          <div className="buttons">
-            <Link to="/admin" className="text-link">
-              Open administrator workspace ↗
-            </Link>
-          </div>
+          {mode === "server" ? (
+            <>
+              <h3>Your test account</h3>
+              <p className="small">
+                Your events and accepted cards remain on this test server when
+                you sign out.
+              </p>
+              <button
+                className="secondary"
+                disabled={busy}
+                onClick={async () => {
+                  await actions.logout();
+                  go("/start");
+                }}
+              >
+                Sign out
+              </button>
+              {account?.role === "operator" && (
+                <p>
+                  <Link to="/admin" className="text-link">
+                    Open administrator workspace ↗
+                  </Link>
+                </p>
+              )}
+            </>
+          ) : (
+            <>
+              <h3>Design workspace</h3>
+              <p className="small">
+                All records are fictional and editable without signing in.
+                Resetting restores the original fictional events and removes
+                your local changes.
+              </p>
+              <button
+                className="secondary danger"
+                onClick={() => {
+                  if (
+                    window.confirm(
+                      "Reset all workspace changes on this device?",
+                    )
+                  ) {
+                    setData(initialStore());
+                    notify("The design workspace was reset.");
+                  }
+                }}
+              >
+                Reset workspace
+              </button>
+              <div className="buttons">
+                <Link to="/admin" className="text-link">
+                  Open administrator workspace ↗
+                </Link>
+              </div>
+            </>
+          )}
         </section>
       </div>
     </>

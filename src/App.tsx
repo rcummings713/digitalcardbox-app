@@ -3,17 +3,19 @@ import { Account, EventForm, EventWorkspace, Workspace } from "./ui/HostPages";
 import { Contact, Home, Informational, Missing, Start } from "./ui/PublicPages";
 import { GuestPage } from "./ui/GuestPages";
 import { Admin } from "./ui/AdminPages";
-import { Link, Logo } from "./ui/shared";
+import { InstagramLink, Link, Logo } from "./ui/shared";
 import { StoreProvider, useStore } from "./ui/state";
+import { SignIn } from "./ui/AuthPages";
 
 function locationKey() {
   return location.pathname + location.search;
 }
 function Shell() {
   const [route, setRoute] = useState(locationKey);
-  const { message, storageError, notify } = useStore();
+  const { message, storageError, notify, mode, account, ready, actions, busy } =
+    useStore();
   const main = useRef<HTMLElement>(null);
-  const first = useRef(true);
+  const previousRoute = useRef(route);
   useEffect(() => {
     const change = () => setRoute(locationKey());
     window.addEventListener("popstate", change);
@@ -35,15 +37,14 @@ function Shell() {
       const h1 = main.current?.querySelector("h1");
       document.title =
         (h1?.textContent || "Cards, gifts & memories") + " · TheDigitalCardBox";
-      if (first.current) {
-        first.current = false;
-      } else {
+      if (previousRoute.current !== route) {
+        previousRoute.current = route;
         main.current?.focus({ preventScroll: true });
         window.scrollTo({ top: 0, behavior: "instant" });
       }
     }, 0);
     return () => clearTimeout(timer);
-  }, [route]);
+  }, [route, ready, account]);
   let content;
   if (guest)
     content = <GuestPage token={parts[1] || ""} step={parts[2] || "landing"} />;
@@ -76,10 +77,20 @@ function Shell() {
   )
     content = <Informational page={parts[0]} />;
   else content = <Missing />;
+  if (mode === "server" && (workspace || admin)) {
+    if (!ready)
+      content = (
+        <div className="empty" role="status">
+          <h1>Opening your workspace…</h1>
+        </div>
+      );
+    else if (!account) content = <SignIn returnTo={route} />;
+  }
   return (
     <div
       className={
         "shell " +
+        (!workspace && !admin && !guest ? "public-shell " : "") +
         (workspace || admin ? "app-shell" : "") +
         (guest ? " guest-shell" : "")
       }
@@ -96,6 +107,7 @@ function Shell() {
                 ["/how-it-works", "How it works"],
                 ["/cards", "The cards"],
                 ["/pricing", "Pricing"],
+                ["/about", "About"],
               ].map(([to, title]) => (
                 <Link
                   key={to}
@@ -119,11 +131,35 @@ function Shell() {
       </header>
       {(workspace || admin) && (
         <div className="workspace-reviewbar">
-          <span>Design workspace · Changes stay on this device</span>
+          <span>
+            {mode === "server"
+              ? account
+                ? `Test workspace · ${account.email}`
+                : "Private host workspace"
+              : "Design workspace · Changes stay on this device"}
+          </span>
           <div>
             <Link to="/workspace">My card boxes</Link>
             <Link to="/workspace/account">Preferences</Link>
             {admin && <Link to="/workspace/account">Return to host tools</Link>}
+            {mode === "server" && account && (
+              <>
+                <button
+                  className="text-link"
+                  disabled={busy}
+                  onClick={() => actions.refresh()}
+                >
+                  Refresh
+                </button>
+                <button
+                  className="text-link"
+                  disabled={busy}
+                  onClick={() => actions.logout()}
+                >
+                  Sign out
+                </button>
+              </>
+            )}
           </div>
         </div>
       )}
@@ -164,6 +200,7 @@ function Shell() {
           <Link to="/privacy">Privacy</Link>
           <Link to="/terms">Terms</Link>
           <Link to="/accessibility">Accessibility</Link>
+          <InstagramLink />
         </nav>
         <p className="copyright">
           © {new Date().getFullYear()} TheDigitalCardBox. All rights reserved.

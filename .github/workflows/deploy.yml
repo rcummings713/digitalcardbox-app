@@ -33,10 +33,13 @@ jobs:
       - run: node --test scripts/deployment-plan.test.mjs
       - run: npm run check:planning
       - run: npm run build
+      - run: npm run test:api
       - name: Install browser for UI review checks
         run: npx playwright install --with-deps chromium
       - name: Verify customer journeys and accessibility
         run: npm run test:ui
+      - name: Verify connected host and guest workflow
+        run: npm run test:connected
       - id: plan
         name: Select deployment from branch
         run: node scripts/deployment-plan.mjs

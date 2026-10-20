@@ -1,6 +1,6 @@
 # Deployment environments and solo release workflow
 
-The setup follows [ADR 0006](../docs/adr/0006-deployment-environments.md). The application is currently a static, sample-only UI.
+The setup follows [ADR 0006](../docs/adr/0006-deployment-environments.md). Cloudflare currently deploys the static browser-review adapter. `npm run dev` additionally runs the local persistent API under ADR 0008; that API is not deployed by this static workflow.
 
 | Environment | Source | URL |
 | --- | --- | --- |

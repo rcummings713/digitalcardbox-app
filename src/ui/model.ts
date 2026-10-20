@@ -4,14 +4,23 @@ import type {
 } from "../modules/gifts/public";
 
 export type CardStyle =
-  "botanical" | "arch" | "midnight" | "ribbon" | "garden" | "photo";
+  | "botanical"
+  | "arch"
+  | "midnight"
+  | "ribbon"
+  | "garden"
+  | "photo"
+  | "little-star";
 export type Service = PaymentService;
 export type Feature = "gifts" | "gifs" | "assistance" | "books" | "newEvents";
 export interface Destination extends DisplayedDestination {
+  previewOnly?: boolean;
   confirmed: boolean;
   enabled: boolean;
 }
 export interface Occasion {
+  revision?: number;
+  locked?: boolean;
   id: string;
   token: string;
   title: string;
@@ -42,6 +51,7 @@ export interface Gift {
   id: string;
   eventId: string;
   entryId?: string;
+  previewOnly?: boolean;
   name: string;
   alias: string;
   service: Service;
@@ -85,6 +95,11 @@ export const eventTypes = [
 ];
 export const designs: { id: CardStyle; name: string; description: string }[] = [
   {
+    id: "little-star",
+    name: "A Little Star",
+    description: "An opening baby card, starlight and your own note",
+  },
+  {
     id: "botanical",
     name: "Pressed Peony",
     description: "Fine botanical lines on warm ivory",
@@ -116,6 +131,12 @@ export const designs: { id: CardStyle; name: string; description: string }[] = [
   },
 ];
 export const gifCollection = [
+  {
+    id: "cosmic",
+    name: "A universe of little stars",
+    tags: "space universe galaxy stars baby boy little sparkle starlight",
+    symbol: "✧",
+  },
   {
     id: "hearts",
     name: "Sending love",
@@ -178,6 +199,7 @@ export function initialStore(): Store {
         service: "Venmo",
         recipient: "Alex & Maya",
         identifier: "@alex-maya-design",
+        previewOnly: true,
         enabled: true,
         confirmed: true,
         version: 1,
@@ -186,6 +208,7 @@ export function initialStore(): Store {
         service: "Cash App",
         recipient: "Alex & Maya",
         identifier: "$AlexMayaDesign",
+        previewOnly: true,
         enabled: true,
         confirmed: true,
         version: 1,
@@ -194,8 +217,9 @@ export function initialStore(): Store {
         service: "Zelle",
         recipient: "Alex & Maya",
         identifier: "alex-maya@example.invalid",
-        enabled: false,
-        confirmed: false,
+        previewOnly: true,
+        enabled: true,
+        confirmed: true,
         version: 1,
       },
     ],

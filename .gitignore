@@ -13,3 +13,12 @@ __pycache__/
 
 test-results/
 playwright-report/
+
+# Persistent local test records, session hashes and link encryption key.
+.data/
+
+# Owner reference uploads stay local; browser-ready derivatives are in public/.
+/IMG_2290.heic
+/IMG_8142.jpeg
+/IMG_9541.heic
+/tmp.gif

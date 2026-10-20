@@ -5,7 +5,7 @@ import { Botanical, Card, Empty, Heading, Notice, download } from "./shared";
 import { useStore } from "./state";
 
 export function EventBook({ event }: { event: Occasion }) {
-  const { data, setData, notify } = useStore();
+  const { data, actions, notify, busy } = useStore();
   const layout = event.bookLayout || "editorial";
   const [spread, setSpread] = useState(0);
   const [reading, setReading] = useState(false);
@@ -54,15 +54,9 @@ export function EventBook({ event }: { event: Occasion }) {
                 aria-label={style.name}
                 aria-describedby={`book-style-${style.value}`}
                 aria-pressed={layout === style.value}
+                disabled={busy}
                 onClick={() =>
-                  setData((d) => ({
-                    ...d,
-                    events: d.events.map((item) =>
-                      item.id === event.id
-                        ? { ...item, bookLayout: style.value }
-                        : item,
-                    ),
-                  }))
+                  actions.updateEvent(event.id, { bookLayout: style.value })
                 }
               >
                 <strong>{style.name}</strong>
@@ -166,7 +160,11 @@ export function EventBook({ event }: { event: Occasion }) {
                       {entry.gif && (
                         <img
                           className="book-sticker"
-                          src={"/gifs/" + entry.gif + ".svg"}
+                          src={
+                            entry.gif === "cosmic"
+                              ? "/gifs/cosmic-poster.png"
+                              : "/gifs/" + entry.gif + ".svg"
+                          }
                           alt="An illustrated keepsake sticker"
                           width="100"
                           height="100"

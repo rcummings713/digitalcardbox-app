@@ -1,3 +1,7 @@
+import { ProviderHandoff } from "./ProviderHandoff";
+import { reviewDestination } from "../modules/gifts/routing";
+import type { GiftHandoff } from "../modules/gifts/routing";
+import type { GiftIntentInput } from "./api";
 import { useEffect, useRef, useState } from "react";
 import type { FormEvent } from "react";
 import {
@@ -21,6 +25,7 @@ import {
 } from "./shared";
 import { useStore } from "./state";
 import { WritingAssist } from "./WritingAssist";
+import type { InvitationResponse } from "./api";
 
 interface Draft {
   id: string;
@@ -32,6 +37,9 @@ interface Draft {
   consent: boolean;
   reference: string;
   submitted: boolean;
+  receiptId?: string;
+  handoff?: GiftHandoff;
+  giftInput?: GiftIntentInput;
 }
 function freshDraft(): Draft {
   return {
@@ -63,7 +71,9 @@ function loadDraft(token: string): Draft {
   return freshDraft();
 }
 export function GuestPage({ token, step }: { token: string; step: string }) {
-  const { data } = useStore();
+  const { data, mode } = useStore();
+  if (mode === "server")
+    return <ConnectedGuestPage token={token} step={step} />;
   const event = data.events.find((x) => x.token === token);
   if (!event || event.status === "draft")
     return (
@@ -79,8 +89,78 @@ export function GuestPage({ token, step }: { token: string; step: string }) {
     );
   return <GuestJourney key={token} event={event} step={step} />;
 }
-function GuestJourney({ event, step }: { event: Occasion; step: string }) {
-  const { data, setData, notify } = useStore();
+function ConnectedGuestPage({ token, step }: { token: string; step: string }) {
+  const { actions } = useStore();
+  const [invitation, setInvitation] = useState<InvitationResponse | null>(null);
+  const [failure, setFailure] = useState("");
+  useEffect(() => {
+    let active = true;
+    setInvitation(null);
+    setFailure("");
+    const load = () =>
+      actions
+        .loadInvitation(token)
+        .then((value) => {
+          if (active) {
+            setInvitation(value);
+            setFailure("");
+          }
+        })
+        .catch((error) => {
+          if (active) {
+            setInvitation(null);
+            setFailure(
+              error.status === 404
+                ? "Your invitation is not available."
+                : error.message,
+            );
+          }
+        });
+    void load();
+    const timer = setInterval(load, 10000);
+    return () => {
+      active = false;
+      clearInterval(timer);
+    };
+  }, [token]);
+  if (failure)
+    return (
+      <Empty title="Your invitation is not available.">
+        <p>{failure}</p>
+        <p>
+          Check the complete link with your host. Events cannot be found by
+          searching.
+        </p>
+        <Link to="/" className="secondary">
+          Back to home
+        </Link>
+      </Empty>
+    );
+  if (!invitation)
+    return (
+      <div className="empty" role="status">
+        <h1>Opening your invitation…</h1>
+      </div>
+    );
+  return (
+    <GuestJourney
+      key={token}
+      event={invitation.event}
+      step={step}
+      authoritativeWindow={invitation.window}
+    />
+  );
+}
+function GuestJourney({
+  event,
+  step,
+  authoritativeWindow,
+}: {
+  event: Occasion;
+  step: string;
+  authoritativeWindow?: string;
+}) {
+  const { data, setData, actions, notify, mode, busy } = useStore();
   const [draft, setDraft] = useState<Draft>(() => loadDraft(event.token));
   const [error, setError] = useState("");
   const [gifSearch, setGifSearch] = useState("");
@@ -88,21 +168,24 @@ function GuestJourney({ event, step }: { event: Occasion; step: string }) {
   const [playing, setPlaying] = useState(false);
   const [suggestions, setSuggestions] = useState(false);
   const base = "/g/" + event.token;
-  const state = eventWindow(event);
+  const state = authoritativeWindow || eventWindow(event);
   const canContribute = state === "open";
   const canGift =
     (state === "open" || state === "gift-only") && data.flags.gifts;
   const services = canGift
     ? event.destinations.filter((x) => x.enabled && x.confirmed)
     : [];
-  const [service, setService] = useState<Service>("Venmo");
+  const [service, setService] = useState<Service>(
+    () => draft.handoff?.service || "Venmo",
+  );
   const selected = services.find((x) => x.service === service) || services[0];
   const [ack, setAck] = useState(false);
-  const [alias, setAlias] = useState("");
-  const [amount, setAmount] = useState("");
+  const [alias, setAlias] = useState(draft.giftInput?.alias || "");
+  const [amount, setAmount] = useState(draft.giftInput?.amount || "");
   const [giftSaved, setGiftSaved] = useState(false);
   const [draftStorageError, setDraftStorageError] = useState(false);
   const previousVersion = useRef("");
+  const gifToggle = useRef<HTMLButtonElement>(null);
   const reduced =
     data.profile.reducedMotion ||
     matchMedia("(prefers-reduced-motion: reduce)").matches;
@@ -164,8 +247,8 @@ function GuestJourney({ event, step }: { event: Occasion; step: string }) {
     setPlaying(false);
     go(base + "/review");
   }
-  function submit() {
-    if (!canContribute || draft.submitted) return;
+  async function submit() {
+    if (!canContribute || draft.submitted || busy) return;
     if (!draft.name.trim() || !draft.note.trim()) {
       go(base + "/card");
       return;
@@ -182,6 +265,14 @@ function GuestJourney({ event, step }: { event: Occasion; step: string }) {
       hidden: false,
       createdAt: new Date().toISOString(),
     };
+    if (mode === "server") {
+      const receipt = await actions.submitCard(event.token, entry);
+      if (!receipt) return;
+      setDraft((d) => ({ ...d, submitted: true, receiptId: receipt.id }));
+      notify("Your card has been delivered to the host’s card box.");
+      go(canGift && services.length ? base + "/gift" : base + "/thanks");
+      return;
+    }
     setData((d) =>
       d.entries.some((x) => x.id === entry.id)
         ? d
@@ -197,39 +288,116 @@ function GuestJourney({ event, step }: { event: Occasion; step: string }) {
     notify("Your card has been added to this device’s card box.");
     go(canGift && services.length ? base + "/gift" : base + "/thanks");
   }
-  function saveGift(e: FormEvent<HTMLFormElement>) {
+  async function saveGift(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
-    if (!canGift || !selected || !ack) return;
+    if (!canGift || !selected || !ack || busy) return;
     if (!draft.name.trim()) {
       setError("Add the name your host knows you by.");
       return;
     }
-    if (data.gifts.some((x) => x.reference === draft.reference)) {
-      setGiftSaved(true);
-      go(base + "/thanks");
-      return;
-    }
-    setData((d) => ({
-      ...d,
-      gifts: [
-        {
-          id: uid(),
-          eventId: event.id,
-          entryId: draft.submitted ? draft.id : undefined,
-          name: draft.name.trim(),
-          alias: alias.trim(),
-          service: selected.service,
-          amount,
+    const input: GiftIntentInput = {
+      requestKey: draft.giftInput?.requestKey || uid(),
+      service: selected.service,
+      version: selected.version,
+      name: draft.name.trim(),
+      alias: alias.trim(),
+      amount,
+      reference: draft.reference,
+      entryId: draft.submitted ? draft.receiptId || draft.id : undefined,
+      acknowledged: true,
+    };
+    if (
+      draft.giftInput &&
+      [
+        "service",
+        "version",
+        "name",
+        "alias",
+        "amount",
+        "reference",
+        "entryId",
+      ].some(
+        (key) =>
+          input[key as keyof GiftIntentInput] !==
+          draft.giftInput![key as keyof GiftIntentInput],
+      )
+    )
+      input.requestKey = uid();
+    update({ giftInput: input });
+    try {
+      const current = reviewDestination(
+        event.destinations,
+        selected.service,
+        selected.version,
+      );
+      let handoff: GiftHandoff;
+      if (mode === "server") {
+        const result = await actions.prepareGift(event.token, input);
+        if (!result) return;
+        handoff = result.handoff;
+      } else {
+        const giftId =
+          data.gifts.find((x) => x.reference === draft.reference)?.id || uid();
+        handoff = {
+          giftId,
+          service: current.service,
+          recipient: current.recipient,
+          identifier: current.identifier,
+          version: current.version,
+          previewOnly: current.previewOnly !== false,
           reference: draft.reference,
-          status: "unconfirmed",
-          date: new Date().toISOString().slice(0, 10),
-        },
-        ...d.gifts,
-      ],
-    }));
-    setGiftSaved(true);
-    notify("Gift details recorded as unconfirmed. No transfer was made.");
-    go(base + "/thanks");
+          amount,
+        };
+        setData((d) => ({
+          ...d,
+          gifts: [
+            {
+              id: giftId,
+              eventId: event.id,
+              entryId: input.entryId,
+              name: input.name,
+              alias: input.alias,
+              service: current.service,
+              amount,
+              reference: draft.reference,
+              previewOnly: current.previewOnly !== false,
+              status: "unconfirmed",
+              date: new Date().toISOString().slice(0, 10),
+            },
+            ...d.gifts.filter((x) => x.reference !== draft.reference),
+          ],
+        }));
+      }
+      update({ handoff, giftInput: input });
+      setGiftSaved(true);
+      notify("Gift details recorded as unconfirmed. No transfer was made.");
+      go(base + "/handoff");
+    } catch (failure) {
+      setError(
+        failure instanceof Error
+          ? failure.message
+          : "Review the current recipient before continuing.",
+      );
+    }
+  }
+  async function validateHandoff() {
+    if (!draft.handoff || !draft.giftInput || !canGift) return false;
+    if (mode === "server")
+      return !!(await actions.prepareGift(event.token, draft.giftInput));
+    try {
+      const current = reviewDestination(
+        event.destinations,
+        draft.handoff.service,
+        draft.handoff.version,
+      );
+      return (
+        current.identifier === draft.handoff.identifier &&
+        current.recipient === draft.handoff.recipient &&
+        (current.previewOnly !== false) === draft.handoff.previewOnly
+      );
+    } catch {
+      return false;
+    }
   }
   if (["paused", "scheduled", "closed"].includes(state))
     return (
@@ -254,7 +422,9 @@ function GuestJourney({ event, step }: { event: Occasion; step: string }) {
         </Empty>
       </>
     );
-  if (!["landing", "card", "review", "gift", "thanks"].includes(step))
+  if (
+    !["landing", "card", "review", "gift", "handoff", "thanks"].includes(step)
+  )
     return (
       <Empty title="This page isn’t part of your invitation.">
         <Link className="primary" to={base}>
@@ -319,6 +489,24 @@ function GuestJourney({ event, step }: { event: Occasion; step: string }) {
         </div>
       </section>
     );
+  if (step === "handoff") {
+    if (!draft.handoff)
+      return (
+        <Empty title="Review your gift details first.">
+          <Link to={base + "/gift"} className="primary">
+            Review recipient
+          </Link>
+        </Empty>
+      );
+    return (
+      <ProviderHandoff
+        key={draft.handoff.giftId + draft.handoff.service}
+        handoff={draft.handoff}
+        base={base}
+        validate={validateHandoff}
+      />
+    );
+  }
   if (step === "thanks")
     return (
       <section className="thank-you">
@@ -333,10 +521,11 @@ function GuestJourney({ event, step }: { event: Occasion; step: string }) {
         </h1>
         <p>
           {draft.submitted
-            ? `A little piece of your love is now in ${event.hosts}’s card box on this device.`
+            ? `A little piece of your love is now in ${event.hosts}’s card box${mode === "server" ? "." : " on this device."}`
             : "Every thoughtful gesture means something."}
         </p>
         {(giftSaved ||
+          draft.handoff ||
           data.gifts.some((x) => x.reference === draft.reference)) && (
           <Notice>
             Your gift is unconfirmed until the host checks their payment
@@ -453,16 +642,16 @@ function GuestJourney({ event, step }: { event: Occasion; step: string }) {
                 </span>
               </label>
               <p className="small">
-                Payment links are not connected in this workspace. This step
-                records your intended gift only; it does not send money or
-                verify receipt.
+                Next, review the handoff to {selected.service}. Fictional
+                recipients stay in preview. Host-configured recipients can open
+                the service; no payment is submitted by this site.
               </p>
               {error && (
                 <p role="alert" className="field-error">
                   {error}
                 </p>
               )}
-              <button className="primary" disabled={!ack}>
+              <button className="primary" disabled={!ack || busy}>
                 Save gift details
               </button>
               <div className="buttons">
@@ -533,8 +722,9 @@ function GuestJourney({ event, step }: { event: Occasion; step: string }) {
                 : "Visible to the host only. Excluded from the event book."}
             </p>
             <p className="small">
-              Sending adds this card to the card box on this device. Nothing is
-              delivered to a server.
+              {mode === "server"
+                ? "Sending saves this card to the event’s test inbox. The host can read it from their own signed-in browser. No payment will be made."
+                : "Sending adds this card to the card box on this device. Nothing is delivered to a server."}
             </p>
             <div className="buttons">
               {draft.submitted ? (
@@ -544,10 +734,10 @@ function GuestJourney({ event, step }: { event: Occasion; step: string }) {
               ) : (
                 <button
                   className="primary"
-                  disabled={!draft.name.trim() || !draft.note.trim()}
+                  disabled={busy || !draft.name.trim() || !draft.note.trim()}
                   onClick={submit}
                 >
-                  Send my card ↗
+                  {busy ? "Sending your card…" : "Send my card ↗"}
                 </button>
               )}
               <Link to={base + "/card"} className="secondary">
@@ -656,13 +846,15 @@ function GuestJourney({ event, step }: { event: Occasion; step: string }) {
               <input
                 id="card-photo"
                 type="file"
+                disabled={mode === "server"}
                 accept="image/jpeg,image/png,image/webp"
                 onChange={(e) => photo(e.target.files?.[0])}
                 aria-describedby="photo-help"
               />
               <p id="photo-help" className="small">
-                One JPG, PNG or WebP, up to 2 MB. Use an image you have
-                permission to share.
+                {mode === "server"
+                  ? "Private photo uploads are not connected yet. Your note and selected GIF can be sent without a photo."
+                  : "One JPG, PNG or WebP, up to 2 MB. Use an image you have permission to share."}
               </p>
               {draft.photo && (
                 <button
@@ -679,6 +871,7 @@ function GuestJourney({ event, step }: { event: Occasion; step: string }) {
                     <button
                       type="button"
                       className="secondary"
+                      ref={gifToggle}
                       onClick={() => setGifOpen(!gifOpen)}
                       aria-expanded={gifOpen}
                       aria-controls="gif-library"
@@ -710,7 +903,7 @@ function GuestJourney({ event, step }: { event: Occasion; step: string }) {
                         placeholder="Love, celebrate, flowers…"
                       />
                       <p className="small">
-                        The original collection · still until you choose play.
+                        A curated collection · still until you choose play.
                       </p>
                       <div className="gif-grid">
                         {gifCollection
@@ -728,6 +921,9 @@ function GuestJourney({ event, step }: { event: Occasion; step: string }) {
                               onClick={() => {
                                 update({ gif: gif.id });
                                 setGifOpen(false);
+                                requestAnimationFrame(() =>
+                                  gifToggle.current?.focus(),
+                                );
                               }}
                             >
                               <MotionSticker id={gif.id} />
@@ -774,7 +970,12 @@ function GuestJourney({ event, step }: { event: Occasion; step: string }) {
             <button className="primary full">Review my card ↗</button>
           </div>
           <aside className="card-preview-column">
-            <div className="live-card">
+            <div
+              className="live-card"
+              role="region"
+              aria-label="Your card preview"
+              tabIndex={0}
+            >
               <p className="eyebrow">Your words, taking shape</p>
               <Card
                 entry={{

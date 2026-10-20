@@ -24,3 +24,12 @@ The local starter is a UI demo and can be refactored into either option. Domain 
 The current Cloudflare Worker preview serves built static demo assets only. Its `wrangler.jsonc` enables that sample deployment and branch previews; it provides no host authentication or server validation and does not resolve this production-stack decision.
 
 [ADR 0006](0006-deployment-environments.md) adds DEV, TEST and owner-approved PROD routing for this static UI. Its GitHub Actions workflow and separate Workers do not resolve the server runtime, identity or PostgreSQL provider decisions above.
+
+
+## Local implementation update — 18 October 2026
+
+[ADR 0008](0008-local-backend-review.md) adds a Node HTTP API with isolated local
+SQLite and seeded identity adapters for the owner’s host/guest testing request.
+This is an implemented local runtime, not the deployed PostgreSQL/managed-auth
+spike or a production stack decision. React pages call explicit API operations;
+provider/runtime adapters and production authorization gates remain open here.

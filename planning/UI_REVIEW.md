@@ -1,4 +1,98 @@
-# Application UI review
+# Application review — 20 October 2026
+
+**Current local branch:** `feature/compact-mobile-layout`.
+**Owner closes issues:** leave every issue open and board items In Progress.
+The owner authorized commit/push to the feature branch and its DEV preview on
+20 October. This does not authorize TEST/PROD promotion or closing issues.
+
+## Connected host and guest walkthrough
+
+Run Node 22.18+ and `npm run dev -- --host 0.0.0.0 --port 5173 --strictPort`.
+Open the local/network URL Vite prints. The browser and server both run on this
+Mac; another phone must be on the same network. Use fictional information only.
+
+1. Review Home’s opening card, GIF, baby glow and before/after artwork. Inspect
+   every public tab on a phone; About contains the supplied exact paragraph.
+2. Choose an occasion, then **Continue with test host**, or sign in at
+   `/workspace` with `host@digitalcardbox.test` / `CardBoxReview!2026`.
+3. Open **A little star is on the way**, or create and publish another event.
+4. In **Invite & share**, copy the guest link or use its downloadable QR. Open
+   the link in a private window, another browser or your phone. Guests cannot
+   open the host inbox and events have no public directory.
+5. Choose **A Little Star** or another design, write a name/note, search for
+   “universe” to find the supplied space GIF, select it and choose book consent.
+6. Review and send. The success page appears only after server acceptance.
+7. Return to the host’s Cards & notes and click **Refresh**, or refocus the
+   browser. Open both book layouts and the text view. Host-only/hidden cards are
+   excluded. Hide/restore a card, rotate the invitation and try the old link.
+8. Sign out. The same events/cards remain when you sign back in or restart the
+   server. Files live in ignored `.data`; clearing browser storage does not
+   delete accepted server records.
+9. Sign in separately as `operator@digitalcardbox.test` with the same published
+   local password. `/admin` has aggregate counts, metadata and server feature
+   controls. It does not grant another host’s private card access. Gift matching
+   can be paused; no control enables money movement. `other@digitalcardbox.test` is a second host for isolation checks.
+
+Production managed identity/PostgreSQL, private photo upload/storage/scanning,
+external GIF catalogs, AI, payment execution, backup/retention and backend deployments remain
+separate work. Default Cloudflare builds remain browser-only until deployed
+backend adapters are selected. See ADR 0008 and LOCAL_API.md. The original
+`npm run dev:ui` account-free browser review is still available.
+
+## Gift handoff walkthrough
+
+The seeded event exposes Cash App, Venmo and Zelle as preview-only recipients.
+Send a card or open the optional gift step directly, enter a recognizable name,
+payment nickname and optional amount. Switching service clears recipient consent.
+Save, preview the service-specific handoff, then finish without sending money.
+The host sees unconfirmed matching details and the linked card when one was sent.
+For real navigation, enter your own verified identifier twice in Settings, uncheck
+Preview only and confirm the service. Never send money during the review.
+Zelle requires your own banking app; its button opens the official bank finder.
+
+DEV is the existing static/browser adapter: records stay in that browser.
+The persistent connected API continues to run locally with `npm run dev` and is
+included in source and CI; pushing the feature does not host that Node service.
+
+## Current verification
+
+- Production client build, planning consistency and six deployment-routing tests pass.
+- Fifteen API tests cover real persistence/reopening, host/guest/operator isolation,
+  CSRF/origin checks, request bounds, retries, consent/moderation, date/revision
+  locks, revocation, event windows, session expiry and disabled money movement.
+- Fourteen browser-only UI journeys and seven connected browser journeys cover the review flow. The
+  connected flow uses separate host/guest browser contexts, sends real test
+  records, persists both book styles and proves a failed send retains its draft.
+- The supplied About paragraph matches exactly. All ten public pages fit
+  375 × 667 and 375 × 812 viewports at default text size, with no horizontal
+  overflow. The 390 × 740 check also fits all ten. Smaller screens, expanded
+  details and text zoom retain ordinary scrolling instead of clipping content.
+- Axe checks on the tested public/application routes report no violations for
+  the selected WCAG 2.2 AA tags. Keyboard focus, reduced motion, optional GIFs,
+  automatic preview stop and explicit animation controls are checked. This is
+  not a substitute for owner, screen-reader or real-device review.
+- Direct database/key/backend source requests are blocked by Vite (403), while
+  intended public GIF/artwork assets and `/api/health` remain available. This
+  includes raw source and absolute filesystem URL regression checks.
+- The supplied GIF and source logo hashes are unchanged. All original uploads
+  remain untouched; `.data` is ignored and is never a public asset directory.
+
+## Current tracking
+
+[DCB-E18-S04 #90](https://github.com/rcummings713/digitalcardbox-app/issues/90)
+tracks this local persistent backend, under the existing database epic #62.
+Related ownership/session/security/flag stories #9, #11, #52, #53, #55 and #83
+are In Progress. Existing public/art-direction stories #85/#88 and domain stories
+#14–16, #21, #23–25, #27–28, #47–48 remain In Progress. PostgreSQL deployment
+Gift route/deadline stories #42/#45 are now In Progress. Production
+PostgreSQL story #63 remains Todo; the test SQLite adapter does not complete it. No stories
+are closed and no board item is marked Done.
+
+The earlier UI review record below is historical context; its statements about
+browser-only storage apply to `npm run dev:ui`, not the connected local command.
+
+---
+
 
 **Branch:** `feature/mvp_iteration_1`. **Stage:** frontend design review.
 **Owner closes issues:** do not close issues or mark board items Done.

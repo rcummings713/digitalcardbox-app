@@ -1,0 +1,1480 @@
+/* Compact phone and handheld layouts. Desktop and print retain their own rules. */
+@media screen and (max-width: 900px) {
+  body {
+    font-size: 14px;
+    line-height: 1.55;
+  }
+  main {
+    width: calc(100% - 24px);
+    padding-bottom: 28px;
+  }
+  main > section + section {
+    margin-top: 30px;
+  }
+  h1 {
+    font-size: 32px;
+    margin: 8px 0 12px;
+  }
+  h2 {
+    font-size: 25px;
+    margin: 8px 0 12px;
+  }
+  h3 {
+    font-size: 22px;
+    margin: 7px 0;
+  }
+  p {
+    margin-bottom: 12px;
+  }
+  .small {
+    font-size: 12px;
+    line-height: 1.5;
+  }
+  .eyebrow {
+    font-size: 9px;
+    letter-spacing: 0.1em;
+    margin-bottom: 7px;
+  }
+  .script-accent {
+    font-size: 26px;
+    line-height: 1.2;
+    margin: 7px 0;
+  }
+  .navigation-bar {
+    padding: 0 8px;
+    gap: 8px;
+    min-height: 44px;
+    flex-wrap: nowrap;
+    justify-content: space-between;
+  }
+  .navigation-bar nav {
+    gap: clamp(6px, 1.8vw, 14px);
+    flex-wrap: nowrap;
+    justify-content: flex-start;
+  }
+  .navigation-bar nav a {
+    font-size: 9.4px;
+    letter-spacing: 0.02em;
+    min-height: 44px;
+    padding: 9px 0;
+    white-space: nowrap;
+  }
+  .workspace-link {
+    font-size: 9px;
+    letter-spacing: 0.02em;
+    gap: 4px;
+    min-height: 44px;
+    white-space: nowrap;
+  }
+  .masthead {
+    padding: 6px 12px 8px;
+  }
+  .brand-logo {
+    width: 155px;
+  }
+  .brand-logo-compact {
+    width: 132px;
+  }
+  .app-shell .masthead,
+  .guest-shell .masthead {
+    padding: 5px 12px;
+  }
+  .primary,
+  .secondary {
+    min-height: 40px;
+    padding: 10px 12px;
+    font-size: 10px;
+    letter-spacing: 0.065em;
+    gap: 8px;
+  }
+  .text-link {
+    min-height: 36px;
+    font-size: 12px;
+    padding: 7px 0;
+  }
+  .buttons {
+    gap: 8px;
+    margin: 14px 0;
+  }
+  .panel {
+    padding: 18px;
+  }
+  .panel + .panel {
+    margin-top: 16px;
+  }
+  .page-heading {
+    margin: 8px 0 20px;
+    gap: 8px;
+  }
+  .page-heading h1,
+  .workspace-content h1 {
+    font-size: 30px;
+    margin: 5px 0 10px;
+  }
+  .heading-copy {
+    font-size: 14px;
+  }
+  .heading-copy p {
+    margin-bottom: 0;
+  }
+  .notice {
+    padding: 12px 14px;
+    font-size: 13px;
+    margin: 14px 0;
+  }
+  .badge {
+    font-size: 10px;
+    padding: 3px 7px;
+  }
+  label {
+    font-size: 12px;
+    margin: 12px 0 6px;
+  }
+  legend {
+    font-size: 12px;
+    margin-bottom: 8px;
+  }
+  input,
+  select,
+  textarea {
+    font-size: 16px;
+    padding: 9px 10px;
+    min-height: 44px;
+  }
+  textarea {
+    line-height: 1.5;
+  }
+  textarea[rows] {
+    height: 9em;
+    min-height: 108px;
+  }
+  .check {
+    gap: 10px;
+    margin: 16px 0;
+    font-size: 13px;
+  }
+  .check input {
+    width: 20px;
+    height: 20px;
+    min-height: 20px;
+  }
+  .optional {
+    font-size: 11px;
+  }
+  fieldset {
+    margin: 16px 0;
+  }
+  summary {
+    min-height: 40px;
+    padding: 10px 0;
+    font-size: 13px;
+  }
+  .home-hero {
+    display: grid;
+    grid-template-columns: minmax(0, 1.15fr) minmax(0, 0.85fr);
+    gap: 14px;
+    text-align: left;
+    align-items: center;
+    padding: 8px 0 22px;
+  }
+  .home-hero h1 {
+    font-size: clamp(28px, 5.4vw, 44px);
+    line-height: 1.05;
+    margin: 8px 0 12px;
+  }
+  .home-hero .script-accent {
+    font-size: clamp(18px, 3vw, 25px);
+    line-height: 1.2;
+    margin: 0 0 9px;
+  }
+  .home-hero > div > p {
+    font-size: 14px;
+    line-height: 1.55;
+    margin: 0 0 12px;
+  }
+  .home-hero > div > .small {
+    font-size: 11px;
+    line-height: 1.45;
+  }
+  .home-hero .buttons {
+    justify-content: flex-start;
+    gap: 4px 12px;
+    margin: 12px 0;
+  }
+  .home-hero .primary {
+    font-size: 9px;
+    padding: 10px;
+    letter-spacing: 0.035em;
+    gap: 6px;
+  }
+  .hero-composition {
+    width: 100%;
+    max-width: none;
+    padding: 0 0 36px 12px;
+    margin: 0;
+  }
+  .hero-composition > img {
+    height: clamp(180px, 36vw, 280px);
+  }
+  .hero-card {
+    left: 0;
+    bottom: 18px;
+    width: 83%;
+  }
+  .hero-card .keepsake-card {
+    min-height: 0;
+    padding: 18px 12px;
+  }
+  .hero-card .card-content {
+    min-height: 130px;
+  }
+  .hero-card .card-kicker {
+    font-size: 6px;
+    letter-spacing: 0.1em;
+  }
+  .hero-card .card-message {
+    font-size: clamp(13px, 2.5vw, 20px);
+    line-height: 1.35;
+    margin: 10px 0;
+  }
+  .hero-card .card-signature {
+    font-size: clamp(15px, 2.5vw, 20px);
+    line-height: 1.2;
+  }
+  .hero-card .keepsake-card::after {
+    inset: 6px;
+  }
+  .hero-label {
+    right: 0;
+    bottom: 0;
+    font-size: clamp(13px, 2.3vw, 20px);
+  }
+  .occasion-section > .eyebrow {
+    font-size: 9px;
+    margin-bottom: 8px;
+  }
+  .occasion-links {
+    margin-top: 10px;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+  .occasion-tile {
+    padding: 14px 10px;
+  }
+  .occasion-tile h2 {
+    font-size: 23px;
+    margin: 7px 0;
+  }
+  .occasion-tile p {
+    font-size: 12px;
+    line-height: 1.4;
+    margin-bottom: 4px;
+  }
+  .occasion-tile .text-link {
+    font-size: 10px;
+    line-height: 1.5;
+    min-height: 32px;
+  }
+  .tile-number {
+    font-size: 10px;
+  }
+  .split-story {
+    grid-template-columns: 0.9fr 1.1fr;
+    gap: 0;
+    align-items: stretch;
+  }
+  .split-story > img {
+    height: 100%;
+    min-height: 240px;
+    object-fit: cover;
+  }
+  .split-story > div {
+    padding: 20px;
+    align-self: center;
+  }
+  .split-story h2 {
+    font-size: 30px;
+  }
+  .split-story p {
+    font-size: 14px;
+    line-height: 1.6;
+  }
+  .center-section {
+    padding: 4px 0;
+  }
+  .center-section > h2 {
+    font-size: 30px;
+  }
+  .design-triptych {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    max-width: none;
+    gap: 10px;
+    margin: 20px auto 10px;
+  }
+  .design-triptych > article:nth-child(2) {
+    transform: none;
+  }
+  .design-triptych > .keepsake-card {
+    min-height: 230px;
+    padding: 28px 14px;
+  }
+  .design-triptych .card-content {
+    min-height: 160px;
+  }
+  .design-triptych .card-kicker {
+    font-size: 7px;
+    letter-spacing: 0.08em;
+  }
+  .design-triptych .card-message {
+    font-size: 19px;
+    line-height: 1.4;
+    margin: 14px 0;
+  }
+  .design-triptych .card-signature {
+    font-size: 18px;
+    line-height: 1.3;
+  }
+  .design-triptych > .card-arch {
+    padding-top: 52px;
+  }
+  .cta-band {
+    padding: 26px 18px;
+    margin-top: 30px;
+  }
+  .cta-band h2 {
+    font-size: 30px;
+  }
+  .cta-band .script-accent {
+    font-size: 25px;
+  }
+  .collection-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 24px 14px;
+    max-width: none;
+  }
+  .collection-grid .keepsake-card {
+    min-height: 280px;
+    padding: 40px 20px;
+  }
+  .collection-grid .card-content {
+    min-height: 170px;
+  }
+  .collection-grid .card-message {
+    font-size: 20px;
+    margin: 16px 0;
+  }
+  .collection-grid .card-signature {
+    font-size: 20px;
+  }
+  .collection-grid .card-kicker {
+    font-size: 7px;
+  }
+  .collection-grid .card-ribbon {
+    padding-top: 100px;
+  }
+  .collection-grid .card-arch {
+    padding-top: 70px;
+  }
+  .collection-grid h2 {
+    font-size: 24px;
+    margin: 12px 0 6px;
+  }
+  .collection-grid p {
+    font-size: 13px;
+    line-height: 1.5;
+  }
+  .steps-grid,
+  .pricing-grid,
+  .two-column {
+    gap: 16px;
+  }
+  .steps-grid .panel h2 {
+    margin-top: 12px;
+  }
+  .steps-grid .panel p {
+    font-size: 14px;
+  }
+  .pricing-grid h2 {
+    font-size: 26px;
+  }
+  .price {
+    font-size: 42px;
+    margin: 15px 0;
+  }
+  .price-tiers {
+    margin: 14px 0;
+  }
+  .price-tiers > div {
+    padding: 10px 0;
+  }
+  .price-tiers dd {
+    font-size: 21px;
+  }
+  .onboarding-grid {
+    gap: 16px;
+    margin: 8px auto 24px;
+  }
+  .onboarding-story {
+    padding: 5px 10px;
+  }
+  .onboarding-story h1 {
+    font-size: 35px;
+    margin-bottom: 10px;
+  }
+  .onboarding-story h1 br {
+    display: none;
+  }
+  .onboarding-story > p {
+    margin-bottom: 8px;
+    font-size: 13px;
+  }
+  .account-panel {
+    padding: 22px;
+  }
+  .account-panel h2 {
+    font-size: 30px;
+  }
+  .account-panel > p {
+    font-size: 13px;
+  }
+  .provider-list {
+    gap: 8px;
+    margin-top: 16px;
+  }
+  .provider-button {
+    min-height: 44px;
+  }
+  .or-rule {
+    margin: 22px 0;
+  }
+  .account-skip {
+    margin-top: 16px;
+    padding-top: 16px;
+  }
+  .workspace-reviewbar {
+    width: calc(100% - 24px);
+    margin-bottom: 16px;
+    padding: 7px 0;
+    font-size: 10px;
+    gap: 0;
+  }
+  .workspace-reviewbar > div {
+    gap: 18px;
+  }
+  .workspace-reviewbar a {
+    min-height: 32px;
+  }
+  .workspace-layout {
+    grid-template-columns: 1fr;
+    gap: 18px;
+  }
+  .workspace-sidebar {
+    position: static;
+    border: 0;
+    border-bottom: 1px solid var(--pink-medium);
+    padding: 0 0 12px;
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: 3px 8px;
+  }
+  .workspace-sidebar > .back-link {
+    grid-column: 2;
+    grid-row: 1 / span 2;
+    font-size: 11px;
+    min-height: 40px;
+    align-self: center;
+  }
+  .workspace-sidebar > .eyebrow {
+    grid-column: 1;
+    grid-row: 1;
+    margin: 0;
+    font-size: 9px;
+  }
+  .workspace-sidebar > h2 {
+    grid-column: 1;
+    grid-row: 2;
+    font-size: 25px;
+    margin: 0 0 6px;
+  }
+  .workspace-sidebar nav {
+    grid-column: 1 / -1;
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 4px;
+  }
+  .workspace-sidebar nav a {
+    justify-content: center;
+    padding: 7px 5px;
+    min-height: 40px;
+    font-size: 9px;
+    letter-spacing: 0.01em;
+    background: #fff;
+    text-align: center;
+  }
+  .sidebar-note {
+    display: none;
+  }
+  .workspace-content .page-heading {
+    margin: 0 0 18px;
+  }
+  .event-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 14px;
+  }
+  .event-tile > a > img {
+    height: 140px;
+  }
+  .event-tile > a > div {
+    padding: 14px;
+  }
+  .event-tile h2 {
+    font-size: 25px;
+    margin: 10px 0;
+  }
+  .event-tile p:not(.eyebrow) {
+    font-size: 12px;
+    margin-bottom: 10px;
+  }
+  .event-tile .row-between {
+    gap: 6px;
+    align-items: flex-start;
+    flex-wrap: wrap;
+  }
+  .event-counts {
+    font-size: 11px;
+    padding-top: 12px;
+    gap: 5px;
+    flex-wrap: wrap;
+  }
+  .event-tile .eyebrow {
+    font-size: 8px;
+    margin: 0;
+  }
+  .workspace-tip {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: 16px;
+    text-align: left;
+    margin: 22px 8px;
+  }
+  .workspace-tip .script-accent {
+    font-size: 22px;
+    white-space: normal;
+    max-width: 110px;
+  }
+  .workspace-tip p {
+    font-size: 12px;
+    line-height: 1.5;
+  }
+  .stat-grid {
+    gap: 8px;
+    margin: 16px 0 20px;
+  }
+  .stat-grid > div {
+    padding: 14px 10px;
+  }
+  .stat-grid strong {
+    font-size: 33px;
+  }
+  .stat-grid span {
+    font-size: 11px;
+  }
+  .dashboard-split {
+    gap: 16px;
+  }
+  .action-list > a {
+    gap: 12px;
+    padding: 12px 0;
+  }
+  .action-list p {
+    font-size: 12px;
+  }
+  .featured-quote {
+    font-size: 24px;
+    margin: 16px 0;
+  }
+  .form-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0 12px;
+  }
+  .form-panel {
+    padding: 18px;
+  }
+  .filter-bar {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 0.75fr);
+    gap: 10px;
+    margin-bottom: 18px;
+  }
+  .filter-bar label {
+    margin: 0 0 6px;
+  }
+  .share-qr {
+    grid-template-columns: 180px minmax(0, 1fr);
+    gap: 20px;
+    padding-top: 16px;
+    margin-top: 20px;
+  }
+  .qr-panel img {
+    width: 160px;
+    height: 160px;
+  }
+  .inbox-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 20px 12px;
+    max-width: none;
+  }
+  .inbox-item .card-small {
+    min-height: 270px;
+    padding: 32px 16px;
+  }
+  .inbox-item .card-small .card-content {
+    min-height: 180px;
+  }
+  .inbox-item .card-small .card-message {
+    font-size: 19px;
+    line-height: 1.45;
+    margin: 15px 0;
+  }
+  .inbox-item .card-small .card-signature {
+    font-size: 20px;
+  }
+  .inbox-item .card-small .card-kicker {
+    font-size: 7px;
+    letter-spacing: 0.1em;
+  }
+  .inbox-item .card-small.card-ribbon {
+    padding-top: 90px;
+  }
+  .inbox-item .card-small.card-arch {
+    padding-top: 60px;
+  }
+  .inbox-item h3 {
+    font-size: 22px;
+  }
+  .inbox-item > .row-between {
+    align-items: flex-start;
+    flex-wrap: wrap;
+    gap: 5px;
+    padding-top: 10px;
+  }
+  .inbox-item .card-small .motion-sticker {
+    width: 50px;
+    height: 50px;
+  }
+  .inbox-item .card-photo .card-photo {
+    max-height: 120px;
+    border-width: 5px;
+  }
+  .card-management {
+    padding: 14px;
+    font-size: 13px;
+  }
+  .gift-list {
+    gap: 14px;
+    margin-bottom: 20px;
+  }
+  .gift-item h2 {
+    font-size: 27px;
+  }
+  .detail-grid {
+    gap: 14px;
+    margin: 16px 0;
+  }
+  .detail-grid dd {
+    font-size: 14px;
+  }
+  .detail-grid dt {
+    font-size: 10px;
+  }
+  .destination {
+    padding: 16px;
+    margin: 16px 0;
+  }
+  .destination strong {
+    font-size: 25px;
+  }
+  .destination dl {
+    margin-bottom: 0;
+    font-size: 13px;
+  }
+  .invitation {
+    grid-template-columns: 0.85fr 1.15fr;
+    margin: 0 auto 20px;
+  }
+  .invitation-image > img {
+    height: 100%;
+    min-height: 300px;
+  }
+  .invitation-copy {
+    padding: 25px 20px;
+  }
+  .invitation h1 {
+    font-size: clamp(34px, 5.5vw, 47px);
+  }
+  .invitation-copy > p:not(.eyebrow) {
+    font-size: 14px;
+  }
+  .invitation-copy .small {
+    font-size: 11px;
+  }
+  .invitation .primary {
+    margin-top: 10px;
+  }
+  .fine-rule {
+    margin: 16px auto;
+  }
+  .guest-stepper {
+    gap: 8px;
+    padding: 12px 0;
+    margin-bottom: 18px;
+    font-size: 9px;
+  }
+  .guest-layout {
+    gap: 20px;
+  }
+  .composer {
+    display: grid;
+    grid-template-columns: minmax(0, 1.12fr) minmax(0, 0.88fr);
+    gap: 16px 12px;
+    align-items: start;
+  }
+  .composer-controls {
+    display: contents;
+  }
+  .composer-controls > .panel {
+    grid-column: 1 / -1;
+    margin: 0;
+  }
+  .composer-controls > .panel:first-child {
+    grid-column: 1;
+    grid-row: 1;
+    padding: 12px;
+  }
+  .composer-controls > .field-error,
+  .composer-controls > .notice,
+  .composer-controls > .full {
+    grid-column: 1 / -1;
+    margin: 0;
+  }
+  .card-preview-column {
+    grid-column: 2;
+    grid-row: 1;
+    position: static;
+    order: 0;
+    min-width: 0;
+    width: 100%;
+  }
+  .card-preview-column .live-card {
+    height: 290px;
+    overflow: auto;
+    overscroll-behavior: contain;
+    scrollbar-width: thin;
+    max-width: none;
+    padding: 3px;
+  }
+  .card-preview-column .live-card > .eyebrow {
+    font-size: 8px;
+    margin-bottom: 6px;
+  }
+  .card-preview-column .live-card > .small {
+    display: none;
+  }
+  .card-preview-column .keepsake-card {
+    min-height: 230px;
+    padding: 30px 14px;
+    box-shadow: none;
+  }
+  .card-preview-column .card-content {
+    min-height: 160px;
+  }
+  .card-preview-column .card-message {
+    font-size: 19px;
+    line-height: 1.4;
+    margin: 14px 0;
+  }
+  .card-preview-column .card-kicker {
+    font-size: 7px;
+    letter-spacing: 0.08em;
+  }
+  .card-preview-column .card-signature {
+    font-size: 20px;
+    line-height: 1.3;
+  }
+  .card-preview-column .card-ribbon {
+    padding-top: 85px;
+  }
+  .card-preview-column .card-arch {
+    padding-top: 55px;
+  }
+  .card-preview-column .card-photo .card-photo {
+    max-height: 100px;
+    border-width: 5px;
+  }
+  .card-preview-column .motion-sticker {
+    width: 65px;
+    height: 65px;
+  }
+  .card-preview-column .live-card > .secondary {
+    margin-top: 10px;
+    min-height: 36px;
+    font-size: 9px;
+    padding: 8px;
+  }
+  .design-choices {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 6px;
+    margin: 10px 0 0;
+  }
+  .design-choices legend {
+    font-size: 12px;
+    line-height: 1.4;
+    margin-bottom: 8px;
+  }
+  .design-choices label {
+    min-height: 40px;
+    padding: 7px;
+    font-size: 11px;
+    line-height: 1.4;
+    gap: 6px;
+  }
+  .design-choices label.chosen {
+    padding: 6px;
+  }
+  .design-choices input {
+    width: 16px;
+    height: 16px;
+    min-height: 16px;
+  }
+  .design-swatch {
+    width: 12px;
+    height: 23px;
+  }
+  .writing-prompts {
+    padding: 14px;
+    margin-top: 12px;
+  }
+  .writing-choice {
+    font-size: 18px;
+    padding: 14px;
+  }
+  .gif-library {
+    padding: 14px;
+    margin: 14px -4px;
+  }
+  .gif-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 8px;
+  }
+  .gif-grid .motion-sticker {
+    width: 65px;
+    height: 65px;
+  }
+  .review-panel {
+    padding: 20px;
+  }
+  .review-panel h2 {
+    font-size: 29px;
+  }
+  .review-note {
+    font-size: 22px;
+  }
+  .thank-you > h1 {
+    font-size: 37px;
+  }
+  .thank-you-card {
+    max-width: 320px;
+    margin: 25px auto;
+  }
+  .matching-note {
+    position: static;
+  }
+  .matching-note .script-accent {
+    font-size: 25px;
+  }
+  .book-toolbar {
+    gap: 12px;
+    margin-bottom: 18px;
+  }
+  .book-style-options {
+    gap: 8px;
+  }
+  .book-style-option {
+    padding: 12px;
+    min-height: 110px;
+    gap: 6px;
+  }
+  .book-style-option[aria-pressed="true"] {
+    padding: 11px;
+  }
+  .book-style-option strong {
+    font-size: 25px;
+  }
+  .book-style-option > span {
+    font-size: 12px;
+    line-height: 1.5;
+  }
+  .book-stage {
+    padding: 12px 10px;
+  }
+  .book-spread {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .book-spread > div {
+    min-height: 330px;
+  }
+  .book-spread > div:first-child {
+    border-bottom: 0;
+    border-right: 1px solid #d9c9b7;
+  }
+  .book-cover {
+    padding: 35px 16px;
+  }
+  .book-cover h2 {
+    font-size: 34px;
+  }
+  .book-cover .eyebrow {
+    font-size: 7px;
+  }
+  .book-cover > p:not(.eyebrow) {
+    font-size: 11px;
+  }
+  .book-cover .script-accent {
+    font-size: 22px;
+  }
+  .cover-rule {
+    margin: 8px auto 18px;
+  }
+  .book-opening {
+    padding: 25px 16px;
+  }
+  .book-opening h3 {
+    font-size: 25px;
+  }
+  .book-opening > p:not(.eyebrow) {
+    font-size: 12px;
+    line-height: 1.65;
+  }
+  .book-opening .eyebrow {
+    font-size: 7px;
+  }
+  .book-dedication {
+    margin-top: 18px;
+  }
+  .book-page {
+    padding: 22px 16px 36px;
+  }
+  .book-page blockquote {
+    font-size: 22px;
+    line-height: 1.45;
+    margin: 18px 0;
+  }
+  .book-photo {
+    margin: 12px 0 18px;
+  }
+  .book-photo > img {
+    height: 145px;
+    border-width: 5px;
+  }
+  .photo-tape {
+    width: 45px;
+    height: 15px;
+  }
+  .book-signature {
+    font-size: 23px;
+  }
+  .book-folio {
+    bottom: 12px;
+    font-size: 9px;
+  }
+  .book-sticker {
+    width: 60px;
+    height: 60px;
+  }
+  .book-pagination {
+    margin-top: 14px;
+  }
+  .book-pagination .secondary {
+    min-height: 36px;
+    padding: 8px 10px;
+    font-size: 9px;
+  }
+  .book-collage .book-page {
+    padding: 18px 12px 35px;
+  }
+  .book-collage .keepsake-card {
+    min-height: 250px;
+    padding: 30px 14px;
+  }
+  .book-collage .card-content {
+    min-height: 180px;
+  }
+  .book-collage .card-message {
+    font-size: 19px;
+    margin: 14px 0;
+  }
+  .book-collage .card-signature {
+    font-size: 20px;
+  }
+  .book-collage .card-kicker {
+    font-size: 7px;
+    letter-spacing: 0.08em;
+  }
+  .book-collage .card-ribbon {
+    padding-top: 80px;
+  }
+  .book-collage .card-arch {
+    padding-top: 55px;
+  }
+  .book-collage .motion-sticker {
+    width: 45px;
+    height: 45px;
+  }
+  .book-collage .card-photo .card-photo {
+    max-height: 110px;
+    border-width: 5px;
+  }
+  .book-summary {
+    gap: 16px;
+    margin-top: 20px;
+  }
+  .book-summary h2 {
+    font-size: 27px;
+  }
+  .book-summary > section > p {
+    font-size: 13px;
+  }
+  .book-summary .panel {
+    padding: 18px;
+  }
+  .book-transcript {
+    padding: 20px;
+  }
+  .book-transcript h3 {
+    font-size: 23px;
+  }
+  .book-transcript article {
+    margin-top: 18px;
+    padding-top: 18px;
+  }
+  .admin-tabs {
+    gap: 14px;
+    margin: 18px 0;
+  }
+  .admin-tabs a {
+    font-size: 10px;
+    padding: 10px 0;
+  }
+  .flag-row {
+    gap: 14px;
+    padding: 14px 0;
+  }
+  .flag-row h3 {
+    font-size: 23px;
+  }
+  .flag-row p {
+    font-size: 13px;
+  }
+  .toggle {
+    min-height: 40px;
+    min-width: 80px;
+    padding: 8px;
+  }
+  .metric-bar {
+    margin: 18px 0;
+  }
+  .activity-list li {
+    padding: 12px 4px;
+  }
+  .site-footer {
+    padding: 22px 12px 16px;
+  }
+  .site-footer .brand-logo-compact {
+    width: 110px;
+  }
+  .site-footer .footer-wordmark {
+    margin-bottom: 6px;
+  }
+  .site-footer p {
+    font-size: 12px;
+    margin-bottom: 6px;
+  }
+  .site-footer nav {
+    gap: 8px 16px;
+  }
+  .site-footer nav a {
+    font-size: 9px;
+    min-height: 36px;
+    padding: 8px 0;
+    letter-spacing: 0.045em;
+  }
+  .site-footer .copyright {
+    margin-top: 8px;
+    font-size: 10px;
+  }
+}
+
+@media screen and (max-width: 600px) {
+  .occasion-links {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .occasion-tile {
+    padding: 12px 10px;
+  }
+  .occasion-tile:nth-child(2) {
+    border-right: 0;
+  }
+  .occasion-tile:nth-child(-n + 2) {
+    border-bottom: 1px solid var(--pink-medium);
+  }
+  .occasion-tile h2 {
+    font-size: 23px;
+  }
+  .split-story {
+    grid-template-columns: 0.7fr 1.3fr;
+  }
+  .split-story > img {
+    min-height: 220px;
+  }
+  .split-story > div {
+    padding: 16px;
+  }
+  .split-story h2 {
+    font-size: 26px;
+  }
+  .split-story p {
+    font-size: 13px;
+  }
+  .design-triptych {
+    gap: 7px;
+  }
+  .design-triptych > .keepsake-card {
+    padding: 22px 10px;
+    min-height: 230px;
+  }
+  .design-triptych .card-message {
+    font-size: 16px;
+    line-height: 1.35;
+  }
+  .design-triptych .card-signature {
+    font-size: 16px;
+  }
+  .design-triptych .card-kicker {
+    font-size: 6px;
+  }
+  .design-triptych > .card-arch {
+    padding-top: 42px;
+  }
+  .design-triptych .keepsake-card::after {
+    inset: 5px;
+  }
+  .collection-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 20px 12px;
+  }
+  .collection-grid .keepsake-card {
+    min-height: 260px;
+    padding: 32px 16px;
+  }
+  .collection-grid .card-message {
+    font-size: 18px;
+  }
+  .collection-grid .card-signature {
+    font-size: 19px;
+  }
+  .collection-grid .card-ribbon {
+    padding-top: 85px;
+  }
+  .collection-grid .card-arch {
+    padding-top: 60px;
+  }
+  .collection-grid h2 {
+    font-size: 23px;
+  }
+  .collection-grid p {
+    font-size: 12px;
+  }
+  .steps-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 12px;
+  }
+  .steps-grid .panel {
+    padding: 15px;
+  }
+  .steps-grid h2 {
+    font-size: 24px;
+  }
+  .steps-grid .panel p {
+    font-size: 13px;
+  }
+  .event-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 12px;
+  }
+  .event-tile > a > img {
+    height: 100px;
+  }
+  .event-tile > a > div {
+    padding: 12px;
+  }
+  .event-tile h2 {
+    font-size: 23px;
+  }
+  .event-tile .badge {
+    font-size: 9px;
+    padding: 2px 5px;
+  }
+  .event-counts {
+    font-size: 10px;
+    padding-top: 10px;
+  }
+  .share-qr {
+    grid-template-columns: 130px minmax(0, 1fr);
+    gap: 14px;
+  }
+  .qr-panel img {
+    width: 130px;
+    height: 130px;
+  }
+  .share-qr h3 {
+    font-size: 23px;
+  }
+  .share-qr p {
+    font-size: 13px;
+  }
+  .qr-panel .text-link {
+    font-size: 11px;
+  }
+  .inbox-item .card-small {
+    padding: 28px 13px;
+    min-height: 250px;
+  }
+  .inbox-item .card-small .card-message {
+    font-size: 17px;
+  }
+  .inbox-item .card-small .card-signature {
+    font-size: 18px;
+  }
+  .inbox-item .card-small.card-ribbon {
+    padding-top: 82px;
+  }
+  .inbox-item .card-small.card-arch {
+    padding-top: 52px;
+  }
+  .invitation {
+    grid-template-columns: 0.65fr 1.35fr;
+  }
+  .invitation-copy {
+    padding: 20px 16px;
+  }
+  .invitation h1 {
+    font-size: 34px;
+  }
+  .invitation-copy > p:not(.eyebrow) {
+    font-size: 13px;
+  }
+  .invitation-copy .small {
+    font-size: 11px;
+  }
+  .invitation-image > img {
+    min-height: 280px;
+  }
+  .design-choices {
+    grid-template-columns: 1fr;
+  }
+  .design-choices label {
+    min-height: 36px;
+    font-size: 10px;
+  }
+  .composer-controls > .panel:first-child > .eyebrow {
+    font-size: 8px;
+  }
+  .card-preview-column .live-card {
+    height: 305px;
+  }
+  .card-preview-column .keepsake-card {
+    padding: 25px 11px;
+    min-height: 220px;
+  }
+  .card-preview-column .card-message {
+    font-size: 17px;
+  }
+  .card-preview-column .card-signature {
+    font-size: 18px;
+  }
+  .card-preview-column .card-ribbon {
+    padding-top: 75px;
+  }
+  .card-preview-column .card-arch {
+    padding-top: 45px;
+  }
+  .book-style-option {
+    min-height: 104px;
+    padding: 10px;
+  }
+  .book-style-option[aria-pressed="true"] {
+    padding: 9px;
+  }
+  .book-style-option strong {
+    font-size: 23px;
+  }
+  .book-style-option > span {
+    font-size: 11px;
+  }
+  .book-spread > div {
+    min-height: 300px;
+  }
+  .book-cover {
+    padding: 26px 10px;
+  }
+  .book-cover h2 {
+    font-size: 29px;
+  }
+  .book-cover > p:not(.eyebrow) {
+    font-size: 10px;
+  }
+  .book-cover .script-accent {
+    font-size: 18px;
+  }
+  .book-opening {
+    padding: 22px 10px;
+  }
+  .book-opening h3 {
+    font-size: 21px;
+  }
+  .book-opening > p:not(.eyebrow) {
+    font-size: 11px;
+  }
+  .book-page {
+    padding: 18px 12px 32px;
+  }
+  .book-page blockquote {
+    font-size: 18px;
+  }
+  .book-photo > img {
+    height: 105px;
+  }
+  .book-signature {
+    font-size: 20px;
+  }
+  .book-collage .book-page {
+    padding: 15px 10px 32px;
+  }
+  .book-collage .keepsake-card {
+    padding: 25px 10px;
+    min-height: 230px;
+    transform: rotate(-2deg);
+  }
+  .book-collage .book-page:nth-child(2) .keepsake-card {
+    transform: rotate(2deg);
+  }
+  .book-collage .card-message {
+    font-size: 16px;
+  }
+  .book-collage .card-signature {
+    font-size: 18px;
+  }
+  .book-collage .card-kicker {
+    font-size: 6px;
+  }
+  .book-collage .card-ribbon {
+    padding-top: 65px;
+  }
+  .book-collage .card-arch {
+    padding-top: 45px;
+  }
+}
+
+@media screen and (max-width: 400px) {
+  .home-hero {
+    gap: 10px;
+  }
+  .home-hero > div > p {
+    font-size: 13px;
+  }
+  .home-hero h1 {
+    font-size: 28px;
+  }
+  .home-hero .primary {
+    font-size: 8.5px;
+    padding: 10px 8px;
+  }
+  .hero-composition {
+    padding-left: 8px;
+  }
+  .hero-card .card-content {
+    min-height: 110px;
+  }
+  .hero-card .card-message {
+    font-size: 12px;
+  }
+  .hero-card .card-signature {
+    font-size: 14px;
+  }
+  .form-grid {
+    grid-template-columns: 1fr;
+  }
+  .book-cover h2 {
+    font-size: 26px;
+  }
+  .book-opening h3 {
+    font-size: 20px;
+  }
+  .book-cover .eyebrow,
+  .book-opening .eyebrow {
+    font-size: 6px;
+  }
+  .book-page blockquote {
+    font-size: 17px;
+  }
+  .book-collage .card-message {
+    font-size: 15px;
+  }
+  .site-footer nav {
+    gap: 6px 12px;
+  }
+}
+
+@media screen and (max-width: 600px) {
+  .occasion-tile {
+    padding: 9px 10px;
+  }
+  .occasion-tile .text-link {
+    min-height: 24px;
+    padding: 4px 0;
+  }
+  .home-hero {
+    padding-top: 4px;
+    padding-bottom: 16px;
+  }
+  .home-hero .buttons {
+    margin: 8px 0;
+  }
+  .home-hero .text-link {
+    min-height: 32px;
+    padding: 4px 0;
+  }
+}
+@media screen and (max-width: 400px) {
+  .home-hero .script-accent {
+    font-size: 16px;
+  }
+}
+@media screen and (max-width: 360px) {
+  .navigation-bar {
+    padding: 0 6px;
+    gap: 6px;
+  }
+  .navigation-bar nav {
+    gap: 6px;
+  }
+  .navigation-bar nav a {
+    font-size: 8.5px;
+    letter-spacing: 0.01em;
+    min-width: 24px;
+    justify-content: center;
+  }
+  .workspace-link {
+    font-size: 8.5px;
+    letter-spacing: 0.01em;
+    gap: 3px;
+  }
+}

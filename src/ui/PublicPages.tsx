@@ -1,144 +1,140 @@
 import { useState } from "react";
 import type { FormEvent } from "react";
-import { Card, Heading, Link, Notice, go, copy } from "./shared";
+import { Card, Heading, InstagramLink, Link, Notice, go, copy } from "./shared";
+import { KeepsakeCard } from "./KeepsakeCard";
+import { ConnectedStart } from "./AuthPages";
 import { designs } from "./model";
 import { useStore } from "./state";
 
 export function Home() {
   return (
-    <>
-      <section className="home-hero">
-        <div>
-          <span className="script-accent">for the moments that matter</span>
-          <h1>
-            A little card.
-            <br />A whole lot of feeling.
-          </h1>
-          <p>
-            Bring your people together for heartfelt cards, shared memories, and
-            a keepsake you’ll come back to.
-          </p>
-          <div className="buttons">
-            <Link to="/start?occasion=Wedding" className="primary">
-              Create a wedding card box <span aria-hidden="true">↗</span>
-            </Link>
-            <Link to="/how-it-works" className="text-link">
-              How it works
-            </Link>
-          </div>
-          <p className="small">
-            Every note belongs. Gifts are always optional.
-          </p>
-        </div>
-        <div className="hero-composition">
-          <img
-            src="/images/flowers.jpg"
-            alt="Soft pink roses ready for a celebration"
-          />
-          <div className="hero-card">
-            <Card
-              small
-              entry={{
-                name: "Jordan",
-                style: "botanical",
-                note: "Here’s to all the little moments that become your favorite memories.",
-              }}
-            />
-          </div>
-          <span className="hero-label">Words worth keeping.</span>
-        </div>
-      </section>
-      <section className="occasion-section">
-        <p className="eyebrow">Make room for every kind of occasion</p>
-        <div className="occasion-links">
+    <section
+      className="discovery-home"
+      aria-label="Digital cards and lasting memories"
+    >
+      <div className="discovery-intro">
+        <p className="eyebrow">Digital cards. Lasting memories.</p>
+        <h1>Keep the feeling.</h1>
+        <p>
+          The words you love. The moments that matter.
+          <br />
+          All together, always close.
+        </p>
+      </div>
+      <div className="discovery-card">
+        <KeepsakeCard interactive gif="cosmic" />
+        <p className="card-preview-caption">
+          A little look at what your host receives.
+        </p>
+      </div>
+      <div className="discovery-create">
+        <p className="eyebrow">What are we celebrating?</p>
+        <div className="discovery-occasions">
           {[
-            ["Wedding", "Our next chapter"],
-            ["Baby shower", "A little one, so much love"],
-            ["Birthday", "Another beautiful year"],
-            ["Other dated event", "Just because it matters"],
-          ].map(([type, title], i) => (
+            ["Wedding", "Wedding"],
+            ["Baby shower", "Baby shower"],
+            ["Birthday", "Birthday"],
+            ["Other dated event", "Every occasion"],
+          ].map(([type, label]) => (
             <Link
               key={type}
               to={"/start?occasion=" + encodeURIComponent(type)}
-              className="occasion-tile"
+              className="secondary"
+              aria-label={
+                type === "Wedding"
+                  ? "Create a wedding card box"
+                  : `Create a ${label.toLowerCase()} card box`
+              }
             >
-              <span className="tile-number">0{i + 1}</span>
-              <h2>{type === "Other dated event" ? "Every occasion" : type}</h2>
-              <p>{title}</p>
-              <span className="text-link">Create a card box ↗</span>
+              {label}
+              <span aria-hidden="true">↗</span>
             </Link>
           ))}
         </div>
-      </section>
-      <section className="split-story">
-        <img
-          src="/images/celebration.jpg"
-          alt="A candlelit table set for friends and family"
-        />
+      </div>
+      <div className="discovery-value">
+        <div className="before-after-art">
+          <img
+            src="/images/card-box-before-after.jpg"
+            width="1080"
+            height="593"
+            alt="Before: boxes full of wedding, graduation and baby cards. After: a lifetime of digital cards, organized together on a phone."
+          />
+        </div>
         <div>
-          <p className="eyebrow">Less collecting. More connecting.</p>
           <h2>
-            One place for every
+            A lifetime of love.
             <br />
-            “we’re so happy for you.”
+            Always in your pocket.
           </h2>
-          <p>
-            Share your event link. Let guests choose a beautiful card and make
-            it their own. Gather their words in an event book that feels as
-            special as the occasion.
-          </p>
-          <Link className="secondary" to="/start">
-            Start your card box
+          <p>Less to store. More to keep.</p>
+          <Link to="/how-it-works" className="text-link">
+            See how it works ↗
           </Link>
         </div>
-      </section>
-      <section className="center-section">
-        <p className="eyebrow">Made to be opened again</p>
-        <h2>
-          Beautiful on the outside.
-          <br />
-          Entirely you on the inside.
-        </h2>
-        <div className="design-triptych">
-          {designs.slice(0, 3).map((d, i) => (
-            <Card
+      </div>
+    </section>
+  );
+}
+function CardCollection() {
+  const [selected, setSelected] = useState(designs[0].id);
+  return (
+    <>
+      <Heading
+        eyebrow="The card collection"
+        title="Make their words a keepsake."
+      >
+        <p>Choose a design. Add a note, a memory, a little personality.</p>
+      </Heading>
+      <section className="compact-collection">
+        <div
+          className="collection-choices"
+          role="group"
+          aria-label="Card designs"
+        >
+          {designs.map((d) => (
+            <button
               key={d.id}
-              small
-              entry={{
-                name: ["Your people", "Your family", "Your friends"][i],
-                style: d.id,
-                note: [
-                  "A little love for the life you are making.",
-                  "All the joy in the world, and then a little more.",
-                  "May the best part always be what comes next.",
-                ][i],
-              }}
-            />
+              aria-pressed={selected === d.id}
+              onClick={() => setSelected(d.id)}
+            >
+              <span>{d.name}</span>
+              <small>{d.description}</small>
+            </button>
           ))}
         </div>
-        <Link className="text-link" to="/cards">
-          Find your kind of beautiful ↗
-        </Link>
+        <div className="collection-preview">
+          <Card
+            entry={{
+              name: selected === "little-star" ? "Norma" : "You",
+              style: selected,
+              note:
+                selected === "little-star"
+                  ? "The universe is full of a million little stars ... but none will shine as much as your beautiful baby Boy !"
+                  : "Some moments stay with us. You are one of mine.",
+              gif: selected === "little-star" ? "cosmic" : undefined,
+            }}
+          />
+        </div>
       </section>
-      <section className="cta-band">
-        <span className="script-accent">let’s make a memory</span>
-        <h2>
-          Your next chapter deserves
-          <br />a beautiful place to begin.
-        </h2>
+      <div className="collection-next">
         <Link to="/start" className="primary">
-          Create your card box
+          Create a card box
         </Link>
-      </section>
+        <p className="small">
+          Sending a card? Open the invitation from your host.
+        </p>
+      </div>
     </>
   );
 }
 
 export function Start() {
-  const { notify } = useStore();
+  const { notify, mode } = useStore();
   const [manual, setManual] = useState(false);
   const occasion =
     new URLSearchParams(location.search).get("occasion") || "Wedding";
+  if (mode === "server") return <ConnectedStart />;
   return (
     <div className="onboarding-grid">
       <div className="onboarding-story">
@@ -245,52 +241,8 @@ export function Start() {
   );
 }
 export function Informational({ page }: { page: string }) {
-  if (page === "cards")
-    return (
-      <>
-        <Heading
-          eyebrow="The card collection"
-          title="A beautiful home for your words."
-        >
-          <p>
-            Original illustrations, considered typography, and all the room you
-            need to make it personal.
-          </p>
-        </Heading>
-        <div className="collection-grid">
-          {designs.map((d, i) => (
-            <div key={d.id}>
-              <Card
-                entry={{
-                  name: "You",
-                  style: d.id,
-                  note: [
-                    "Some moments stay with us. You are one of mine.",
-                    "Here’s to your beautiful next chapter.",
-                    "Of all the stars, you found each other.",
-                    "With more love than a card could ever hold.",
-                    "May your days grow wild with happiness.",
-                    "For the memories we made, and the ones still to come.",
-                  ][i],
-                }}
-              />
-              <h2>{d.name}</h2>
-              <p>{d.description}</p>
-            </div>
-          ))}
-        </div>
-        <section className="cta-band">
-          <h2>Your words make it a keepsake.</h2>
-          <Link to="/start" className="primary">
-            Create a card box
-          </Link>
-          <p className="small">
-            Received an invitation? Open the event link from your host to send a
-            card.
-          </p>
-        </section>
-      </>
-    );
+  const { mode } = useStore();
+  if (page === "cards") return <CardCollection />;
   if (page === "pricing")
     return (
       <>
@@ -337,10 +289,14 @@ export function Informational({ page }: { page: string }) {
                 <dd>$79</dd>
               </div>
             </dl>
-            <p className="small">
-              One card with its photo counts as one entry. GIFs and cash gifts
-              do not add entries. Purchasing is not connected in this workspace.
-            </p>
+            <details className="entry-count-details">
+              <summary>About entries &amp; checkout</summary>
+              <p className="small">
+                One card with its photo counts as one entry. GIFs and cash gifts
+                do not add entries. Purchasing is not connected in this
+                workspace.
+              </p>
+            </details>
           </section>
         </div>
       </>
@@ -389,40 +345,28 @@ export function Informational({ page }: { page: string }) {
     return (
       <>
         <Heading
-          eyebrow="A little about us"
+          eyebrow="About TheDigitalCardBox"
           title="Less to carry. More to keep."
-        >
-          <p>The heart of a greeting card. The ease of a shared link.</p>
-        </Heading>
-        <section className="split-story">
-          <img
-            src="/images/tea.jpg"
-            alt="A quiet cup of tea beside a journal"
-          />
-          <div>
-            <span className="script-accent">our purpose</span>
-            <h2>
-              For the people.
-              <br />
-              For the words.
-              <br />
-              For the years ahead.
-            </h2>
-            <p>
-              The best part of a celebration is the connection. A heartfelt
-              note, a shared memory, something to return to long after the
-              occasion.
-            </p>
-            <p>
-              TheDigitalCardBox brings those moments together in one thoughtful
-              place. From weddings and baby showers to birthdays and quiet
-              milestones: less paper to manage, and more room for what matters.
-            </p>
-            <Link to="/start" className="primary">
-              Make room for your memories
-            </Link>
-          </div>
-        </section>
+        />
+        <article className="about-story">
+          <p className="about-verbatim">
+            The Digital Card box is a comprehensive digital event solutions
+            platform that modernizes social celebrations by seamlessly
+            integrating digital invitations, sentimental e-cards, and
+            frictionless cash gifting into a unified web and mobile ecosystem.
+            The platform empowers event hosts to design elegant e-invites and
+            deploy venue-specific, custom QR codes that replace physical
+            envelope boxes at weddings, baby showers, and milestone parties.
+            Simultaneously, it provides guests with a secure, all-in-one portal
+            to compose meaningful, permanently archived digital notes and
+            directly execute secure monetary gifts. By bridging the emotional
+            value of traditional greeting cards with the convenience of instant
+            mobile payments, the company eliminates the logistical friction of
+            ATMs, physical card shopping, and venue storage, offering a
+            sustainable, highly secure, and digitally preserved gifting
+            experience for the modern era
+          </p>
+        </article>
       </>
     );
   const copyByPage: Record<string, [string, string, string[]]> = {
@@ -430,8 +374,12 @@ export function Informational({ page }: { page: string }) {
       "Your privacy",
       "Your words deserve care.",
       [
-        "This design workspace stores fictional records and the changes you make in your browser’s local storage. It does not create an account, upload a photo, send a note to a server, or connect a payment service. Use fictional information while reviewing it.",
-        "Uploaded photos stay on this device. You can remove your card, clear your browser data, or reset the design workspace in Account settings. An exported file stays on the device where you download it.",
+        mode === "server"
+          ? "Test events and accepted cards are saved on this development server. Host and guest access use separate session cookies. Use fictional information; payments are disabled."
+          : "This design workspace stores fictional records and the changes you make in your browser’s local storage. It does not create an account, upload a photo, send a note to a server, or connect a payment service. Use fictional information while reviewing it.",
+        mode === "server"
+          ? "Unsent card drafts stay in this browser tab. Accepted cards remain on the test server until removed by their host or the development database is reset. Clearing browser storage does not erase accepted cards. Private photo uploads are not connected yet. Downloads remain on the device where you save them."
+          : "Uploaded photos stay on this device. You can remove your card, clear your browser data, or reset the design workspace in Account settings. An exported file stays on the device where you download it.",
         "Contact drafts open in your own email app. Nothing is sent until you choose to send it there. No advertising trackers or external GIF searches are loaded by this interface.",
       ],
     ],
@@ -441,7 +389,9 @@ export function Informational({ page }: { page: string }) {
       [
         "Share only words and images that you have permission to use. Keep payment credentials, financial documents and sensitive personal information out of notes.",
         "External gift activity is separate from a card. A guest report or an app handoff does not verify receipt. The host checks their own payment service before marking a gift as received.",
-        "This account-free design workspace does not process payments or purchases. Features that require connected accounts will be available after the corresponding services are implemented.",
+        mode === "server"
+          ? "Local test accounts support card and event-book review. This environment does not process payments, transfer money or accept purchases. Production account providers and database hosting remain separate implementation work."
+          : "This account-free design workspace does not process payments or purchases. Features that require connected accounts will be available after the corresponding services are implemented.",
       ],
     ],
     accessibility: [
@@ -449,7 +399,7 @@ export function Informational({ page }: { page: string }) {
       "A place for everyone.",
       [
         "We are building toward WCAG 2.2 Level AA with keyboard navigation, visible focus, text alternatives, sufficient contrast, labeled controls and layouts that adapt to zoom and small screens.",
-        "Cards have a readable text version. GIFs are still by default; motion starts only when you choose to play it. You can reduce motion in Account settings.",
+        "Cards have a readable text version. Composer GIFs stay still until you press Play. The home card has a brief opening preview; reduced-motion settings keep it still. You can also reduce motion in Account settings.",
         "If something gets in your way, email support@digitalcardbox.com with the page and what you were trying to do. Please leave out private guest or payment information.",
       ],
     ],
@@ -492,43 +442,58 @@ export function Contact() {
   return (
     <>
       <Heading eyebrow="A note away" title="Let’s keep in touch." />
-      <div className="two-column">
-        <section className="panel">
+      <div className="contact-layout">
+        <section className="panel contact-form">
           <h2>Send a little hello</h2>
-          <form onSubmit={prepare} onChange={() => setDraft(null)}>
-            <label htmlFor="contact-name">Your name</label>
-            <input
-              id="contact-name"
-              name="name"
-              autoComplete="name"
-              required
-              maxLength={80}
-            />
-            <label htmlFor="contact-email">Email address</label>
-            <input
-              id="contact-email"
-              name="email"
-              type="email"
-              autoComplete="email"
-              required
-            />
-            <label htmlFor="contact-topic">What’s on your mind?</label>
-            <select id="contact-topic" name="topic">
-              <option>General question</option>
-              <option>Support</option>
-              <option>Hosting</option>
-              <option>Feedback</option>
-            </select>
-            <label htmlFor="contact-message">Your message</label>
-            <textarea
-              id="contact-message"
-              name="message"
-              required
-              rows={6}
-              maxLength={3000}
-            />
+          <form
+            aria-label="Contact form"
+            onSubmit={prepare}
+            onChange={() => setDraft(null)}
+          >
+            <div className="contact-fields">
+              <div>
+                <label htmlFor="contact-name">Your name</label>
+                <input
+                  id="contact-name"
+                  name="name"
+                  autoComplete="name"
+                  required
+                  maxLength={80}
+                />
+              </div>
+              <div>
+                <label htmlFor="contact-email">Email address</label>
+                <input
+                  id="contact-email"
+                  name="email"
+                  type="email"
+                  autoComplete="email"
+                  required
+                  maxLength={254}
+                />
+              </div>
+              <div className="contact-wide">
+                <label htmlFor="contact-topic">What’s on your mind?</label>
+                <select id="contact-topic" name="topic">
+                  <option>General question</option>
+                  <option>Support</option>
+                  <option>Hosting</option>
+                  <option>Feedback</option>
+                </select>
+              </div>
+              <div className="contact-wide">
+                <label htmlFor="contact-message">Your message</label>
+                <textarea
+                  id="contact-message"
+                  name="message"
+                  required
+                  rows={3}
+                  maxLength={3000}
+                />
+              </div>
+            </div>
             <p className="small">
-              Please leave out passwords, payment details and private guest
+              Leave out passwords, payment details and private guest
               information.
             </p>
             <button className="primary">Prepare email draft</button>
@@ -562,33 +527,31 @@ export function Contact() {
             </div>
           )}
         </section>
-        <aside className="panel">
-          <span className="script-accent">hello!</span>
-          <h2>We’d love to hear from you.</h2>
-          <p>
-            Support
-            <br />
-            <a href="mailto:support@digitalcardbox.com">
-              support@digitalcardbox.com
-            </a>
-          </p>
-          <p>
-            General information
-            <br />
-            <a href="mailto:info@digitalcardbox.com">info@digitalcardbox.com</a>
-          </p>
-          <details>
-            <summary>Looking for an event?</summary>
+        <aside className="panel contact-info" aria-label="Contact details">
+          <h2>We’re a note away.</h2>
+          <div className="contact-addresses">
             <p>
-              Use the link or QR from your host. We do not offer a public event
-              directory.
+              Support
+              <br />
+              <a href="mailto:support@digitalcardbox.com">
+                support@digitalcardbox.com
+              </a>
             </p>
-          </details>
-          <details>
-            <summary>Have a question about a gift?</summary>
             <p>
-              Check the payment service you used and contact your host through a
-              channel you know.
+              General information
+              <br />
+              <a href="mailto:info@digitalcardbox.com">
+                info@digitalcardbox.com
+              </a>
+            </p>
+          </div>
+          <InstagramLink />
+          <details>
+            <summary>Looking for an event or a gift?</summary>
+            <p>
+              Use the private link or QR from your host. For a gift question,
+              check the service you used and contact your host through a channel
+              you know.
             </p>
           </details>
         </aside>

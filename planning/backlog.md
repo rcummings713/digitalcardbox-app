@@ -563,6 +563,12 @@ Release: October 2026 private MVP. A managed PostgreSQL foundation stores custom
   - Demonstrate concurrent same-key submission returns one resource, changed-body key reuse conflicts, rollback leaves no orphan outbox work, and crash/duplicate/out-of-order delivery cannot duplicate or regress a projection.
   - Domain stories own route/window/quota/consent/receipt checks using these primitives; backup stays DCB-E08-S05 and later provider-specific retry work stays DCB-E08-S06.
   - **Blocked by:** DCB-E18-S02
+- **DCB-E18-S04 Run a persistent local host and guest test backend** — UI design review. As the owner, I want a persistent local backend for host and guest review so that I can test the full card journey across browsers while the UI continues to change.
+  - Seeded fictional host/operator identities use server sessions; host operations enforce event ownership and guest actions remain invitation-scoped.
+  - Create/publish a card box, open the invitation in another browser, submit a note with an allowlisted GIF and explicit consent, and review the persistent host inbox and both book layouts.
+  - Validate CSRF/origin, revisions, bounded input, retry keys, event windows, link rotation, moderation and feature flags on the server; payment execution remains disabled.
+  - Version and test the isolated local SQLite adapter without replacing the managed PostgreSQL/identity production gates; leave private photo uploads visibly unavailable.
+  - Record API/browser verification and local test access; leave GitHub story #90 open and In Progress for owner closure.
 
 ### DCB-E19 Customer UI and owner design review
 

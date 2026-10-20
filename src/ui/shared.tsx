@@ -1,8 +1,9 @@
-import { useEffect, useState } from "react";
+import { useEffect, useId, useState } from "react";
 import type { MouseEvent, ReactNode } from "react";
 import QRCode from "qrcode";
 import type { CardStyle, Entry } from "./model";
 import { gifCollection } from "./model";
+import { KeepsakeCard } from "./KeepsakeCard";
 
 export function go(path: string) {
   window.history.pushState({}, "", path);
@@ -18,6 +19,7 @@ export function Link({
   children: ReactNode;
   className?: string;
   "aria-current"?: "page";
+  "aria-label"?: string;
 }) {
   function click(e: MouseEvent<HTMLAnchorElement>) {
     if (e.button || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
@@ -31,13 +33,33 @@ export function Link({
   );
 }
 export function Logo({ compact = false }: { compact?: boolean }) {
+  const toneId = `brand-logo-tone-${useId()}`;
   return (
     <span className={`brand-logo${compact ? " brand-logo-compact" : ""}`}>
+      <svg
+        className="brand-logo-treatment"
+        width="0"
+        height="0"
+        aria-hidden="true"
+        focusable="false"
+      >
+        <defs>
+          {/* Lift the baked-in cream to white before CSS blends it into the page. */}
+          <filter id={toneId} colorInterpolationFilters="sRGB">
+            <feComponentTransfer>
+              <feFuncR type="linear" slope="1.07" />
+              <feFuncG type="linear" slope="1.16" />
+              <feFuncB type="linear" slope="1.27" />
+            </feComponentTransfer>
+          </filter>
+        </defs>
+      </svg>
       <img
         src="/images/company-logo.png?brand=thedigitalcardbox"
         alt="TheDigitalCardBox — Elevating events & memories"
         width="1742"
         height="903"
+        style={{ filter: `url("#${toneId}")` }}
       />
     </span>
   );
@@ -188,7 +210,13 @@ export function MotionSticker({
   return (
     <img
       className="motion-sticker"
-      src={`/gifs/${id}.${animate ? "gif" : "svg"}`}
+      src={
+        animate
+          ? `/gifs/${id}.gif`
+          : id === "cosmic"
+            ? "/gifs/cosmic-poster.png"
+            : `/gifs/${id}.svg`
+      }
       alt={item.name}
       width="180"
       height="180"
@@ -204,6 +232,18 @@ export function Card({
   small?: boolean;
   animate?: boolean;
 }) {
+  if (entry.style === "little-star")
+    return (
+      <article aria-label={`Card from ${entry.name || "you"}`}>
+        <KeepsakeCard
+          name={entry.name}
+          note={entry.note}
+          gif={entry.gif}
+          animate={animate}
+          small={small}
+        />
+      </article>
+    );
   return (
     <article
       className={`keepsake-card card-${entry.style}${small ? " card-small" : ""}`}
@@ -295,4 +335,31 @@ export function download(filename: string, value: string, type = "text/plain") {
   a.download = filename;
   a.click();
   setTimeout(() => URL.revokeObjectURL(url), 1000);
+}
+
+export function InstagramLink() {
+  return (
+    <a
+      className="instagram-link"
+      href="https://www.instagram.com/thedigitalcardbox/"
+      target="_blank"
+      rel="noopener noreferrer"
+      aria-label="Instagram — @thedigitalcardbox (opens in a new tab)"
+    >
+      <svg
+        viewBox="0 0 24 24"
+        width="17"
+        height="17"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="1.6"
+        aria-hidden="true"
+      >
+        <rect x="3" y="3" width="18" height="18" rx="5" />
+        <circle cx="12" cy="12" r="4" />
+        <circle cx="17.5" cy="6.5" r=".7" fill="currentColor" />
+      </svg>
+      <span>Instagram</span>
+    </a>
+  );
 }

@@ -1,7 +1,9 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import type { Feature } from "./model";
 import { Heading, Link, Notice, Status } from "./shared";
 import { useStore } from "./state";
+import { request } from "./api";
+import type { AdminSummary } from "./api";
 const flags: { key: Feature; title: string; description: string }[] = [
   {
     key: "newEvents",
@@ -32,7 +34,7 @@ const flags: { key: Feature; title: string; description: string }[] = [
     description: "Allow hosts to arrange and read their consented event book.",
   },
 ];
-export function Admin({ tab }: { tab: string }) {
+function ReviewAdmin({ tab }: { tab: string }) {
   const { data, setData, notify } = useStore();
   const [query, setQuery] = useState("");
   return (
@@ -211,6 +213,151 @@ export function Admin({ tab }: { tab: string }) {
             </section>
           </div>
         </>
+      )}
+    </>
+  );
+}
+
+export function Admin({ tab }: { tab: string }) {
+  const { mode } = useStore();
+  return mode === "server" ? (
+    <ConnectedAdmin tab={tab} />
+  ) : (
+    <ReviewAdmin tab={tab} />
+  );
+}
+function ConnectedAdmin({ tab }: { tab: string }) {
+  const { account, actions, data, busy } = useStore();
+  const [summary, setSummary] = useState<AdminSummary | null>(null);
+  const [error, setError] = useState("");
+  useEffect(() => {
+    let active = true;
+    if (account?.role === "operator")
+      request<AdminSummary>("/api/admin/summary")
+        .then((value) => {
+          if (active) setSummary(value);
+        })
+        .catch((error) => {
+          if (active) setError(error.message);
+        });
+    return () => {
+      active = false;
+    };
+  }, [account?.id, tab, data.flags]);
+  if (account?.role !== "operator")
+    return (
+      <section className="panel">
+        <h1>Site administrator access required.</h1>
+        <p>
+          Host sign-in does not grant site administration or access to other
+          hosts’ private cards.
+        </p>
+        <Link to="/workspace/account" className="secondary">
+          Return to your account
+        </Link>
+      </section>
+    );
+  return (
+    <>
+      <Heading
+        eyebrow="Site administration"
+        title="The whole picture, thoughtfully."
+      />
+      <Notice>
+        Server controls · Private card text and payment identifiers are excluded
+        from this view. Money movement is disabled.
+      </Notice>
+      <nav className="admin-tabs" aria-label="Administrator pages">
+        {[
+          ["overview", "Overview"],
+          ["features", "Feature controls"],
+          ["events", "Event directory"],
+          ["activity", "Activity"],
+        ].map(([slug, title]) => (
+          <Link
+            key={slug}
+            to={"/admin/" + slug}
+            aria-current={tab === slug ? "page" : undefined}
+          >
+            {title}
+          </Link>
+        ))}
+      </nav>
+      {error && <p role="alert">{error}</p>}
+      {tab === "features" ? (
+        <section className="panel">
+          <h2>Feature availability</h2>
+          {flags.map((flag) => (
+            <div className="flag-row" key={flag.key}>
+              <div>
+                <h3>{flag.title}</h3>
+                <p>
+                  {flag.key === "gifts"
+                    ? "Allow gift matching and reviewed provider handoffs. This service never sends money."
+                    : flag.description}
+                </p>
+              </div>
+              <button
+                className={"toggle " + (data.flags[flag.key] ? "enabled" : "")}
+                role="switch"
+                aria-label={flag.title}
+                aria-checked={data.flags[flag.key]}
+                disabled={busy}
+                onClick={() => actions.setFlag(flag.key, !data.flags[flag.key])}
+              >
+                <span aria-hidden="true" />
+                {data.flags[flag.key] ? "On" : "Off"}
+              </button>
+            </div>
+          ))}
+        </section>
+      ) : !summary ? (
+        <p role="status">Loading server statistics…</p>
+      ) : tab === "events" ? (
+        <section className="panel">
+          <h2>Event directory</h2>
+          <p className="small">
+            Event metadata only. No invitation tokens, recipient accounts or
+            private card text.
+          </p>
+          <div className="admin-event-list">
+            {summary.events.map((event) => (
+              <div key={event.id}>
+                <div>
+                  <h3>{event.title}</h3>
+                  <p>
+                    {event.type} · {event.date}
+                  </p>
+                </div>
+                <Status>{event.status}</Status>
+              </div>
+            ))}
+          </div>
+        </section>
+      ) : tab === "activity" ? (
+        <section className="panel">
+          <h2>Server activity</h2>
+          <ol className="activity-list">
+            {summary.audit.map((item, index) => (
+              <li key={index}>{item.action}</li>
+            ))}
+          </ol>
+        </section>
+      ) : (
+        <div className="stat-grid">
+          <div>
+            <strong>{summary.totals.events}</strong>
+            <span>Card boxes</span>
+          </div>
+          <div>
+            <strong>{summary.totals.cards}</strong>
+            <span>Accepted test cards</span>
+          </div>
+          <div>
+            <strong>0</strong>
+            <span>Payment services connected</span>
+          </div>
+        </div>
       )}
     </>
   );
