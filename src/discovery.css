@@ -272,10 +272,6 @@
   height: 340px;
   perspective: 1200px;
   isolation: isolate;
-  /* Keep the rotating cover’s projected bounds inside its stage on all engines.
-     Card pages retain their own scrollports; focus rings have an 8px allowance. */
-  overflow: clip;
-  overflow-clip-margin: 8px;
 }
 .little-star-spread {
   display: grid;
@@ -1494,5 +1490,19 @@ html[data-motion="reduce"] .star-baby {
   }
   .provider-handoff .handoff-instructions-panel {
     margin-block: 6px;
+  }
+}
+
+/* Preserve room for the host link across font engines; wrap at enlarged text sizes. */
+@media screen and (max-width: 900px) {
+  .navigation-bar {
+    padding-inline: 8px;
+    gap: 5px;
+    flex-wrap: wrap;
+  }
+  .navigation-bar nav {
+    min-width: 0;
+    gap: clamp(3px, 1vw, 6px);
+    flex-wrap: wrap;
   }
 }
