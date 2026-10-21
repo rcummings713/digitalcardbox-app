@@ -11,12 +11,14 @@ import { initialStore, loadStore, STORAGE_KEY, uid } from "./model";
 import type { Destination, Entry, Feature, Occasion, Store } from "./model";
 import {
   ApiError,
+  initialConfiguration,
   dataMode,
   eventPayload,
   request,
   workspaceRequest,
 } from "./api";
 import type {
+  PublicConfiguration,
   GiftIntentInput,
   GiftIntentResponse,
   HostAccount,
@@ -24,6 +26,13 @@ import type {
   SessionResponse,
 } from "./api";
 interface Actions {
+  startReview: () => Promise<boolean>;
+  guestCsrf: (token: string) => string | undefined;
+  reviewFeedback: (
+    id: string,
+    state: "new" | "reviewed" | "archived",
+  ) => Promise<boolean>;
+  setAiEnabled: (enabled: boolean) => Promise<boolean>;
   saveDestination: (
     eventId: string,
     destination: Destination,
@@ -57,6 +66,7 @@ interface Actions {
   ) => Promise<{ id: string; createdAt: string } | undefined>;
 }
 interface State {
+  configuration: PublicConfiguration;
   data: Store;
   setData: Dispatch<SetStateAction<Store>>;
   notify: (message: string) => void;
@@ -90,6 +100,8 @@ export function StoreProvider({ children }: { children: ReactNode }) {
   const [data, setData] = useState(() =>
     dataMode === "server" ? emptyStore() : loadStore(),
   );
+  const [configuration, setConfiguration] =
+    useState<PublicConfiguration>(initialConfiguration);
   const [account, setAccount] = useState<HostAccount | null>(null);
   const [ready, setReady] = useState(dataMode !== "server");
   const [busy, setBusy] = useState(false);
@@ -148,6 +160,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
         if (!mounted.current || generation !== sessionGeneration.current)
           return;
         csrf.current = value.csrfToken;
+        if (value.configuration) setConfiguration(value.configuration);
         setAccount(value.account);
         setData((d) => ({ ...d, flags: value.flags }));
         if (value.account) await refresh();
@@ -201,6 +214,48 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       : "system";
   }, [data.profile.reducedMotion]);
   const actions: Actions = {
+    guestCsrf: (token) => guestCsrf.current[token],
+    async startReview() {
+      return Boolean(
+        await perform(async () => {
+          const value = await request<SessionResponse>("/api/review/session", {
+            method: "POST",
+            body: "{}",
+          });
+          csrf.current = value.csrfToken;
+          setAccount(value.account);
+          if (value.configuration) setConfiguration(value.configuration);
+          await refresh();
+          return true;
+        }),
+      );
+    },
+    async reviewFeedback(id, state) {
+      return Boolean(
+        await perform(async () => {
+          await request(
+            `/api/admin/feedback/${encodeURIComponent(id)}`,
+            { method: "PATCH", body: JSON.stringify({ state }) },
+            csrf.current,
+          );
+          return true;
+        }),
+      );
+    },
+    async setAiEnabled(enabled) {
+      return Boolean(
+        await perform(async () => {
+          await request(
+            "/api/admin/media",
+            { method: "PATCH", body: JSON.stringify({ enabled }) },
+            csrf.current,
+          );
+          const value = await request<PublicConfiguration>("/api/config");
+          setConfiguration(value);
+          return true;
+        }),
+      );
+    },
     async login(email, password) {
       const result = await perform(async () => {
         const value = await request<SessionResponse>("/api/session", {
@@ -485,6 +540,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
               name: entry.name,
               note: entry.note,
               style: entry.style,
+              artId: entry.artId ?? null,
               gif: entry.gif ?? null,
               consent: entry.consent,
             }),
@@ -504,6 +560,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     <Context.Provider
       value={{
         data,
+        configuration,
         setData: reviewSetData,
         notify,
         message,

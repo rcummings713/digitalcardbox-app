@@ -22,3 +22,9 @@ playwright-report/
 /IMG_8142.jpeg
 /IMG_9541.heic
 /tmp.gif
+
+# Local Worker secrets and isolated worker test output.
+.dev.vars*
+!.dev.vars.example
+!.env.server.example
+.worker-test-dist/

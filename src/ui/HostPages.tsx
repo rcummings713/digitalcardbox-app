@@ -455,8 +455,9 @@ function Overview({ event }: { event: Occasion }) {
   );
 }
 function Share({ event }: { event: Occasion }) {
-  const { actions, notify, mode, busy } = useStore();
-  const url = location.origin + "/g/" + event.token;
+  const { actions, notify, mode, busy, configuration } = useStore();
+  const url =
+    (configuration.publicSiteUrl || location.origin) + "/g/" + event.token;
   async function publish() {
     if (await actions.updateEvent(event.id, { status: "published" }))
       notify(
@@ -521,7 +522,9 @@ function Share({ event }: { event: Occasion }) {
                 </p>
                 <p className="small">
                   {mode === "server"
-                    ? "Open this link on another device or in a private browser to test the guest experience. The invitation grants guest access only."
+                    ? configuration.hosted
+                      ? "This live invitation opens on another phone or browser. The QR contains the same private guest link; it never contains a payment identifier."
+                      : "Use the network address shown when the app starts for another phone on the same Wi-Fi. A localhost address cannot open on someone else’s phone."
                     : "For this design review, open the link in the same browser and device. Custom card boxes are stored on this device."}
                 </p>
               </div>

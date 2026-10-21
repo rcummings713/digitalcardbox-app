@@ -6,9 +6,12 @@ const api = spawn(process.execPath, ["server/index.mjs"], {
   stdio: "inherit",
   env: process.env,
 });
+const uiArgs = process.argv.slice(2);
+// A same-network phone can open the actual invitation URL shown by Vite.
+if (!uiArgs.includes("--host")) uiArgs.push("--host", "0.0.0.0");
 const ui = spawn(
   process.execPath,
-  ["node_modules/vite/bin/vite.js", ...process.argv.slice(2)],
+  ["node_modules/vite/bin/vite.js", ...uiArgs],
   {
     cwd: root,
     stdio: "inherit",

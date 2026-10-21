@@ -1,28 +1,14 @@
+import { AiCardComposer } from "./AiCardComposer";
+import { GifPicker } from "./GifPicker";
 import { ProviderHandoff } from "./ProviderHandoff";
 import { reviewDestination } from "../modules/gifts/routing";
 import type { GiftHandoff } from "../modules/gifts/routing";
 import type { GiftIntentInput } from "./api";
 import { useEffect, useRef, useState } from "react";
 import type { FormEvent } from "react";
-import {
-  designs,
-  eventWindow,
-  formatDate,
-  gifCollection,
-  reference,
-  uid,
-} from "./model";
+import { designs, eventWindow, formatDate, reference, uid } from "./model";
 import type { CardStyle, Entry, Occasion, Service } from "./model";
-import {
-  Card,
-  Empty,
-  Heading,
-  Link,
-  MotionSticker,
-  Notice,
-  copy,
-  go,
-} from "./shared";
+import { Card, Empty, Heading, Link, Notice, copy, go } from "./shared";
 import { useStore } from "./state";
 import { WritingAssist } from "./WritingAssist";
 import type { InvitationResponse } from "./api";
@@ -32,6 +18,8 @@ interface Draft {
   name: string;
   note: string;
   style: CardStyle;
+  artId?: string;
+  generatedArtId?: string;
   photo?: string;
   gif?: string;
   consent: boolean;
@@ -61,7 +49,8 @@ function loadDraft(token: string): Draft {
       draft?.id &&
       typeof draft.name === "string" &&
       typeof draft.note === "string" &&
-      designs.some((d) => d.id === draft.style) &&
+      (designs.some((d) => d.id === draft.style) ||
+        (draft.style === "ai-art" && typeof draft.artId === "string")) &&
       typeof draft.reference === "string"
     )
       return draft;
@@ -163,10 +152,11 @@ function GuestJourney({
   const { data, setData, actions, notify, mode, busy } = useStore();
   const [draft, setDraft] = useState<Draft>(() => loadDraft(event.token));
   const [error, setError] = useState("");
-  const [gifSearch, setGifSearch] = useState("");
   const [gifOpen, setGifOpen] = useState(false);
   const [playing, setPlaying] = useState(false);
   const [suggestions, setSuggestions] = useState(false);
+  const [aiOpen, setAiOpen] = useState(false);
+  const [designCategory, setDesignCategory] = useState("All designs");
   const base = "/g/" + event.token;
   const state = authoritativeWindow || eventWindow(event);
   const canContribute = state === "open";
@@ -205,7 +195,13 @@ function GuestJourney({
     }
   }, [selected?.service, selected?.version]);
   useEffect(() => {
-    setPlaying(false);
+    if (!draft.gif || reduced) {
+      setPlaying(false);
+      return;
+    }
+    setPlaying(true);
+    const stop = setTimeout(() => setPlaying(false), 4400);
+    return () => clearTimeout(stop);
   }, [draft.gif, reduced]);
   function update(value: Partial<Draft>) {
     setDraft((d) => ({ ...d, ...value }));
@@ -259,6 +255,7 @@ function GuestJourney({
       name: draft.name.trim(),
       note: draft.note.trim(),
       style: draft.style,
+      artId: draft.style === "ai-art" ? draft.artId : undefined,
       photo: draft.photo,
       gif: data.flags.gifs ? draft.gif : undefined,
       consent: draft.consent,
@@ -534,7 +531,7 @@ function GuestJourney({
         )}
         {draft.submitted && (
           <div className="thank-you-card">
-            <Card entry={draft} />
+            <Card entry={draft} guestToken={event.token} />
           </div>
         )}
         <Link to={base} className="secondary">
@@ -709,6 +706,7 @@ function GuestJourney({
         <div className="guest-layout">
           <div className="live-card">
             <Card
+              guestToken={event.token}
               entry={{ ...draft, gif: data.flags.gifs ? draft.gif : undefined }}
             />
           </div>
@@ -770,28 +768,99 @@ function GuestJourney({
           <div className="composer-controls">
             <section className="panel">
               <p className="eyebrow">01 · Start with a little beauty</p>
+              <label htmlFor="design-category">
+                Browse {designs.length} designs
+              </label>
+              <select
+                id="design-category"
+                value={designCategory}
+                onChange={(event) => setDesignCategory(event.target.value)}
+              >
+                {[
+                  "All designs",
+                  ...new Set(designs.map((design) => design.category)),
+                ].map((category) => (
+                  <option key={category}>{category}</option>
+                ))}
+              </select>
               <fieldset className="design-choices">
                 <legend>Choose your card design</legend>
-                {designs.map((design) => (
-                  <label
-                    key={design.id}
-                    className={draft.style === design.id ? "chosen" : ""}
-                  >
+                {designs
+                  .filter(
+                    (design) =>
+                      designCategory === "All designs" ||
+                      design.category === designCategory,
+                  )
+                  .map((design) => (
+                    <label
+                      key={design.id}
+                      className={draft.style === design.id ? "chosen" : ""}
+                    >
+                      <input
+                        type="radio"
+                        name="design"
+                        value={design.id}
+                        checked={draft.style === design.id}
+                        onChange={() =>
+                          update({ style: design.id, artId: undefined })
+                        }
+                      />
+                      <span
+                        className={"design-swatch swatch-" + design.id}
+                        style={{
+                          background: design.paper,
+                          color: design.accent,
+                          borderColor: design.accent,
+                        }}
+                        aria-hidden="true"
+                      />
+                      <span>{design.name}</span>
+                    </label>
+                  ))}
+                {draft.generatedArtId && (
+                  <label className={draft.style === "ai-art" ? "chosen" : ""}>
                     <input
                       type="radio"
                       name="design"
-                      value={design.id}
-                      checked={draft.style === design.id}
-                      onChange={() => update({ style: design.id })}
+                      value="ai-art"
+                      checked={draft.style === "ai-art"}
+                      onChange={() =>
+                        update({ style: "ai-art", artId: draft.generatedArtId })
+                      }
                     />
-                    <span
-                      className={"design-swatch swatch-" + design.id}
-                      aria-hidden="true"
-                    />
-                    <span>{design.name}</span>
+                    <span className="design-swatch" aria-hidden="true">
+                      ✦
+                    </span>
+                    <span>Your AI card</span>
                   </label>
-                ))}
+                )}
               </fieldset>
+              {data.flags.assistance && (
+                <>
+                  <button
+                    type="button"
+                    className="secondary full"
+                    aria-expanded={aiOpen}
+                    aria-controls="ai-card-options"
+                    onClick={() => setAiOpen(!aiOpen)}
+                  >
+                    Make a card with AI
+                  </button>
+                  {aiOpen && (
+                    <div id="ai-card-options">
+                      <AiCardComposer
+                        token={event.token}
+                        csrfToken={actions.guestCsrf(event.token)}
+                        artId={draft.generatedArtId}
+                        onGenerated={(id) => update({ generatedArtId: id })}
+                        onChoose={(id) =>
+                          update({ style: "ai-art", artId: id })
+                        }
+                      />
+                    </div>
+                  )}
+                </>
+              )}
             </section>
             <section className="panel">
               <p className="eyebrow">02 · Add the part only you can write</p>
@@ -889,58 +958,15 @@ function GuestJourney({
                     )}
                   </div>
                   {gifOpen && (
-                    <section
-                      id="gif-library"
-                      className="gif-library"
-                      aria-label="GIF library"
-                    >
-                      <label htmlFor="gif-search">Find a little feeling</label>
-                      <input
-                        id="gif-search"
-                        type="search"
-                        value={gifSearch}
-                        onChange={(e) => setGifSearch(e.target.value)}
-                        placeholder="Love, celebrate, flowers…"
-                      />
-                      <p className="small">
-                        A curated collection · still until you choose play.
-                      </p>
-                      <div className="gif-grid">
-                        {gifCollection
-                          .filter((g) =>
-                            (g.name + " " + g.tags)
-                              .toLowerCase()
-                              .includes(gifSearch.toLowerCase()),
-                          )
-                          .map((gif) => (
-                            <button
-                              key={gif.id}
-                              type="button"
-                              aria-label={gif.name}
-                              aria-pressed={draft.gif === gif.id}
-                              onClick={() => {
-                                update({ gif: gif.id });
-                                setGifOpen(false);
-                                requestAnimationFrame(() =>
-                                  gifToggle.current?.focus(),
-                                );
-                              }}
-                            >
-                              <MotionSticker id={gif.id} />
-                              <span>{gif.name}</span>
-                            </button>
-                          ))}
-                      </div>
-                      {!gifCollection.some((g) =>
-                        (g.name + " " + g.tags)
-                          .toLowerCase()
-                          .includes(gifSearch.toLowerCase()),
-                      ) && (
-                        <p role="status">
-                          No GIFs found. Try “love” or “celebrate”.
-                        </p>
-                      )}
-                    </section>
+                    <GifPicker
+                      selected={draft.gif}
+                      onChoose={(id) => {
+                        update({ gif: id });
+                        setPlaying(true);
+                        setGifOpen(false);
+                        requestAnimationFrame(() => gifToggle.current?.focus());
+                      }}
+                    />
                   )}
                 </>
               )}
@@ -978,6 +1004,7 @@ function GuestJourney({
             >
               <p className="eyebrow">Your words, taking shape</p>
               <Card
+                guestToken={event.token}
                 entry={{
                   ...draft,
                   gif: data.flags.gifs ? draft.gif : undefined,

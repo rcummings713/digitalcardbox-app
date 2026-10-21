@@ -30,10 +30,16 @@ jobs:
           node-version: '22'
           cache: npm
       - run: npm ci
+      - id: plan
+        name: Select deployment from branch
+        run: node scripts/deployment-plan.mjs
       - run: node --test scripts/deployment-plan.test.mjs
       - run: npm run check:planning
       - run: npm run build
+        env:
+          VITE_DATA_MODE: ${{ steps.plan.outputs.environment == 'DEV' && 'server' || 'review' }}
       - run: npm run test:api
+      - run: npm run test:worker
       - name: Install browser for UI review checks
         run: npx playwright install --with-deps chromium
       - name: Verify customer journeys and accessibility
@@ -48,9 +54,6 @@ jobs:
           path: test-results/**/*.png
           if-no-files-found: ignore
           retention-days: 7
-      - id: plan
-        name: Select deployment from branch
-        run: node scripts/deployment-plan.mjs
       - uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
         with:
           name: site-${{ github.run_id }}

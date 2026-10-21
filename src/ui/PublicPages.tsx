@@ -1,12 +1,13 @@
-import { useState } from "react";
+import { CardCarousel } from "./CardCarousel";
+import { useRef, useState } from "react";
 import type { FormEvent } from "react";
 import { Card, Heading, InstagramLink, Link, Notice, go, copy } from "./shared";
-import { KeepsakeCard } from "./KeepsakeCard";
 import { ConnectedStart } from "./AuthPages";
 import { designs } from "./model";
 import { useStore } from "./state";
 
 export function Home() {
+  const imageDialog = useRef<HTMLDialogElement>(null);
   return (
     <section
       className="discovery-home"
@@ -22,7 +23,7 @@ export function Home() {
         </p>
       </div>
       <div className="discovery-card">
-        <KeepsakeCard interactive gif="cosmic" />
+        <CardCarousel />
         <p className="card-preview-caption">
           A little look at what your host receives.
         </p>
@@ -54,23 +55,44 @@ export function Home() {
       </div>
       <div className="discovery-value">
         <div className="before-after-art">
-          <img
-            src="/images/card-box-before-after.jpg"
-            width="1080"
-            height="593"
-            alt="Before: boxes full of wedding, graduation and baby cards. After: a lifetime of digital cards, organized together on a phone."
-          />
-        </div>
-        <div>
-          <h2>
-            A lifetime of love.
-            <br />
-            Always in your pocket.
-          </h2>
-          <p>Less to store. More to keep.</p>
-          <Link to="/how-it-works" className="text-link">
-            See how it works ↗
-          </Link>
+          <button
+            type="button"
+            className="before-after-button"
+            aria-label="View the card-box comparison at full size"
+            onClick={() => imageDialog.current?.showModal()}
+          >
+            <img
+              src="/images/card-box-before-after.png"
+              width="1080"
+              height="593"
+              alt="Before: boxes full of wedding, graduation and baby cards. After: a lifetime of digital cards, organized together on a phone."
+            />
+            <span>View the comparison ↗</span>
+          </button>
+          <dialog
+            className="image-lightbox"
+            ref={imageDialog}
+            onClick={(event) => {
+              if (event.target === imageDialog.current)
+                imageDialog.current?.close();
+            }}
+            aria-label="The card-box comparison"
+          >
+            <button
+              type="button"
+              className="secondary close-image"
+              autoFocus
+              onClick={() => imageDialog.current?.close()}
+            >
+              Close image
+            </button>
+            <img
+              src="/images/card-box-before-after.png"
+              width="1080"
+              height="593"
+              alt="Full-size original comparison of physical card storage and an organized digital card box."
+            />
+          </dialog>
         </div>
       </div>
     </section>
@@ -117,6 +139,14 @@ function CardCollection() {
           />
         </div>
       </section>
+      <details className="collection-ai-info">
+        <summary>Make a card with AI</summary>
+        <p>
+          Open your host’s invitation, then choose “Make a card with AI.” Pick
+          an occasion, palette, art style and motif; add your own words and an
+          optional GIF afterward.
+        </p>
+      </details>
       <div className="collection-next">
         <Link to="/start" className="primary">
           Create a card box
@@ -344,10 +374,7 @@ export function Informational({ page }: { page: string }) {
   if (page === "about")
     return (
       <>
-        <Heading
-          eyebrow="About TheDigitalCardBox"
-          title="Less to carry. More to keep."
-        />
+        <Heading eyebrow="Our story" title="About TheDigitalCardBox" />
         <article className="about-story">
           <p className="about-verbatim">
             The Digital Card box is a comprehensive digital event solutions
@@ -364,7 +391,7 @@ export function Informational({ page }: { page: string }) {
             mobile payments, the company eliminates the logistical friction of
             ATMs, physical card shopping, and venue storage, offering a
             sustainable, highly secure, and digitally preserved gifting
-            experience for the modern era
+            experience for the modern era.
           </p>
         </article>
       </>

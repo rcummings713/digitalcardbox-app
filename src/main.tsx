@@ -4,6 +4,7 @@ import App from "./App";
 import "./styles.css";
 import "./compact-mobile.css";
 import "./discovery.css";
+import "./media.css";
 
 createRoot(document.getElementById("root")!).render(
   <React.StrictMode>

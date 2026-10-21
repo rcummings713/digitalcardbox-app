@@ -1,6 +1,6 @@
 # Deployment environments and solo release workflow
 
-The setup follows [ADR 0006](../docs/adr/0006-deployment-environments.md). Cloudflare currently deploys the static browser-review adapter. `npm run dev` additionally runs the local persistent API under ADR 0008; that API is not deployed by this static workflow.
+The setup follows [ADR 0006](../docs/adr/0006-deployment-environments.md). The feature DEV route now builds the connected UI and deploys `wrangler.dev.jsonc` with a private SQLite-backed Durable Object under ADR 0009. TEST/PROD retain their previous static review route; their production backend/identity decisions are not part of this DEV change. `npm run dev` retains the Node SQLite adapter for local review.
 
 | Environment | Source | URL |
 | --- | --- | --- |
@@ -49,3 +49,24 @@ Use Actions **Re-run jobs** after adding missing credentials or resolving a tran
 Run `node --test scripts/deployment-plan.test.mjs`, `npm run build`, and `npm run check:planning` before merging. The pipeline pins its actions and Wrangler version, deploys the checked build artifact, and serializes deployment updates. Deleted-branch push events skip jobs so the default-branch fallback cannot select a production deployment. Branch-routing tests cover unsupported refs, tags, PR events, nested names, shell-sensitive characters, and preview-name collisions.
 
 For an application rollback, revert the problematic production change on master through a PR, let Build pass, and approve the rollback deployment. Keep the deployed SHA/version in the incident note. Domain and database release checks remain required when those implementations are introduced.
+
+## DEV shared backend (21 October)
+
+The feature preview has isolated persistent storage, Secure/HttpOnly cookies,
+private seven-day host review sessions and secret-protected operator access.
+Do not share the local published test passwords as hosted logins. Install
+`DCB_OPERATOR_PASSWORD` on the named DEV preview with Wrangler's secret prompt,
+using a generated password of at least 20 characters; operator email is
+`operator@digitalcardbox.test`. `DCB_HOST_PASSWORD` is optional for the seeded
+fictional hosts; ordinary reviewers use Continue without signing in.
+
+GIF/AI setup and limits: [CARD_MEDIA.md](../docs/specs/CARD_MEDIA.md). The OpenAI
+key is not a GitHub build secret and is never embedded into `dist`. A named
+preview's Durable Object namespace is separate from the base Worker and other
+previews. Updating the same named preview retains review data; removing it can
+remove access/data. New preview names require their own secrets.
+
+The original Worker-specific CI token may need narrowly scoped capability to
+create/use this DEV Worker's Durable Object binding. Diagnose the actual API
+error before changing permissions; do not broaden TEST/PROD tokens or grant
+account-wide access for unrelated resources. No production deployment is authorized.

@@ -8,7 +8,7 @@ export function SignIn({
   returnTo?: string;
   showChoices?: boolean;
 }) {
-  const { actions, busy, notify, account } = useStore();
+  const { actions, busy, notify, account, configuration } = useStore();
   const [email, setEmail] = useState(
     new URLSearchParams(location.search).get("access") === "operator"
       ? "operator@digitalcardbox.test"
@@ -51,7 +51,7 @@ export function SignIn({
               className="provider-button"
               onClick={() =>
                 notify(
-                  `${provider} sign-in is not connected yet. Use the test host to continue.`,
+                  `${provider} sign-in is not connected yet. Use the continue option below.`,
                 )
               }
             >
@@ -94,29 +94,37 @@ export function SignIn({
         <button
           className="secondary full"
           disabled={busy}
-          onClick={() =>
-            signIn("host@digitalcardbox.test", "CardBoxReview!2026")
-          }
+          onClick={async () => {
+            if (configuration.reviewSessions) {
+              if (await actions.startReview()) go(next);
+            } else
+              await signIn("host@digitalcardbox.test", "CardBoxReview!2026");
+          }}
         >
-          Continue with test host ↗
+          {configuration.reviewSessions
+            ? "Continue without signing in ↗"
+            : "Continue with test host ↗"}
         </button>
         <p className="small">
-          Skip account setup. Test cards are saved on this development server;
-          no payments are enabled.
+          {configuration.reviewSessions
+            ? "Start a private test workspace saved to this browser for seven days. Share your invitation to test with guests. Use fictional event information."
+            : "Skip account setup. Test cards are saved on this development server; no payments are enabled."}
         </p>
       </div>
-      <details>
-        <summary>Test account details</summary>
-        <p className="small">
-          Host: <code>host@digitalcardbox.test</code>
-          <br />
-          Second host: <code>other@digitalcardbox.test</code>
-          <br />
-          Administrator: <code>operator@digitalcardbox.test</code>
-          <br />
-          Password for these local accounts: <code>CardBoxReview!2026</code>
-        </p>
-      </details>
+      {!configuration.hosted && (
+        <details>
+          <summary>Test account details</summary>
+          <p className="small">
+            Host: <code>host@digitalcardbox.test</code>
+            <br />
+            Second host: <code>other@digitalcardbox.test</code>
+            <br />
+            Administrator: <code>operator@digitalcardbox.test</code>
+            <br />
+            Password for these local accounts: <code>CardBoxReview!2026</code>
+          </p>
+        </details>
+      )}
       <p className="small">
         Use fictional information while testing.{" "}
         <Link to="/privacy">Privacy notice</Link>

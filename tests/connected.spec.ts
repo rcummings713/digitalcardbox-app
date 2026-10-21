@@ -1,6 +1,7 @@
 import { test, expect } from "@playwright/test";
 import type { Page } from "@playwright/test";
 import AxeBuilder from "@axe-core/playwright";
+import jsQR from "jsqr";
 async function login(page: Page, email = "host@digitalcardbox.test") {
   await page.goto("/workspace");
   await page.getByLabel("Email address", { exact: true }).fill(email);
@@ -80,6 +81,23 @@ test("host creates and publishes, separate guests send real cards, and the host 
   await expect(
     page.getByAltText("QR code for this event’s guest link"),
   ).toBeVisible();
+  const pixels = await page
+    .getByAltText("QR code for this event’s guest link")
+    .evaluate((element) => {
+      const image = element as HTMLImageElement;
+      const canvas = document.createElement("canvas");
+      canvas.width = 640;
+      canvas.height = 640;
+      const context = canvas.getContext("2d")!;
+      context.drawImage(image, 0, 0, 640, 640);
+      return {
+        data: Array.from(context.getImageData(0, 0, 640, 640).data),
+        naturalWidth: image.naturalWidth,
+      };
+    });
+  expect(pixels.naturalWidth).toBe(1280);
+  const decoded = jsQR(new Uint8ClampedArray(pixels.data), 640, 640)?.data;
+  expect(decoded).toBe(invitation);
   const guestContext = await browser.newContext({
     baseURL: "http://127.0.0.1:4175",
     viewport: { width: 375, height: 812 },
@@ -94,7 +112,7 @@ test("host creates and publishes, separate guests send real cards, and the host 
     const guest = await guestContext.newPage();
     await sendCard(
       guest,
-      invitation,
+      decoded!,
       "Guest Across Browsers",
       "The little moments will become your biggest memories.",
       true,
@@ -230,6 +248,7 @@ test("public pages fit a phone, keep exact About copy and Instagram, and preserv
       "/pricing",
       "/about",
       "/contact",
+      "/feedback",
       "/privacy",
       "/terms",
       "/accessibility",
@@ -258,7 +277,7 @@ test("public pages fit a phone, keep exact About copy and Instagram, and preserv
   }
   await page.goto("/about");
   const exact =
-    "The Digital Card box is a comprehensive digital event solutions platform that modernizes social celebrations by seamlessly integrating digital invitations, sentimental e-cards, and frictionless cash gifting into a unified web and mobile ecosystem. The platform empowers event hosts to design elegant e-invites and deploy venue-specific, custom QR codes that replace physical envelope boxes at weddings, baby showers, and milestone parties. Simultaneously, it provides guests with a secure, all-in-one portal to compose meaningful, permanently archived digital notes and directly execute secure monetary gifts. By bridging the emotional value of traditional greeting cards with the convenience of instant mobile payments, the company eliminates the logistical friction of ATMs, physical card shopping, and venue storage, offering a sustainable, highly secure, and digitally preserved gifting experience for the modern era";
+    "The Digital Card box is a comprehensive digital event solutions platform that modernizes social celebrations by seamlessly integrating digital invitations, sentimental e-cards, and frictionless cash gifting into a unified web and mobile ecosystem. The platform empowers event hosts to design elegant e-invites and deploy venue-specific, custom QR codes that replace physical envelope boxes at weddings, baby showers, and milestone parties. Simultaneously, it provides guests with a secure, all-in-one portal to compose meaningful, permanently archived digital notes and directly execute secure monetary gifts. By bridging the emotional value of traditional greeting cards with the convenience of instant mobile payments, the company eliminates the logistical friction of ATMs, physical card shopping, and venue storage, offering a sustainable, highly secure, and digitally preserved gifting experience for the modern era.";
   await expect(page.locator(".about-verbatim")).toHaveText(exact);
   await page.goto("/");
   await page.keyboard.press("Tab");
@@ -272,7 +291,11 @@ test("public pages fit a phone, keep exact About copy and Instagram, and preserv
     page.getByRole("button", { name: "Play GIF", exact: true }),
   ).toBeDisabled();
   await expect(page.locator('img[src$=".gif"]')).toHaveCount(0);
-  await expect(page.getByText("Hugs + Kisses,")).toBeVisible();
+  await expect(
+    page
+      .locator('.card-carousel-slide[aria-hidden="false"]')
+      .getByText("Hugs + Kisses,"),
+  ).toBeVisible();
 });
 
 test("a failed server send keeps the draft and never claims delivery", async ({
@@ -364,7 +387,6 @@ test("the home card opens once, pauses its GIF, and keeps manual controls availa
   await expect(
     page.getByRole("button", { name: "Close the card", exact: true }),
   ).toBeFocused();
-  await page.getByRole("button", { name: "Play GIF", exact: true }).click();
   await expect(page.locator('img[src="/gifs/cosmic.gif"]')).toBeVisible();
   await page.getByRole("button", { name: "Pause GIF", exact: true }).click();
   await expect(page.locator('img[src="/gifs/cosmic.gif"]')).toHaveCount(0);
@@ -378,6 +400,8 @@ test("the development server never serves database files, keys or backend source
   for (const path of [
     "/server/index.mjs",
     "/server/index.mjs?raw",
+    "/worker/index.mjs",
+    "/.dev.vars.example",
     "/@fs" + database,
     "/@fs" + key,
   ]) {
@@ -477,5 +501,131 @@ test("all three seeded gift handoffs stay private previews and appear unconfirme
     } finally {
       await context.close();
     }
+  }
+});
+
+test("all four home cards open with matching GIFs and support carousel keyboard navigation", async ({
+  page,
+}) => {
+  await page.setViewportSize({ width: 375, height: 812 });
+  await page.emulateMedia({ reducedMotion: "no-preference" });
+  await page.goto("/");
+  const gifs = ["cosmic", "rings", "sixteen", "graduate"];
+  for (let index = 0; index < gifs.length; index++) {
+    const slide = page.locator('.card-carousel-slide[aria-hidden="false"]');
+    await expect(slide).toHaveAttribute(
+      "aria-label",
+      new RegExp(`^${index + 1} of 4`),
+    );
+    await expect(
+      slide.locator(`img[src="/gifs/${gifs[index]}.gif"]`),
+    ).toBeVisible();
+    await slide.getByRole("button", { name: "Pause GIF", exact: true }).click();
+    await expect(slide.locator('img[src$=".gif"]')).toHaveCount(0);
+    if (index < 3)
+      await page
+        .getByRole("button", { name: "Next example card", exact: true })
+        .click();
+  }
+  await page
+    .getByLabel("Swipe or use arrow keys to browse example cards")
+    .focus();
+  await page.keyboard.press("ArrowLeft");
+  await expect(
+    page.locator('.card-carousel-slide[aria-hidden="false"]'),
+  ).toHaveAttribute("aria-label", /^3 of 4/);
+  await page
+    .getByRole("button", { name: "View the card-box comparison at full size" })
+    .click();
+  await expect(page.getByRole("dialog")).toBeVisible();
+  const image = page.getByRole("dialog").locator("img");
+  expect(
+    await image.evaluate(
+      (element) => (element as HTMLImageElement).naturalWidth,
+    ),
+  ).toBe(1080);
+  await page.keyboard.press("Escape");
+  await expect(page.getByRole("dialog")).not.toBeVisible();
+});
+
+test("guest can browse 26 templates and use the curated GIF store while AI awaits its private key", async ({
+  page,
+}) => {
+  await login(page);
+  await page.goto("/workspace/events/test-baby-shower/share");
+  const invitation = await page
+    .getByLabel("Guest invitation link")
+    .inputValue();
+  await page.goto(invitation + "/card");
+  await expect(page.locator('input[name="design"]')).toHaveCount(26);
+  await page.getByLabel("Browse 26 designs").selectOption("Wedding");
+  await page.getByLabel("Orchid Atelier", { exact: true }).check();
+  await expect(page.locator(".live-card .card-orchid")).toBeVisible();
+  await page
+    .getByRole("button", { name: "Make a card with AI", exact: true })
+    .click();
+  await expect(
+    page.getByRole("button", { name: "Create one card with AI" }),
+  ).toBeDisabled();
+  await expect(page.locator(".ai-card-composer")).toContainText(
+    "AI artwork is not enabled",
+  );
+  await page.getByRole("button", { name: /^(Add|Change) a GIF/ }).click();
+  await page.getByLabel("Find a little feeling").fill("wedding rings");
+  await page
+    .getByRole("button", { name: "Forever starts here", exact: true })
+    .click();
+  await expect(
+    page.locator('.live-card img[src="/gifs/rings.gif"]'),
+  ).toBeVisible();
+  const audit = await new AxeBuilder({ page })
+    .withTags(["wcag2a", "wcag2aa", "wcag21aa", "wcag22aa"])
+    .analyze();
+  expect(audit.violations).toEqual([]);
+});
+
+test("public feedback is saved and appears in the private operator inbox", async ({
+  page,
+  browser,
+}) => {
+  await page.goto("/feedback");
+  await page.getByRole("radio", { name: "4 out of 5" }).check();
+  await page
+    .getByLabel("What would you like to share?")
+    .selectOption("Card designs");
+  await page
+    .getByLabel("Your feedback", { exact: true })
+    .fill(
+      "The wedding designs are lovely. A larger preview would help me choose.",
+    );
+  const audit = await new AxeBuilder({ page })
+    .withTags(["wcag2a", "wcag2aa", "wcag21aa", "wcag22aa"])
+    .analyze();
+  expect(audit.violations).toEqual([]);
+  await page
+    .getByRole("button", { name: "Send feedback", exact: true })
+    .click();
+  await expect(
+    page.getByRole("heading", { name: "Thank you for helping us grow." }),
+  ).toBeVisible();
+  const context = await browser.newContext({
+    baseURL: "http://127.0.0.1:4175",
+  });
+  try {
+    const operator = await context.newPage();
+    await login(operator, "operator@digitalcardbox.test");
+    await operator.goto("/admin/feedback");
+    await expect(operator.locator(".feedback-message")).toContainText(
+      "A larger preview would help me choose.",
+    );
+    await operator
+      .getByRole("button", { name: "Mark reviewed", exact: true })
+      .click();
+    await operator.getByLabel("Review status").selectOption("reviewed");
+    await expect(operator.locator(".feedback-message")).toContainText(
+      "A larger preview would help me choose.",
+    );
+  } finally {
+    await context.close();
   }
 });

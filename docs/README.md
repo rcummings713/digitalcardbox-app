@@ -16,3 +16,6 @@
 When an implementation detail changes, update the relevant spec, ADR, affected reference document and GitHub issue in the same pull request.
 
 - [Reviewed provider gift handoffs](specs/GIFT_ROUTING.md) — actual Cash App/Venmo profile navigation, Zelle bank guidance, fictional recipient previews and matching boundaries.
+
+
+- [Card media and AI key setup](specs/CARD_MEDIA.md): curated store, moderated generation, quotas and private feedback. [ADR 0009](adr/0009-hosted-dev-media.md) extends the shared backend to isolated DEV for live QR invitations.

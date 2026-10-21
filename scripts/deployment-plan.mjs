@@ -16,7 +16,7 @@ export function deploymentPlan(branch, { event = 'push', refType = 'branch' } = 
   const slug = branch.slice(prefix.length + 1).toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '').slice(0, 18).replace(/-+$/g, '') || 'branch';
   const hash = createHash('sha256').update(branch).digest('hex').slice(0, 8);
   const previewName = `${prefix}-${slug}-${hash}`;
-  return { environment, wranglerEnvironment, worker, previewName, command: `preview --env ${wranglerEnvironment} --worker-name ${worker} --name ${previewName}` };
+  return { environment, wranglerEnvironment, worker, previewName, command: `preview ${environment === "DEV" ? "--config wrangler.dev.jsonc" : "--env test"} --worker-name ${worker} --name ${previewName}` };
 }
 
 if (process.argv[1] && fileURLToPath(import.meta.url) === resolve(process.argv[1])) {

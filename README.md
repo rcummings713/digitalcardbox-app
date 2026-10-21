@@ -44,13 +44,26 @@ Cash App/Venmo open the recipient’s HTTPS profile; Zelle opens its bank finder
 with instructions to use your bank’s app. No amount, memo, guest name or private
 card content is passed to a provider. See [gift routing](docs/specs/GIFT_ROUTING.md).
 
-The original account-free browser adapter remains available with
-`npm run dev:ui`. Default `npm run build` produces that static review mode for
-the existing Cloudflare deployment workflow. It **does not deploy this Node API**.
-Do not use the review build as a production authentication/storage implementation.
+The isolated feature DEV preview now uses a shared Cloudflare SQLite-backed
+backend: invitations and QR codes work across phones. Choose **Continue without
+signing in** to create a private seven-day browser workspace. Published local test
+passwords do not authenticate hosted accounts. Operator access needs its own
+server secret. TEST/PROD stay on their existing deployment paths.
+
+There are **26 card designs**, a **24-item searchable same-origin GIF store**, four
+opening home-page examples and private feedback. AI artwork is implemented with
+strict choices, moderation and persistent request caps, but needs a server-side
+OpenAI API key. See [card media and setup](docs/specs/CARD_MEDIA.md) and
+[ADR 0009](docs/adr/0009-hosted-dev-media.md). No GIF API key is needed.
+
+The account-free browser adapter remains available with `npm run dev:ui`.
+Default `npm run build` produces that static review mode; DEV CI explicitly builds
+with `VITE_DATA_MODE=server` and uses `wrangler.dev.jsonc`. For local phone testing,
+open the **Network** URL Vite prints before creating/sharing the invitation; a
+localhost QR cannot address this computer from another phone.
 
 Checks: `npm run build`, `npm run check:planning`, `npm run test:api`,
-`npm run test:ui`, `npm run test:connected`, and
+`npm run test:worker`, `npm run test:ui`, `npm run test:connected`, and
 `node --test scripts/deployment-plan.test.mjs`. Connected tests use a separate
 temporary database, never the owner’s `.data` directory. Playwright uses Chrome
 on macOS and installed Chromium on CI (`npx playwright install chromium`).

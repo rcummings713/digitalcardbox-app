@@ -1,3 +1,4 @@
+import { templates, gifStore } from "../../src/modules/media/catalog.ts";
 export class Problem extends Error {
   constructor(status, message, code = "request_rejected") {
     super(message);
@@ -8,24 +9,8 @@ export class Problem extends Error {
 export const fail = (status, message, code) => {
   throw new Problem(status, message, code);
 };
-export const styles = [
-  "botanical",
-  "arch",
-  "midnight",
-  "ribbon",
-  "garden",
-  "photo",
-  "little-star",
-];
-export const gifIds = [
-  "hearts",
-  "confetti",
-  "flowers",
-  "stars",
-  "cheers",
-  "hug",
-  "cosmic",
-];
+export const styles = [...templates.map((d) => d.id), "ai-art"];
+export const gifIds = gifStore.map((g) => g.id);
 export const eventTypes = [
   "Wedding",
   "Baby shower",
@@ -174,12 +159,21 @@ export function validateEvent(input, current, now) {
   return result;
 }
 export function validateCard(input, flags) {
-  keys(input, ["requestKey", "name", "note", "style", "gif", "consent"]);
+  keys(input, [
+    "requestKey",
+    "name",
+    "note",
+    "style",
+    "gif",
+    "consent",
+    "artId",
+  ]);
   const card = {
     requestKey: text(input.requestKey, "submission reference", 80),
     name: text(input.name, "name", 80),
     note: text(input.note, "note", 5000),
     style: input.style,
+    artId: input.artId ?? null,
     gif: input.gif || null,
     consent: input.consent,
   };
@@ -187,6 +181,13 @@ export function validateCard(input, flags) {
     fail(422, "The submission reference is invalid.");
   if (!styles.includes(card.style))
     fail(422, "Choose a card from the collection.");
+  if (
+    (card.style === "ai-art" &&
+      (typeof card.artId !== "string" ||
+        !/^[a-f0-9-]{36}$/.test(card.artId))) ||
+    (card.style !== "ai-art" && card.artId !== null)
+  )
+    fail(422, "Choose approved artwork or a collection design.");
   if (card.gif !== null && (!gifIds.includes(card.gif) || !flags.gifs))
     fail(422, "Choose an available GIF from the library.");
   if (typeof card.consent !== "boolean")

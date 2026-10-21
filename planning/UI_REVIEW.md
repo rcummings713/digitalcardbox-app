@@ -191,3 +191,6 @@ progress without removing backend acceptance criteria. No issues were closed.
 
 These checks validate the UI and fictional local adapter. They do not validate
 production authentication, server access control, money movement or ADA compliance.
+
+
+21 October review: test the four home carousel cards and automatic/pause/reduced-motion GIFs; browse all 26 templates and search the 24-item GIF store; inspect the uncropped comparison; submit private feedback and review it as operator. Decode a published QR on another device and confirm its card in the host inbox. AI requires a private OpenAI key; see docs/specs/CARD_MEDIA.md. Stories #91 and #92 extend the existing epics and remain open/In Progress. No TEST/PROD promotion.

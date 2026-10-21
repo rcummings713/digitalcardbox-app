@@ -18,6 +18,8 @@ export default defineConfig({
         "**/.agents/**",
         "**/.aws/**",
         "**/server/**",
+        "**/worker/**",
+        "**/.dev.vars*",
         "**/*.sqlite",
         "**/*.sqlite-*",
         "**/*.key",

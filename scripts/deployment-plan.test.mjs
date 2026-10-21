@@ -13,7 +13,7 @@ test('feature and release branches use isolated previews, including nested names
   for (const branch of ['feature/mvp_iteration_1', 'feature/cards/editor', 'release/2026-10', 'release/pilot/fix']) {
     const plan = deploymentPlan(branch);
     assert.equal(plan.environment, branch.startsWith('feature/') ? 'DEV' : 'TEST');
-    assert.match(plan.command, /^preview --env (dev|test) --worker-name digitalcardbox-app-(dev|test) --name [a-z0-9-]+$/);
+    assert.match(plan.command, /^preview (?:--config wrangler\.dev\.jsonc --worker-name digitalcardbox-app-dev|--env test --worker-name digitalcardbox-app-test) --name [a-z0-9-]+$/);
     assert.ok(plan.previewName.length + plan.worker.length + 1 <= 63);
   }
 });

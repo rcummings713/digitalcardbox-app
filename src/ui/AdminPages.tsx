@@ -1,3 +1,4 @@
+import { FeedbackInbox } from "./FeedbackPages";
 import { useEffect, useState } from "react";
 import type { Feature } from "./model";
 import { Heading, Link, Notice, Status } from "./shared";
@@ -24,9 +25,9 @@ const flags: { key: Feature; title: string; description: string }[] = [
   },
   {
     key: "assistance",
-    title: "Writing prompts",
+    title: "Writing and card assistance",
     description:
-      "Offer optional starting points without blocking manual notes.",
+      "Offer optional writing prompts and configured AI artwork without blocking manual cards.",
   },
   {
     key: "books",
@@ -54,6 +55,7 @@ function ReviewAdmin({ tab }: { tab: string }) {
           ["features", "Feature controls"],
           ["events", "Event directory"],
           ["activity", "Activity"],
+          ["feedback", "Feedback"],
         ].map(([slug, label]) => (
           <Link
             key={slug}
@@ -273,6 +275,7 @@ function ConnectedAdmin({ tab }: { tab: string }) {
           ["features", "Feature controls"],
           ["events", "Event directory"],
           ["activity", "Activity"],
+          ["feedback", "Feedback"],
         ].map(([slug, title]) => (
           <Link
             key={slug}
@@ -284,9 +287,12 @@ function ConnectedAdmin({ tab }: { tab: string }) {
         ))}
       </nav>
       {error && <p role="alert">{error}</p>}
-      {tab === "features" ? (
+      {tab === "feedback" ? (
+        <FeedbackInbox />
+      ) : tab === "features" ? (
         <section className="panel">
           <h2>Feature availability</h2>
+          <AiMediaControl />
           {flags.map((flag) => (
             <div className="flag-row" key={flag.key}>
               <div>
@@ -360,5 +366,53 @@ function ConnectedAdmin({ tab }: { tab: string }) {
         </div>
       )}
     </>
+  );
+}
+
+function AiMediaControl() {
+  const { actions } = useStore();
+  const [status, setStatus] = useState<{
+    configured: boolean;
+    available: boolean;
+    usedToday: number;
+    dailyLimit: number;
+    estimatedDailyCeilingUsd: number;
+  } | null>(null);
+  const [error, setError] = useState("");
+  const [pending, setPending] = useState(false);
+  const load = () =>
+    request<{ ai: NonNullable<typeof status> }>("/api/admin/media")
+      .then((value) => setStatus(value.ai))
+      .catch((failure) => setError(failure.message));
+  useEffect(() => {
+    void load();
+  }, []);
+  return (
+    <div className="flag-row">
+      <div>
+        <h3>AI card artwork</h3>
+        <p>
+          {status?.configured
+            ? `${status.usedToday} of ${status.dailyLimit} daily attempts used. Estimated daily reserve: $${status.estimatedDailyCeilingUsd.toFixed(2)}. Provider charges can vary.`
+            : "Set the private server-side API key to enable artwork generation. Collection cards are always available."}
+        </p>
+        {error && <p role="alert">{error}</p>}
+      </div>
+      <button
+        className={"toggle " + (status?.available ? "enabled" : "")}
+        role="switch"
+        aria-label="AI card artwork"
+        aria-checked={!!status?.available}
+        disabled={pending || !status?.configured}
+        onClick={async () => {
+          setPending(true);
+          if (await actions.setAiEnabled(!status?.available)) await load();
+          setPending(false);
+        }}
+      >
+        <span aria-hidden="true" />
+        {status?.available ? "On" : "Off"}
+      </button>
+    </div>
   );
 }

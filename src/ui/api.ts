@@ -16,6 +16,7 @@ export interface InvitationResponse {
   csrfToken: string;
 }
 export interface SessionResponse {
+  configuration?: PublicConfiguration;
   account: HostAccount | null;
   csrfToken: string | null;
   flags: Record<Feature, boolean>;
@@ -122,3 +123,22 @@ export interface GiftIntentResponse {
   handoff: GiftHandoff;
   repeated: boolean;
 }
+
+export interface PublicConfiguration {
+  connected: boolean;
+  hosted: boolean;
+  publicSiteUrl: string;
+  reviewSessions: boolean;
+  gifCount: number;
+  ai: { available: boolean; dailyLimit: number; perGuest: number };
+  feedback: boolean;
+}
+export const initialConfiguration: PublicConfiguration = {
+  connected: false,
+  hosted: false,
+  publicSiteUrl: "",
+  reviewSessions: false,
+  gifCount: 24,
+  ai: { available: false, dailyLimit: 20, perGuest: 2 },
+  feedback: false,
+};

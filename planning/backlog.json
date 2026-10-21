@@ -1,6 +1,6 @@
 {
   "project": "TheDigitalCardBox",
-  "version": "2026-10-18",
+  "version": "2026-10-21",
   "source": "Canonical product/security/database specs, ADRs, Word references and live GitHub backlog review",
   "note": "AI-drafted planning backlog. October working estimate is 180 hours after adding 24 explicit database-foundation hours. Replan capacity before committing to October 31; acceptance gates remain mandatory. Post-MVP candidates are not release commitments.",
   "epics": [
@@ -519,6 +519,22 @@
           "release": "October 2026 private MVP",
           "target_date": "2026-10-25",
           "estimate_hours": 2
+        },
+        {
+          "id": "DCB-E05-S08",
+          "title": "Generate moderated card artwork within a bounded budget",
+          "story": "As an invited guest, I want controlled greeting-card artwork so that I can personalize my card without unbounded cost or arbitrary prompts.",
+          "acceptance": [
+            "Offer at least 20 independent manual templates; keep notes separate from artwork.",
+            "Only allowlisted occasion/palette/art-direction/motif choices reach a fixed server-built single-image request; reject arbitrary prompts, URLs and provider overrides.",
+            "Persist guest/event/IP/global daily reservations before provider work, allow one active job, deduplicate and count failures without automatic paid retry.",
+            "Moderate input and output, fail closed on explicit/malformed/unavailable safety checks, expose only approved owned assets, and document server-only key setup.",
+            "Manual cards and GIFs remain usable on missing keys, failures or quota limits; the owner reviews and closes the story."
+          ],
+          "priority": "P0",
+          "release": "UI design review",
+          "target_date": null,
+          "estimate_hours": null
         }
       ],
       "release": "October 2026 private MVP and follow-on"
@@ -1693,6 +1709,21 @@
             "Validate CSRF/origin, revisions, bounded input, retry keys, event windows, link rotation, moderation and feature flags on the server; payment execution remains disabled.",
             "Version and test the isolated local SQLite adapter without replacing the managed PostgreSQL/identity production gates; leave private photo uploads visibly unavailable.",
             "Record API/browser verification and local test access; leave GitHub story #90 open and In Progress for owner closure."
+          ],
+          "priority": "P0",
+          "release": "UI design review",
+          "target_date": null,
+          "estimate_hours": null
+        },
+        {
+          "id": "DCB-E18-S05",
+          "title": "Host the DEV test backend for live invitations and QR codes",
+          "story": "As the owner, I want shared DEV invitations so that QR codes work across phones.",
+          "acceptance": [
+            "Reuse the event/card repository behind an isolated Cloudflare SQLite Durable Object adapter; keep managed production identity/PostgreSQL open.",
+            "Cookie-owned private review workspaces and secret-protected operator access replace public hosted test passwords.",
+            "Generate high-resolution QR images from the canonical published guest URL; decode and test fresh-browser guest submission and host inbox.",
+            "Persist bounded feedback and approved private card assets with ownership, CSRF, window and quota enforcement; no money movement or TEST/PROD promotion."
           ],
           "priority": "P0",
           "release": "UI design review",

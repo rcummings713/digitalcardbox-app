@@ -1,16 +1,11 @@
+import { templates, gifStore } from "../modules/media/catalog";
+import type { TemplateId } from "../modules/media/catalog";
 import type {
   PaymentService,
   DisplayedDestination,
 } from "../modules/gifts/public";
 
-export type CardStyle =
-  | "botanical"
-  | "arch"
-  | "midnight"
-  | "ribbon"
-  | "garden"
-  | "photo"
-  | "little-star";
+export type CardStyle = TemplateId | "ai-art";
 export type Service = PaymentService;
 export type Feature = "gifts" | "gifs" | "assistance" | "books" | "newEvents";
 export interface Destination extends DisplayedDestination {
@@ -41,6 +36,7 @@ export interface Entry {
   name: string;
   note: string;
   style: CardStyle;
+  artId?: string;
   photo?: string;
   gif?: string;
   consent: boolean;
@@ -93,87 +89,17 @@ export const eventTypes = [
   "Bat Mitzvah",
   "Wake / Celebration of Life",
 ];
-export const designs: { id: CardStyle; name: string; description: string }[] = [
-  {
-    id: "little-star",
-    name: "A Little Star",
-    description: "An opening baby card, starlight and your own note",
-  },
-  {
-    id: "botanical",
-    name: "Pressed Peony",
-    description: "Fine botanical lines on warm ivory",
-  },
-  {
-    id: "arch",
-    name: "Golden Hour",
-    description: "Sculptural arches, champagne and blush",
-  },
-  {
-    id: "midnight",
-    name: "Written in the Stars",
-    description: "A constellation of wishes in midnight ink",
-  },
-  {
-    id: "ribbon",
-    name: "With Love",
-    description: "A generous bow and a handwritten sentiment",
-  },
-  {
-    id: "garden",
-    name: "Wildflower Letter",
-    description: "An illustrated garden with room for your words",
-  },
-  {
-    id: "photo",
-    name: "A Moment to Keep",
-    description: "A photograph, a little white space, a lasting note",
-  },
-];
-export const gifCollection = [
-  {
-    id: "cosmic",
-    name: "A universe of little stars",
-    tags: "space universe galaxy stars baby boy little sparkle starlight",
-    symbol: "✧",
-  },
-  {
-    id: "hearts",
-    name: "Sending love",
-    tags: "love hearts wedding anniversary",
-    symbol: "♥",
-  },
-  {
-    id: "confetti",
-    name: "Time to celebrate",
-    tags: "celebrate party birthday graduation confetti",
-    symbol: "✦",
-  },
-  {
-    id: "flowers",
-    name: "A little bouquet",
-    tags: "flowers thanks thank you love garden",
-    symbol: "✿",
-  },
-  {
-    id: "stars",
-    name: "You are a star",
-    tags: "stars congrats congratulations graduation sparkle",
-    symbol: "✧",
-  },
-  {
-    id: "cheers",
-    name: "Here’s to you",
-    tags: "cheers party celebrate wedding",
-    symbol: "♧",
-  },
-  {
-    id: "hug",
-    name: "A warm hug",
-    tags: "hug comfort sympathy friendship love",
-    symbol: "♡",
-  },
-];
+export const designs: readonly {
+  id: TemplateId;
+  name: string;
+  description: string;
+  motif: string;
+  paper: string;
+  ink: string;
+  accent: string;
+  category: string;
+}[] = templates;
+export const gifCollection = gifStore;
 export function uid() {
   return crypto.randomUUID();
 }

@@ -1,3 +1,4 @@
+import { MediaService } from "./media-service.mjs";
 import { createServer } from "node:http";
 import { ReviewApplication } from "./application.mjs";
 import { publicHost, hash } from "./domain/identity.mjs";
@@ -33,14 +34,23 @@ async function body(request) {
     fail(400, "The request is not valid JSON.");
   }
 }
-export function createApiServer(
+export function createApiHandler(
   repository,
-  { secureCookies = false, allowedOrigins = [], rateLimit = true } = {},
+  {
+    secureCookies = false,
+    allowedOrigins = [],
+    rateLimit = true,
+    identity,
+    services = {},
+    hosted = false,
+    publicSiteUrl = "",
+  } = {},
 ) {
   const app = new ReviewApplication(
     repository,
-    new LocalTestIdentity(repository),
+    identity ?? new LocalTestIdentity(repository),
   );
+  const media = services.media ?? new MediaService(repository);
   const buckets = new Map();
   function throttle(key, max, period = 60000) {
     if (!rateLimit) return;
@@ -56,7 +66,7 @@ export function createApiServer(
     if (++bucket.count > max)
       fail(429, "Please wait a moment before trying again.", "rate_limited");
   }
-  const server = createServer(async (request, response) => {
+  return async (request, response) => {
     response.setHeader("Content-Type", "application/json; charset=utf-8");
     response.setHeader("Cache-Control", "no-store");
     response.setHeader("X-Content-Type-Options", "nosniff");
@@ -101,10 +111,158 @@ export function createApiServer(
         )
           fail(403, "Refresh this page before saving.", "csrf_failed");
       };
+      const origin = `${secureCookies ? "https" : "http"}://${request.headers.host}`;
+      const configuration = () => ({
+        connected: true,
+        hosted,
+        publicSiteUrl: publicSiteUrl || origin,
+        reviewSessions: hosted,
+        gifCount: media.gifs().length,
+        ai: {
+          available: media.available && repository.flags().assistance,
+          dailyLimit: 20,
+          perGuest: 2,
+        },
+        feedback: true,
+      });
+      const sendImage = (image) => {
+        response.statusCode = 200;
+        response.setHeader("Content-Type", image.mime);
+        response.setHeader(
+          "Content-Disposition",
+          "inline; filename=card-art.webp",
+        );
+        response.end(image.image);
+      };
+      if (path === "/api/config" && read) return send(200, configuration());
+      if (path === "/api/gifs" && read) {
+        const query = new URL(request.url, "http://local.invalid").searchParams;
+        if ([...query.keys()].some((k) => k !== "q"))
+          fail(422, "Use the GIF search field.");
+        return send(200, {
+          gifs: media.gifs(query.get("q") || ""),
+          source: "TheDigitalCardBox curated GIF store",
+        });
+      }
+      if (path === "/api/review/session" && method === "POST") {
+        if (!hosted) fail(404, "Endpoint not found.");
+        keys(await body(request), []);
+        const result = session
+          ? { account: publicHost(session.host), csrfToken: session.csrf_token }
+          : app.startReview(request.socket.remoteAddress);
+        if (result.token)
+          response.setHeader(
+            "Set-Cookie",
+            cookie(HOST_COOKIE, result.token, "/api", secureCookies, 604800),
+          );
+        return send(200, {
+          account: result.account,
+          csrfToken: result.csrfToken,
+          configuration: configuration(),
+        });
+      }
+      if (path === "/api/feedback/session" && read) {
+        throttle(`feedback-session:${request.socket.remoteAddress}`, 20);
+        const result = media.feedbackSession(jar.dcb_feedback);
+        if (result.cookieToken)
+          response.setHeader(
+            "Set-Cookie",
+            cookie(
+              "dcb_feedback",
+              result.cookieToken,
+              "/api/feedback",
+              secureCookies,
+              86400,
+            ),
+          );
+        return send(200, { csrfToken: result.csrfToken });
+      }
+      if (path === "/api/feedback" && method === "POST") {
+        const result = media.saveFeedback(
+          jar.dcb_feedback,
+          request.headers["x-csrf-token"],
+          await body(request),
+          request.socket.remoteAddress,
+        );
+        return send(result.repeated ? 200 : 201, { id: result.id });
+      }
+      if (path === "/api/admin/feedback" && read)
+        return send(200, { feedback: media.listFeedback(app, session) });
+      let featureMatch = path.match(
+        /^\/api\/admin\/feedback\/([A-Za-z0-9-]+)$/,
+      );
+      if (featureMatch && method === "PATCH") {
+        requireCsrf();
+        return send(
+          200,
+          media.reviewFeedback(
+            app,
+            session,
+            featureMatch[1],
+            await body(request),
+          ),
+        );
+      }
+      if (path === "/api/admin/media" && read) {
+        app.requireOperator(session);
+        return send(200, { ai: media.status() });
+      }
+      if (path === "/api/admin/media" && method === "PATCH") {
+        requireCsrf();
+        app.requireOperator(session);
+        const input = await body(request);
+        keys(input, ["enabled"]);
+        if (typeof input.enabled !== "boolean")
+          fail(422, "Choose a card artwork setting.");
+        if (input.enabled && !media.status().configured)
+          fail(
+            409,
+            "Configure the server-side AI key before enabling card artwork.",
+          );
+        repository.transaction(() => {
+          repository.run(
+            "UPDATE runtime_settings SET value=? WHERE key='ai_cards_enabled'",
+            input.enabled ? "1" : "0",
+          );
+          repository.audit(
+            session.host.id,
+            "AI card artwork " + (input.enabled ? "enabled" : "paused") + ".",
+          );
+        });
+        return send(200, { ai: media.status() });
+      }
+      featureMatch = path.match(
+        /^\/api\/invitations\/([A-Za-z0-9_-]{20,100})\/art(?:\/([A-Za-z0-9-]+))?$/,
+      );
+      if (featureMatch) {
+        if (method === "POST" && !featureMatch[2]) {
+          const result = await media.generate(
+            app,
+            featureMatch[1],
+            jar.dcb_guest,
+            request.headers["x-csrf-token"],
+            await body(request),
+            request.socket.remoteAddress,
+          );
+          return send(result.repeated ? 200 : 201, result);
+        }
+        if (read && featureMatch[2])
+          return sendImage(
+            media.guestArt(
+              app,
+              featureMatch[1],
+              jar.dcb_guest,
+              featureMatch[2],
+            ),
+          );
+      }
+      featureMatch = path.match(/^\/api\/host\/art\/([A-Za-z0-9-]+)$/);
+      if (featureMatch && read)
+        return sendImage(media.hostArt(app, session, featureMatch[1]));
       if (path === "/api/health" && read)
         return send(200, {
           ok: true,
-          mode: "local-test",
+          mode: hosted ? "hosted-dev" : "local-test",
           moneyMovement: false,
         });
       if (path === "/api/session" && read)
@@ -112,6 +270,7 @@ export function createApiServer(
           account: session ? publicHost(session.host) : null,
           csrfToken: session?.csrf_token ?? null,
           flags: repository.flags(),
+          configuration: configuration(),
         });
       if (path === "/api/session" && method === "POST") {
         throttle(`login:${request.socket.remoteAddress}`, 12, 15 * 60000);
@@ -294,7 +453,10 @@ export function createApiServer(
         });
       }
     }
-  });
+  };
+}
+export function createApiServer(repository, options = {}) {
+  const server = createServer(createApiHandler(repository, options));
   server.requestTimeout = 15000;
   server.headersTimeout = 10000;
   return server;

@@ -3,6 +3,8 @@ import {
   reviewDestination,
   fictionalIdentifier,
 } from "../src/modules/gifts/routing.ts";
+import { randomUUID } from "node:crypto";
+import { consume } from "./media-service.mjs";
 import { hash, secret, publicHost } from "./domain/identity.mjs";
 import {
   fail,
@@ -38,6 +40,38 @@ export class ReviewApplication {
       csrfToken: csrf,
       expiresAt: expires,
     };
+  }
+  startReview(ip) {
+    return this.repo.transaction(() => {
+      consume(
+        this.repo,
+        "review:ip:" + hash(this.repo.key.toString("hex") + ip),
+        this.repo.now().slice(0, 10),
+        5,
+      );
+      const id = "visitor-" + randomUUID();
+      this.repo.run(
+        "INSERT INTO hosts (id,email,name,role,password_salt,password_hash) VALUES(?,?,?,'host',?,?)",
+        id,
+        id + "@review.invalid",
+        "My workspace",
+        secret(),
+        secret(),
+      );
+      const token = secret(),
+        csrf = secret();
+      this.repo.putHostSession(
+        hash(token),
+        id,
+        csrf,
+        new Date(this.repo.clock().getTime() + 7 * 86400000).toISOString(),
+      );
+      return {
+        token,
+        account: publicHost(this.repo.host(id)),
+        csrfToken: csrf,
+      };
+    });
   }
   session(token) {
     const session = token && this.repo.hostSession(hash(token));
@@ -174,7 +208,8 @@ export class ReviewApplication {
           !["name", "note", "style", "gif"].every(
             (k) => candidate[k] === previous[k],
           ) ||
-          candidate.consent !== !!previous.consent
+          candidate.consent !== !!previous.consent ||
+          (candidate.artId ?? null) !== previous.art_id
         )
           fail(
             409,
@@ -188,6 +223,16 @@ export class ReviewApplication {
       if (windowFor(event, this.repo.clock()) !== "open")
         fail(409, "This invitation is not accepting cards.");
       const value = validateCard(input, flags);
+      if (
+        value.artId &&
+        !this.repo.one(
+          "SELECT id FROM card_art WHERE id=? AND event_id=? AND guest_id=?",
+          value.artId,
+          event.id,
+          session.guest_id,
+        )
+      )
+        fail(404, "Your card artwork could not be found.");
       const entry = this.repo.insertCard(event.id, session.guest_id, value);
       // A guest receives only a receipt for their own submission, never the host inbox.
       return {

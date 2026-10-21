@@ -2,6 +2,8 @@
 
 **Status:** Accepted for local testing. **Date:** 18 October 2026.
 
+**21 October extension:** [ADR 0009](0009-hosted-dev-media.md) adds the shared backend to isolated DEV. The historical local-only/static-DEV statements below are superseded for that preview; TEST/PROD and managed production gates remain separate.
+
 ## Context
 
 The owner now requests real host/guest processing while the page design remains

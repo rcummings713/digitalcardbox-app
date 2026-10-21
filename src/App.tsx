@@ -1,3 +1,4 @@
+import { FeedbackPage } from "./ui/FeedbackPages";
 import { useEffect, useRef, useState } from "react";
 import { Account, EventForm, EventWorkspace, Workspace } from "./ui/HostPages";
 import { Contact, Home, Informational, Missing, Start } from "./ui/PublicPages";
@@ -63,6 +64,7 @@ function Shell() {
     );
   else if (admin) content = <Admin tab={parts[1] || "overview"} />;
   else if (path === "/contact") content = <Contact />;
+  else if (path === "/feedback") content = <FeedbackPage />;
   else if (
     [
       "about",
@@ -134,7 +136,7 @@ function Shell() {
           <span>
             {mode === "server"
               ? account
-                ? `Test workspace · ${account.email}`
+                ? (account.id.startsWith("visitor-") ? "Private test workspace · Saved to this browser" : `Test workspace · ${account.email}`)
                 : "Private host workspace"
               : "Design workspace · Changes stay on this device"}
           </span>
@@ -197,6 +199,7 @@ function Shell() {
         <nav aria-label="Footer navigation">
           <Link to="/about">About</Link>
           <Link to="/contact">Contact</Link>
+          <Link to="/feedback">Feedback</Link>
           <Link to="/privacy">Privacy</Link>
           <Link to="/terms">Terms</Link>
           <Link to="/accessibility">Accessibility</Link>

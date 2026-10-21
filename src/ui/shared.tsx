@@ -1,3 +1,8 @@
+import { TemplateArt } from "./TemplateArt";
+import type { OccasionCard } from "./KeepsakeCard";
+import type { CSSProperties } from "react";
+import { useReducedMotion } from "./KeepsakeCard";
+import { templates } from "../modules/media/catalog";
 import { useEffect, useId, useState } from "react";
 import type { MouseEvent, ReactNode } from "react";
 import QRCode from "qrcode";
@@ -226,30 +231,84 @@ export function MotionSticker({
 export function Card({
   entry,
   small = false,
-  animate = false,
+  animate,
+  guestToken,
 }: {
-  entry: Pick<Entry, "style" | "name" | "note" | "photo" | "gif">;
+  entry: Pick<Entry, "style" | "name" | "note" | "photo" | "gif" | "artId">;
   small?: boolean;
   animate?: boolean;
+  guestToken?: string;
 }) {
-  if (entry.style === "little-star")
+  const reduced = useReducedMotion();
+  const [autoPlaying, setAutoPlaying] = useState(false);
+  useEffect(() => {
+    if (!entry.gif || small || reduced || animate !== undefined) {
+      setAutoPlaying(false);
+      return;
+    }
+    setAutoPlaying(true);
+    const stop = setTimeout(() => setAutoPlaying(false), 4400);
+    return () => clearTimeout(stop);
+  }, [entry.gif, entry.style, small, reduced, animate]);
+  const motion = !reduced && !small && (animate ?? autoPlaying);
+  const opening: Partial<Record<CardStyle, OccasionCard>> = {
+    "little-star": "baby",
+    "wedding-vows": "wedding",
+    "sweet-sixteen": "sixteen",
+    graduation: "graduation",
+  };
+  const occasion = opening[entry.style];
+  const design = templates.find((item) => item.id === entry.style);
+  if (occasion)
     return (
       <article aria-label={`Card from ${entry.name || "you"}`}>
         <KeepsakeCard
           name={entry.name}
           note={entry.note}
           gif={entry.gif}
-          animate={animate}
+          animate={motion}
+          occasion={occasion}
           small={small}
         />
       </article>
     );
   return (
     <article
-      className={`keepsake-card card-${entry.style}${small ? " card-small" : ""}`}
+      className={`keepsake-card card-${entry.style}${small ? " card-small" : ""}${design && !["botanical", "arch", "midnight", "ribbon", "garden", "photo"].includes(entry.style) ? " card-curated" : ""}`}
+      style={
+        design
+          ? ({
+              "--card-paper": design.paper,
+              "--card-ink": design.ink,
+              "--card-accent": design.accent,
+            } as CSSProperties)
+          : undefined
+      }
       aria-label={`Card from ${entry.name || "you"}`}
     >
-      <Botanical kind={entry.style} />
+      {entry.style === "ai-art" && entry.artId ? (
+        <img
+          className="card-art ai-card-art"
+          src={
+            guestToken
+              ? `/api/invitations/${encodeURIComponent(guestToken)}/art/${encodeURIComponent(entry.artId)}`
+              : `/api/host/art/${encodeURIComponent(entry.artId)}`
+          }
+          alt="Personalized greeting-card artwork"
+        />
+      ) : design &&
+        ![
+          "botanical",
+          "arch",
+          "midnight",
+          "ribbon",
+          "garden",
+          "photo",
+        ].includes(entry.style) ? (
+        <TemplateArt id={design.id} />
+      ) : (
+        <Botanical kind={entry.style} />
+      )}
       <div className="card-content">
         <span className="card-kicker">A little love, always</span>
         {entry.photo && (
@@ -262,7 +321,7 @@ export function Card({
         <p className="card-message">
           {entry.note || "Your words belong somewhere beautiful."}
         </p>
-        {entry.gif && <MotionSticker id={entry.gif} animate={animate} />}
+        {entry.gif && <MotionSticker id={entry.gif} animate={motion} />}
         <span className="card-signature">
           {entry.name ? `With love, ${entry.name}` : "With love, you"}
         </span>
@@ -276,8 +335,9 @@ export function QR({ url }: { url: string }) {
   useEffect(() => {
     let active = true;
     setError(false);
+    setSrc("");
     QRCode.toDataURL(url, {
-      width: 320,
+      width: 1280,
       margin: 4,
       errorCorrectionLevel: "M",
       color: { dark: "#222222", light: "#ffffff" },

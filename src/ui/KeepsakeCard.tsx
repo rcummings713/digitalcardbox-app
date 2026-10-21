@@ -4,7 +4,7 @@ export const littleStarNote =
   "The universe is full of a million little stars ... but none will shine as much as your beautiful baby Boy !";
 export const littleStarVerse =
   "El universo está lleno de miles de estrellitas… pero ninguna brilla tanto como su hermoso bebito.";
-function useReducedMotion() {
+export function useReducedMotion() {
   const [reduced, setReduced] = useState(
     () =>
       matchMedia("(prefers-reduced-motion: reduce)").matches ||
@@ -82,18 +82,108 @@ export function StarBaby() {
     </svg>
   );
 }
+export type OccasionCard = "baby" | "wedding" | "sixteen" | "graduation";
+const occasionCopy = {
+  baby: {
+    lead: "Welcome,",
+    title: "little star.",
+    verse: littleStarVerse,
+    ribbon: "QUÉ ALEGRÍA TAN GRANDE",
+    label: "baby",
+  },
+  wedding: {
+    lead: "Forever,",
+    title: "together.",
+    verse: "May the ordinary days become your most extraordinary memories.",
+    ribbon: "TO A LIFETIME OF LITTLE MOMENTS",
+    label: "wedding",
+  },
+  sixteen: {
+    lead: "Hello,",
+    title: "sweet sixteen.",
+    verse: "Big dreams. A brave heart. A whole beautiful world ahead.",
+    ribbon: "YOUR KIND OF MAGIC",
+    label: "sweet sixteen",
+  },
+  graduation: {
+    lead: "Here’s to",
+    title: "what’s next.",
+    verse: "Look how far you have come. Imagine all the places you will go.",
+    ribbon: "THE NEXT CHAPTER IS YOURS",
+    label: "graduation",
+  },
+};
+function OccasionIllustration({ occasion }: { occasion: OccasionCard }) {
+  if (occasion === "baby") return <StarBaby />;
+  return (
+    <svg
+      className="star-baby occasion-illustration"
+      viewBox="0 0 150 145"
+      role="img"
+      aria-label={
+        occasion === "wedding"
+          ? "Interlocking wedding rings"
+          : occasion === "sixteen"
+            ? "A sparkling sixteen"
+            : "Graduation cap and diploma"
+      }
+    >
+      {occasion === "wedding" ? (
+        <g fill="none" stroke="#b28d50">
+          <circle cx="57" cy="79" r="29" strokeWidth="4" />
+          <circle cx="94" cy="79" r="29" strokeWidth="4" />
+          <path d="M82 46L94 32L107 46L94 60Z" strokeWidth="2" />
+          <path
+            d="M25 29L28 20L31 29L40 32L31 35L28 44L25 35L16 32Z"
+            fill="#d5b774"
+            stroke="none"
+          />
+        </g>
+      ) : occasion === "sixteen" ? (
+        <g fill="#af6c8d">
+          <text
+            x="75"
+            y="100"
+            textAnchor="middle"
+            fontSize="85"
+            fontFamily="Georgia,serif"
+          >
+            16
+          </text>
+          <path
+            d="M25 25L30 10L35 25L50 30L35 35L30 50L25 35L10 30ZM118 113L122 100L126 113L139 117L126 121L122 134L118 121L105 117Z"
+            fill="#bc9c63"
+          />
+        </g>
+      ) : (
+        <g stroke="#b19150" strokeWidth="2" strokeLinejoin="round">
+          <path d="M13 48L75 19L137 48L75 78Z" fill="#344a61" />
+          <path d="M34 59V87Q75 110 116 87V59" fill="#556d82" />
+          <path d="M129 53V88" />
+          <circle cx="129" cy="92" r="3" fill="#b19150" />
+          <path d="M35 116L110 104L116 128L41 139Z" fill="#f3e7cc" />
+          <path d="M72 110L77 134" strokeWidth="6" stroke="#b991a0" />
+        </g>
+      )}
+    </svg>
+  );
+}
 export function KeepsakeCard({
   name = "Norma",
   note = littleStarNote,
   gif,
   interactive = false,
-  animate = false,
+  active = true,
+  occasion = "baby",
+  animate,
   small = false,
 }: {
   name?: string;
   note?: string;
   gif?: string;
   interactive?: boolean;
+  active?: boolean;
+  occasion?: OccasionCard;
   animate?: boolean;
   small?: boolean;
 }) {
@@ -104,27 +194,37 @@ export function KeepsakeCard({
   const toggle = useRef<HTMLButtonElement>(null);
   const panelId = useId();
   const item = gifCollection.find((g) => g.id === gif);
+  const greeting = occasionCopy[occasion];
   useEffect(() => {
-    if (!interactive || reduced) return;
+    if (!interactive || !active || reduced) return;
     const reveal = setTimeout(() => {
-      if (!touched.current) {
-        setOpen(true);
-        setPlaying(true);
-      }
+      if (!touched.current) setOpen(true);
     }, 550);
-    const pause = setTimeout(() => setPlaying(false), 4400);
-    return () => {
-      clearTimeout(reveal);
-      clearTimeout(pause);
-    };
-  }, [interactive, reduced]);
+    return () => clearTimeout(reveal);
+  }, [interactive, active, reduced]);
   useEffect(() => {
-    if (reduced) setPlaying(false);
-  }, [reduced]);
-  const motion = !reduced && (interactive ? playing && open : animate);
+    if (!active) {
+      setPlaying(false);
+      if (interactive) setOpen(false);
+      touched.current = false;
+      return;
+    }
+    if (!open || !item || reduced) {
+      setPlaying(false);
+      return;
+    }
+    setPlaying(true);
+    const stop = setTimeout(() => setPlaying(false), 4400);
+    return () => clearTimeout(stop);
+  }, [active, open, item?.id, reduced, interactive]);
+  const motion =
+    active &&
+    !reduced &&
+    open &&
+    (interactive || animate === undefined ? playing : animate);
   return (
     <div
-      className={`little-star-keepsake${interactive ? " is-interactive" : ""}${open ? " is-open" : ""}${small ? " is-small" : ""}`}
+      className={`little-star-keepsake occasion-${occasion}${interactive ? " is-interactive" : ""}${open ? " is-open" : ""}${small ? " is-small" : ""}`}
     >
       <div className="little-star-book" id={panelId}>
         <div className="little-star-spread" inert={!open} aria-hidden={!open}>
@@ -165,11 +265,14 @@ export function KeepsakeCard({
                 />
               )}
               <div className="little-star-greeting">
-                <p lang="es">{littleStarVerse}</p>
-                <StarBaby />
+                <p lang={occasion === "baby" ? "es" : "en"}>{greeting.verse}</p>
+                <OccasionIllustration occasion={occasion} />
               </div>
-              <p className="little-star-ribbon" lang="es">
-                QUÉ ALEGRÍA TAN GRANDE
+              <p
+                className="little-star-ribbon"
+                lang={occasion === "baby" ? "es" : "en"}
+              >
+                {greeting.ribbon}
               </p>
             </div>
           </section>
@@ -185,7 +288,7 @@ export function KeepsakeCard({
               setOpen(true);
               requestAnimationFrame(() => toggle.current?.focus());
             }}
-            aria-label="Open the baby card"
+            aria-label={`Open the ${greeting.label} card`}
             aria-expanded={open}
             aria-controls={panelId}
             tabIndex={open ? -1 : 0}
@@ -195,9 +298,9 @@ export function KeepsakeCard({
               ✧<br />☾<br />✦
             </span>
             <span className="little-star-cover-title">
-              Welcome,
+              {greeting.lead}
               <br />
-              <em>little star.</em>
+              <em>{greeting.title}</em>
             </span>
             <span className="little-star-cover-hint">
               a world of love awaits inside

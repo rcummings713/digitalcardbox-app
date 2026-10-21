@@ -219,6 +219,12 @@ Release: October 2026 private MVP and follow-on. AI offers bounded editable choi
   - Record token/image usage without private memories in logs.
   - Budget switch disables AI while templates and manual notes continue.
   - Keep token/image counts, prompt/model versions and outcomes without durable private prompt/suggestion copies; quota counters are not financial transactions.
+- **DCB-E05-S08 Generate moderated card artwork within a bounded budget** — UI design review. As an invited guest, I want controlled greeting-card artwork so that I can personalize my card without unbounded cost or arbitrary prompts.
+  - Offer at least 20 independent manual templates; keep notes separate from artwork.
+  - Only allowlisted occasion/palette/art-direction/motif choices reach a fixed server-built single-image request; reject arbitrary prompts, URLs and provider overrides.
+  - Persist guest/event/IP/global daily reservations before provider work, allow one active job, deduplicate and count failures without automatic paid retry.
+  - Moderate input and output, fail closed on explicit/malformed/unavailable safety checks, expose only approved owned assets, and document server-only key setup.
+  - Manual cards and GIFs remain usable on missing keys, failures or quota limits; the owner reviews and closes the story.
 
 ### DCB-E06 External cash gifts with guest choice
 
@@ -569,6 +575,11 @@ Release: October 2026 private MVP. A managed PostgreSQL foundation stores custom
   - Validate CSRF/origin, revisions, bounded input, retry keys, event windows, link rotation, moderation and feature flags on the server; payment execution remains disabled.
   - Version and test the isolated local SQLite adapter without replacing the managed PostgreSQL/identity production gates; leave private photo uploads visibly unavailable.
   - Record API/browser verification and local test access; leave GitHub story #90 open and In Progress for owner closure.
+- **DCB-E18-S05 Host the DEV test backend for live invitations and QR codes** — UI design review. As the owner, I want shared DEV invitations so that QR codes work across phones.
+  - Reuse the event/card repository behind an isolated Cloudflare SQLite Durable Object adapter; keep managed production identity/PostgreSQL open.
+  - Cookie-owned private review workspaces and secret-protected operator access replace public hosted test passwords.
+  - Generate high-resolution QR images from the canonical published guest URL; decode and test fresh-browser guest submission and host inbox.
+  - Persist bounded feedback and approved private card assets with ownership, CSRF, window and quota enforcement; no money movement or TEST/PROD promotion.
 
 ### DCB-E19 Customer UI and owner design review
 

@@ -1,6 +1,6 @@
 # Local host and guest API
 
-**Scope:** ADR 0008, 18 October 2026. Persistent local test service; no production identity, transaction-data API
+**Scope:** ADR 0008 and ADR 0009, updated 21 October 2026. Local and isolated hosted DEV review; no production identity, transaction-data API
 or payment execution. JSON request/response bodies, `/api` same-origin
 proxy, no CORS grant. Errors are `{ error: { code, message } }` without stack,
 private content or secrets. Invalid API paths return JSON 404 rather than SPA HTML.
@@ -67,3 +67,30 @@ Only the current guest’s card can be linked. No arbitrary outbound URL is acce
 The shared routing module builds fixed HTTPS provider profiles or Zelle’s bank
 finder; amount/reference are copied manually. See GIFT_ROUTING.md. Production
 PostgreSQL unit-of-work contracts and approved provider-data access remain open.
+
+## Shared DEV media and feedback extension
+
+`GET /api/config` exposes public mode, actual UI origin, catalog count and AI
+availability; session reads also include this configuration. Hosted
+`POST /api/review/session {}` creates/reuses a private cookie-owned host workspace
+(seven-day cookie; no account recovery). Published local passwords are refused by
+the hosted identity adapter. Hosted cookies are Secure. Local QR users should
+open the LAN UI URL first; `DCB_PUBLIC_SITE_URL` can fix a canonical local UI origin.
+
+| Route | Additional contract |
+| --- | --- |
+| `GET /api/gifs?q=` | Bounded same-origin catalog search, known IDs only |
+| `POST /api/invitations/:token/art` | Guest CSRF and exactly four design choices + retry key; reserve caps, moderate twice, return approved `artId` only |
+| `GET /api/invitations/:token/art/:id` | Only the owning event guest, private no-store WebP |
+| `GET /api/host/art/:id` | Only the owning event host, private no-store WebP |
+| `GET /api/admin/media` | Operator-only configuration, daily attempts and estimated reserve |
+| `PATCH /api/admin/media` | Operator + CSRF; `{enabled:boolean}` kill switch |
+| `GET /api/feedback/session` | Scoped HttpOnly feedback cookie + CSRF, 24 hours |
+| `POST /api/feedback` | CSRF, retry key, rating/category/comment and optional consented email; persistent abuse limits |
+| `GET /api/admin/feedback` | Operator-only private feedback, newest 200 |
+| `PATCH /api/admin/feedback/:id` | Operator + CSRF; new/reviewed/archived state, minimal audit |
+
+Card input optionally adds `artId`; `style=ai-art` requires approved artwork owned
+by this guest/event. Manual styles cannot attach arbitrary art IDs. Catalog IDs
+now cover 26 templates and 24 GIFs. No photo or arbitrary URL input is added.
+See [CARD_MEDIA.md](CARD_MEDIA.md) for exact quotas, retention and key setup.

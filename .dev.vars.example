@@ -1,0 +1,7 @@
+# Copy to .dev.vars for local Wrangler only (ignored).
+OPENAI_API_KEY=
+AI_CARDS_ENABLED=false
+DCB_OPERATOR_PASSWORD=
+DCB_HOST_PASSWORD=
+# HTTP local Wrangler testing only. Never configure on hosted environments.
+DCB_LOCAL_TEST=true

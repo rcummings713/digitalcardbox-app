@@ -86,8 +86,6 @@ test("guest composes a card, searches GIFs and keeps host-only content out of th
   await page.getByLabel("Find a little feeling").fill("flowers");
   await expect(page.locator(".gif-grid>button")).toHaveCount(1);
   await page.getByRole("button", { name: "A little bouquet" }).click();
-  await expect(page.locator('img[src$=".gif"]')).toHaveCount(0);
-  await page.getByRole("button", { name: "Play GIF" }).click();
   await expect(page.locator('img[src$=".gif"]')).toHaveCount(1);
   await page.getByRole("button", { name: "Pause GIF" }).click();
   await page.getByRole("button", { name: "Review my card" }).click();
@@ -179,7 +177,7 @@ test("admin flags affect guest choices while preserving existing records", async
   await page.goto("/admin/features");
   await page.getByRole("switch", { name: "GIF library" }).click();
   await page.getByRole("switch", { name: "External gift choices" }).click();
-  await page.getByRole("switch", { name: "Writing prompts" }).click();
+  await page.getByRole("switch", { name: "Writing and card assistance" }).click();
   await page.goto(invitation + "/card");
   await expect(page.getByRole("button", { name: "Add a GIF" })).toHaveCount(0);
   await expect(
