@@ -221,3 +221,8 @@ sizes and motion controls are preserved without page-scale transforms.
 
 
 The 21 October DEV extension adds 26 collection designs, 24 searchable curated GIFs, four opening carousel cards, an uncropped comparison image with full-size view, private feedback and bounded AI card artwork. About keeps the requested paragraph with its final period and omits the removed tagline. See [CARD_MEDIA.md](CARD_MEDIA.md) and [ADR 0009](../adr/0009-hosted-dev-media.md).
+
+22 October: the picker now searches 144 same-origin GIFs/animations with
+24-result pages and feeling/occasion shortcuts. New Noto assets retain credits
+in card/book views and exports. CardVault and book archives embed selected
+animation/poster bytes; see CARD_MEDIA.md for license and retention details.

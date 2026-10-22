@@ -1,5 +1,5 @@
 import { randomUUID, createHash } from "node:crypto";
-import { aiOptions, gifStore } from "../src/modules/media/catalog.ts";
+import { aiOptions, searchGifs } from "../src/modules/media/catalog.ts";
 import { fail, keys, text, windowFor, dayInZone } from "./domain/events.mjs";
 import { hash, secret } from "./domain/identity.mjs";
 
@@ -84,20 +84,9 @@ export class MediaService {
   gifs(query = "") {
     if (query.length > 50)
       fail(422, "Search for a GIF using up to 50 characters.");
-    const q = query.trim().toLocaleLowerCase();
-    return gifStore
-      .filter((gif) =>
-        `${gif.name} ${gif.tags}`.toLocaleLowerCase().includes(q),
-      )
-      .map((gif) => ({
-        ...gif,
-        poster:
-          gif.id === "cosmic"
-            ? "/gifs/cosmic-poster.png"
-            : `/gifs/${gif.id}.svg`,
-        url: `/gifs/${gif.id}.gif`,
-      }));
+    return searchGifs(query);
   }
+
   async call(path, payload) {
     let response;
     try {

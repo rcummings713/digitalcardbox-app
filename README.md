@@ -50,11 +50,11 @@ signing in** to create a private seven-day browser workspace. Published local te
 passwords do not authenticate hosted accounts. Operator access needs its own
 server secret. TEST/PROD stay on their existing deployment paths.
 
-There are **26 card designs**, a **24-item searchable same-origin GIF store**, four
+There are **26 card designs**, a **144-item searchable same-origin animation store**, four
 opening home-page examples and private feedback. AI artwork is implemented with
 strict choices, moderation and persistent request caps, but needs a server-side
 OpenAI API key. See [card media and setup](docs/specs/CARD_MEDIA.md) and
-[ADR 0009](docs/adr/0009-hosted-dev-media.md). No GIF API key is needed.
+[ADR 0009](docs/adr/0009-hosted-dev-media.md). No GIF API key is needed. The 120 added Noto animations use CC BY 4.0 with attribution, are stored with the app, and are embedded in CardVault/book data exports.
 
 The account-free browser adapter remains available with `npm run dev:ui`.
 Default `npm run build` produces that static review mode; DEV CI explicitly builds

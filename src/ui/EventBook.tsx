@@ -1,3 +1,6 @@
+import { cardArchive } from "../modules/media/archive";
+import { GifCredit } from "./GifCredit";
+import { findGif, gifCreditText } from "../modules/media/catalog";
 import { useState } from "react";
 import { bookEntries, formatDate } from "./model";
 import type { Occasion } from "./model";
@@ -9,6 +12,8 @@ export function EventBook({ event }: { event: Occasion }) {
   const layout = event.bookLayout || "editorial";
   const [spread, setSpread] = useState(0);
   const [reading, setReading] = useState(false);
+  const [saving, setSaving] = useState(false);
+  const [saveError, setSaveError] = useState("");
   const entries = bookEntries(data, event.id);
   const pages = Math.ceil(entries.length / 2) + 1;
   const safeSpread = Math.min(spread, pages - 1);
@@ -160,16 +165,15 @@ export function EventBook({ event }: { event: Occasion }) {
                       {entry.gif && (
                         <img
                           className="book-sticker"
-                          src={
-                            entry.gif === "cosmic"
-                              ? "/gifs/cosmic-poster.png"
-                              : "/gifs/" + entry.gif + ".svg"
+                          src={findGif(entry.gif)?.poster}
+                          alt={
+                            findGif(entry.gif)?.name || "A keepsake animation"
                           }
-                          alt="An illustrated keepsake sticker"
                           width="100"
                           height="100"
                         />
                       )}
+                      <GifCredit id={entry.gif} />
                     </>
                   )}
                   <span className="book-folio">
@@ -210,7 +214,35 @@ export function EventBook({ event }: { event: Occasion }) {
             contributions close. Your basic CardVault export remains available
             without purchasing.
           </p>
+          {saveError && <p role="alert">{saveError}</p>}
           <div className="buttons">
+            <button
+              className="secondary"
+              disabled={saving}
+              onClick={async () => {
+                setSaving(true);
+                setSaveError("");
+                try {
+                  const saved = await cardArchive(event.title, entries);
+                  download(
+                    "TheDigitalCardBox-event-book-with-animations.json",
+                    JSON.stringify(saved, null, 2),
+                    "application/json",
+                  );
+                  notify("Your book notes and animations are saved together.");
+                } catch (error) {
+                  setSaveError(
+                    error instanceof Error
+                      ? error.message
+                      : "The book could not be saved. Please try again.",
+                  );
+                } finally {
+                  setSaving(false);
+                }
+              }}
+            >
+              {saving ? "Saving animations…" : "Save book with animations ↓"}
+            </button>
             <button
               className="secondary"
               onClick={() => {
@@ -218,7 +250,10 @@ export function EventBook({ event }: { event: Occasion }) {
                   "TheDigitalCardBox-event-book.txt",
                   `${event.title}\n${formatDate(event.date)}\n\n` +
                     entries
-                      .map((x) => `From ${x.name}\n${x.note}`)
+                      .map(
+                        (x) =>
+                          `From ${x.name}\n${x.note}${x.gif ? `\nAnimation: ${findGif(x.gif)?.name || x.gif}\nLocal asset: ${findGif(x.gif)?.url || ""}` : ""}${gifCreditText(x.gif) ? "\n" + gifCreditText(x.gif) : ""}`,
+                      )
                       .join("\n\n"),
                 );
                 notify("Your readable event-book file is ready.");

@@ -92,5 +92,12 @@ open the LAN UI URL first; `DCB_PUBLIC_SITE_URL` can fix a canonical local UI or
 
 Card input optionally adds `artId`; `style=ai-art` requires approved artwork owned
 by this guest/event. Manual styles cannot attach arbitrary art IDs. Catalog IDs
-now cover 26 templates and 24 GIFs. No photo or arbitrary URL input is added.
+now cover 26 templates and 144 GIFs/animations. No photo or arbitrary URL input is added.
 See [CARD_MEDIA.md](CARD_MEDIA.md) for exact quotas, retention and key setup.
+
+22 October: `/api/gifs` searches the preserved local catalog, including 120
+freely licensed Noto animations. Responses include allowlisted animation/poster
+paths and creator/license/source/modification metadata. Card payloads still save
+only a known GIF ID; no schema or payment change. The actual assets persist in
+the repository/deployment, and user-triggered CardVault/book archives embed the
+selected bytes and credits. No new remote media endpoint is introduced.

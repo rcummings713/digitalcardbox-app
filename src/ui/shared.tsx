@@ -2,6 +2,7 @@ import { TemplateArt } from "./TemplateArt";
 import type { OccasionCard } from "./KeepsakeCard";
 import type { CSSProperties } from "react";
 import { useReducedMotion } from "./KeepsakeCard";
+import { GifCredit } from "./GifCredit";
 import { templates } from "../modules/media/catalog";
 import { useEffect, useId, useState } from "react";
 import type { MouseEvent, ReactNode } from "react";
@@ -215,13 +216,7 @@ export function MotionSticker({
   return (
     <img
       className="motion-sticker"
-      src={
-        animate
-          ? `/gifs/${id}.gif`
-          : id === "cosmic"
-            ? "/gifs/cosmic-poster.png"
-            : `/gifs/${id}.svg`
-      }
+      src={animate ? item.url : item.poster}
       alt={item.name}
       width="180"
       height="180"
@@ -270,6 +265,7 @@ export function Card({
           occasion={occasion}
           small={small}
         />
+        <GifCredit id={entry.gif} />
       </article>
     );
   return (
@@ -325,6 +321,7 @@ export function Card({
         <span className="card-signature">
           {entry.name ? `With love, ${entry.name}` : "With love, you"}
         </span>
+        <GifCredit id={entry.gif} />
       </div>
     </article>
   );

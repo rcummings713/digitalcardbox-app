@@ -37,3 +37,15 @@ No payment execution is introduced; reviewed external gift handoffs remain as
 previously authorized. Do not promote to TEST/PROD as part of this change. Named
 previews and their storage can expire or be deleted; preserve review evidence
 before removal. The owner reviews and closes stories manually.
+
+## 22 October: freely licensed stored animations
+
+The owner excludes new GIF-provider costs and complicated agreements. Expand the
+existing catalog with 120 Google Fonts Animated Noto Emoji animations licensed
+under CC BY 4.0, bringing the picker to 144 choices. Commit approved files and
+posters with stable IDs and a hashed provenance manifest; runtime calls remain
+same-origin. Carry creator/license/modification notices in card/book views and
+archives. Exports can include the actual selected animation/poster bytes, so
+retention does not depend on Google URLs or a search-provider API. Keep the
+original home examples and supplied cosmic asset unchanged. No API key,
+subscription or paid GIF agreement is introduced; production gates remain open.

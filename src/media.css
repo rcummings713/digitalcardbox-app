@@ -639,3 +639,52 @@
     margin-bottom: 7px;
   }
 }
+.gif-pagination {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin-top: 10px;
+}
+.gif-pagination .secondary {
+  min-height: 32px;
+  padding: 6px 10px;
+  font-size: 11px;
+}
+.gif-pagination span {
+  font-size: 12px;
+  white-space: nowrap;
+}
+.gif-results-count {
+  margin: 6px 0;
+}
+.gif-credit {
+  font-size: 11px;
+  line-height: 1.5;
+  font-family: inherit;
+  color: inherit;
+  margin: 8px 0 0;
+  text-align: center;
+}
+.gif-credit a {
+  color: inherit;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  display: inline-block;
+  min-height: 24px;
+  padding-block: 3px;
+}
+.book-page .gif-credit {
+  font-size: 10px;
+}
+@media print {
+  .gif-credit {
+    display: block !important;
+    break-inside: avoid;
+  }
+  .gif-credit a::after {
+    content: " (" attr(href) ")";
+    font-size: 8px;
+    overflow-wrap: anywhere;
+  }
+}

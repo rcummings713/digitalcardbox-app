@@ -629,3 +629,160 @@ test("public feedback is saved and appears in the private operator inbox", async
     await context.close();
   }
 });
+
+test("free animations can be searched, sent, kept in the host book, and exported with their actual bytes", async ({
+  page,
+  browser,
+}) => {
+  const { readFile } = await import("node:fs/promises");
+  await login(page);
+  await page.goto("/workspace/events/test-baby-shower/share");
+  const invitation = await page
+    .getByLabel("Guest invitation link")
+    .inputValue();
+  const context = await browser.newContext({
+    baseURL: "http://127.0.0.1:4175",
+    viewport: { width: 375, height: 812 },
+  });
+  const external: string[] = [];
+  context.on("request", (request) => {
+    if (
+      request.url().startsWith("http") &&
+      new URL(request.url()).origin !== "http://127.0.0.1:4175"
+    )
+      external.push(request.url());
+  });
+  try {
+    const guest = await context.newPage();
+    await guest.goto(invitation + "/card");
+    await guest
+      .getByLabel("Your name", { exact: true })
+      .fill("Noto Keepsake Guest");
+    await guest
+      .getByLabel("Your note", { exact: true })
+      .fill(
+        "A freely licensed little animation, kept with these words for years to come.",
+      );
+    await guest.getByRole("button", { name: "Add a GIF" }).click();
+    await expect(guest.locator(".gif-library-heading")).toContainText("144");
+    await expect(guest.locator(".gif-grid>button")).toHaveCount(24);
+    await guest.getByRole("button", { name: "Next GIFs", exact: true }).click();
+    await expect(guest.locator(".gif-results-count")).toContainText(
+      "Page 2 of 6",
+    );
+    await guest.getByLabel("Find a little feeling").fill("heart face");
+    await guest
+      .getByRole("button", { name: "Heart Face", exact: true })
+      .click();
+    await expect(
+      guest.locator('.live-card img[src="/gifs/noto/1f970.webp"]'),
+    ).toBeVisible();
+    await expect(guest.locator(".live-card .gif-credit")).toContainText(
+      "CC BY 4.0",
+    );
+    const axe = await new AxeBuilder({ page: guest })
+      .withTags(["wcag2a", "wcag2aa", "wcag21aa", "wcag22aa"])
+      .analyze();
+    expect(axe.violations).toEqual([]);
+    await guest.getByRole("button", { name: "Pause GIF", exact: true }).click();
+    await expect(
+      guest.locator('.live-card img[src="/gifs/noto/1f970.png"]'),
+    ).toBeVisible();
+    await guest.getByRole("checkbox", { name: /event book/ }).check();
+    await guest.getByRole("button", { name: "Review my card" }).click();
+    await guest.getByRole("button", { name: "Send my card" }).click();
+    await expect(
+      guest
+        .getByRole("heading", { name: "Your words have a home." })
+        .or(guest.getByRole("link", { name: "Skip gift and finish" })),
+    ).toBeVisible();
+    if (
+      await guest
+        .getByRole("link", { name: "Skip gift and finish" })
+        .isVisible()
+    )
+      await guest.getByRole("link", { name: "Skip gift and finish" }).click();
+    await guest.emulateMedia({ reducedMotion: "reduce" });
+    await guest.reload();
+    await expect(
+      guest.locator('img[src="/gifs/noto/1f970.png"]'),
+    ).toBeVisible();
+    expect(external).toEqual([]);
+    await page.goto("/workspace/events/test-baby-shower/cards");
+    await page.getByLabel("Find a card").fill("Noto Keepsake Guest");
+    await expect(
+      page.locator('.inbox-item img[src="/gifs/noto/1f970.png"]'),
+    ).toBeVisible();
+    await expect(page.locator(".inbox-item .gif-credit")).toContainText(
+      "Google Fonts",
+    );
+    await page.route("**/gifs/noto/1f970.webp", (route) =>
+      route.fulfill({ status: 503, body: "Unavailable" }),
+    );
+    const incomplete: string[] = [];
+    page.on("download", (download) =>
+      incomplete.push(download.suggestedFilename()),
+    );
+    await page
+      .getByRole("button", { name: "Export cards ↓", exact: true })
+      .click();
+    await expect(page.getByRole("alert")).toContainText("could not be saved");
+    expect(incomplete).toEqual([]);
+    await page.unroute("**/gifs/noto/1f970.webp");
+    const pending = page.waitForEvent("download");
+    await page
+      .getByRole("button", { name: "Export cards ↓", exact: true })
+      .click();
+    const download = await pending;
+    const saved = JSON.parse(await readFile((await download.path())!, "utf8"));
+    expect(
+      saved.cards.some(
+        (card: { gif: string; name: string }) =>
+          card.gif === "noto-1f970" && card.name === "Noto Keepsake Guest",
+      ),
+    ).toBe(true);
+    const asset = saved.animations.find(
+      (animation: { id: string }) => animation.id === "noto-1f970",
+    );
+    expect(asset.license).toBe("CC BY 4.0");
+    expect(asset.animation).toMatch(/^data:image\/webp;base64,/);
+    expect(
+      Buffer.from(asset.animation.split(",")[1], "base64")
+        .subarray(0, 4)
+        .toString(),
+    ).toBe("RIFF");
+    await page.goto("/workspace/events/test-baby-shower/book");
+    await page
+      .getByRole("button", { name: "The Editorial", exact: true })
+      .click();
+    for (
+      let n = 0;
+      n < 10 &&
+      (await page
+        .locator('.book-sticker[src="/gifs/noto/1f970.png"]')
+        .count()) === 0;
+      n++
+    )
+      await page.getByRole("button", { name: "Next →", exact: true }).click();
+    await expect(
+      page.locator('.book-sticker[src="/gifs/noto/1f970.png"]'),
+    ).toBeVisible();
+    await expect(page.locator(".book-page .gif-credit")).toContainText(
+      "CC BY 4.0",
+    );
+    const bookPending = page.waitForEvent("download");
+    await page
+      .getByRole("button", { name: "Save book with animations ↓", exact: true })
+      .click();
+    const book = JSON.parse(
+      await readFile((await (await bookPending).path())!, "utf8"),
+    );
+    expect(
+      book.animations.some(
+        (animation: { id: string }) => animation.id === "noto-1f970",
+      ),
+    ).toBe(true);
+  } finally {
+    await context.close();
+  }
+});

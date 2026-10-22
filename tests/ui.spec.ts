@@ -84,7 +84,8 @@ test("guest composes a card, searches GIFs and keeps host-only content out of th
   await page.getByLabel("Written in the Stars", { exact: true }).check();
   await page.getByRole("button", { name: "Add a GIF" }).click();
   await page.getByLabel("Find a little feeling").fill("flowers");
-  await expect(page.locator(".gif-grid>button")).toHaveCount(1);
+  await expect(page.getByRole("button", {name:"A little bouquet", exact:true})).toBeVisible();
+  expect(await page.locator(".gif-grid>button").count()).toBeGreaterThan(1);
   await page.getByRole("button", { name: "A little bouquet" }).click();
   await expect(page.locator('img[src$=".gif"]')).toHaveCount(1);
   await page.getByRole("button", { name: "Pause GIF" }).click();

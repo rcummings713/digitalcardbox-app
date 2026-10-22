@@ -1,6 +1,8 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
+import { createHash } from "node:crypto";
+import { SqliteReviewRepository } from "../adapters/sqlite.mjs";
 import { Agent, setup, card, invitation } from "./helpers.mjs";
 import {
   templates,
@@ -76,25 +78,66 @@ async function ready(t, options = {}) {
   });
   return { ...f, ...mock, ...(await invitation(f)) };
 }
-test("26 templates and the searchable 24-item GIF store reference real same-origin assets", async (t) => {
+test("templates and the expanded GIF store reference licensed, preserved same-origin assets", async (t) => {
   const f = await setup(t);
   assert(templates.length >= 20);
   assert.equal(new Set(templates.map((t) => t.id)).size, templates.length);
-  assert.equal(gifStore.length, 24);
+  assert.equal(gifStore.length, 144);
   const result = await f.guest.call("/api/gifs?q=universe");
   assert.equal(result.status, 200);
   assert.equal(result.data.gifs.length, 1);
   for (const gif of gifStore) {
-    assert(
-      (
-        await readFile(
-          new URL(`../../public/gifs/${gif.id}.gif`, import.meta.url),
-        )
-      )
-        .subarray(0, 3)
-        .toString() === "GIF",
+    assert.match(gif.url, /^\/gifs\/[a-z0-9_/-]+\.(gif|webp)$/);
+    const media = await readFile(
+      new URL("../../public" + gif.url, import.meta.url),
     );
+    assert(media.length > 0 && media.length < 5000000);
+    assert(
+      gif.url.endsWith(".gif")
+        ? media.subarray(0, 3).toString() === "GIF"
+        : media.subarray(0, 4).toString() === "RIFF" &&
+            media.subarray(8, 12).toString() === "WEBP",
+    );
+    await readFile(new URL("../../public" + gif.poster, import.meta.url));
   }
+  const manifest = JSON.parse(
+    await readFile(
+      new URL("../../src/modules/media/noto-manifest.json", import.meta.url),
+      "utf8",
+    ),
+  );
+  assert.equal(manifest.animations.length, 120);
+  assert.equal(new Set(manifest.animations.map((item) => item.id)).size, 120);
+  for (const item of manifest.animations) {
+    const asset = gifStore.find((gif) => gif.id === item.id);
+    assert.equal(asset.license, "CC BY 4.0");
+    assert.equal(asset.creator, "Google Fonts");
+    const media = await readFile(
+      new URL("../../public" + item.url, import.meta.url),
+    );
+    assert.equal(createHash("sha256").update(media).digest("hex"), item.sha256);
+    assert.equal(
+      createHash("sha256")
+        .update(
+          await readFile(
+            new URL("../../public" + item.poster, import.meta.url),
+          ),
+        )
+        .digest("hex"),
+      item.posterSha256,
+    );
+    const chunks = [];
+    for (let offset = 12; offset + 8 <= media.length; ) {
+      const size = media.readUInt32LE(offset + 4);
+      chunks.push(media.subarray(offset, offset + 4).toString());
+      offset += 8 + size + (size % 2);
+    }
+    assert(chunks.includes("ANIM"));
+    assert(chunks.filter((type) => type === "ANMF").length >= 2);
+  }
+  assert.equal((await f.guest.call("/api/config")).data.gifCount, 144);
+  const search = await f.guest.call("/api/gifs?q=heart%20face");
+  assert(search.data.gifs.some((gif) => gif.id === "noto-1f970"));
   assert.equal(
     (await f.guest.call("/api/gifs?q=" + "x".repeat(51))).status,
     422,
@@ -488,4 +531,36 @@ test("one in-flight job per guest and the shared IP cap prevent parallel paid ge
     f.repo.one("SELECT used FROM usage_counters WHERE scope='ai:global'").used,
     1,
   );
+});
+
+test("a licensed animation survives submission, guest expiry, book reads and a reopened repository", async (t) => {
+  const f = await setup(t);
+  const { event, path } = await invitation(f);
+  const sent = await f.guest.call(path + "/cards", "POST", {
+    ...card("licensed-note-00001"),
+    gif: "noto-1f970",
+  });
+  assert.equal(sent.status, 201);
+  f.repo.run("UPDATE guest_sessions SET expires_at='2000-01-01T00:00:00Z'");
+  const saved = (await f.host.call("/api/host/workspace")).data.entries.find(
+    (entry) => entry.id === sent.data.entry.id,
+  );
+  assert.equal(saved.gif, "noto-1f970");
+  assert(
+    (await f.host.call(`/api/host/events/${event.id}/book`)).data.entries.some(
+      (entry) => entry.id === saved.id && entry.gif === "noto-1f970",
+    ),
+  );
+  const reopened = new SqliteReviewRepository(f.path);
+  try {
+    assert(
+      reopened
+        .workspace(reopened.host("review-host"))
+        .entries.some(
+          (entry) => entry.id === saved.id && entry.gif === "noto-1f970",
+        ),
+    );
+  } finally {
+    reopened.close();
+  }
 });

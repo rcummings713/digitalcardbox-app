@@ -1,4 +1,6 @@
-// Versioned, original card artwork and GIFs. IDs are shared by the UI and API.
+import { notoAnimations } from "./noto-catalog.ts";
+
+// Versioned card artwork and retained animations. IDs are shared by the UI and API.
 export const templates = [
   {
     id: "little-star",
@@ -262,7 +264,7 @@ export const templates = [
   },
 ] as const;
 export type TemplateId = (typeof templates)[number]["id"];
-export const gifStore = [
+const originalGifStore = [
   {
     id: "cosmic",
     name: "A universe of little stars",
@@ -408,6 +410,72 @@ export const gifStore = [
     symbol: "✧",
   },
 ] as const;
+export interface GifAsset {
+  id: string;
+  name: string;
+  tags: string;
+  symbol: string;
+  url: string;
+  poster: string;
+  origin: "original" | "owner" | "noto";
+  creator: string;
+  license: string;
+  licenseUrl: string;
+  sourceUrl: string;
+  changes: string;
+}
+export const gifStore: readonly GifAsset[] = [
+  ...originalGifStore.map(
+    (gif): GifAsset => ({
+      ...gif,
+      url: `/gifs/${gif.id}.gif`,
+      poster:
+        gif.id === "cosmic" ? "/gifs/cosmic-poster.png" : `/gifs/${gif.id}.svg`,
+      origin: gif.id === "cosmic" ? "owner" : "original",
+      creator:
+        gif.id === "cosmic" ? "Owner-supplied reference" : "TheDigitalCardBox",
+      license:
+        gif.id === "cosmic"
+          ? "Owner-supplied; commercial rights review pending"
+          : "Original project artwork",
+      licenseUrl: "/media-credits.html",
+      sourceUrl: "/media-credits.html",
+      changes: "None",
+    }),
+  ),
+  ...notoAnimations.map(
+    (gif): GifAsset => ({
+      id: gif.id,
+      name: gif.name,
+      tags: gif.tags,
+      symbol: gif.symbol,
+      url: `/gifs/noto/${gif.codepoint}.webp`,
+      poster: `/gifs/noto/${gif.codepoint}.png`,
+      origin: "noto",
+      creator: "Google Fonts",
+      license: "CC BY 4.0",
+      licenseUrl: "https://creativecommons.org/licenses/by/4.0/",
+      sourceUrl: `https://fonts.gstatic.com/s/e/notoemoji/latest/${gif.rgi}/512.gif`,
+      changes:
+        "Resized and re-encoded as animated WebP; frame rate reduced with loop timing preserved; static PNG poster extracted.",
+    }),
+  ),
+];
+export const findGif = (id?: string) => gifStore.find((gif) => gif.id === id);
+export const searchGifs = (query: string) => {
+  const words = query.trim().toLocaleLowerCase().split(/\s+/).filter(Boolean);
+  return gifStore.filter((gif) => {
+    const searchable = `${gif.name} ${gif.tags}`.toLocaleLowerCase();
+    return words.every((word) => searchable.includes(word));
+  });
+};
+export const gifCreditText = (id?: string) => {
+  const gif = findGif(id);
+  return gif?.origin === "noto"
+    ? `Animation: ${gif.name} by ${gif.creator} (Animated Noto Emoji), ${gif.license} (${gif.licenseUrl}). Source: ${gif.sourceUrl}. Changes: ${gif.changes}`
+    : "";
+};
+
 export const aiOptions = {
   occasion: [
     "Wedding",

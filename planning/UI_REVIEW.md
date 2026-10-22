@@ -194,3 +194,9 @@ production authentication, server access control, money movement or ADA complian
 
 
 21 October review: test the four home carousel cards and automatic/pause/reduced-motion GIFs; browse all 26 templates and search the 24-item GIF store; inspect the uncropped comparison; submit private feedback and review it as operator. Decode a published QR on another device and confirm its card in the host inbox. AI requires a private OpenAI key; see docs/specs/CARD_MEDIA.md. Stories #91 and #92 extend the existing epics and remain open/In Progress. No TEST/PROD promotion.
+
+22 October free-animation review (#77/#80): search “heart face,” page through
+144 choices, add a Noto animation, pause/replay, and check reduced-motion posters.
+Send a consented card, reopen the host inbox/book, and export its CardVault/book
+archive; verify actual animation bytes and license/source/modification notices.
+No external provider request or GIF key is required. Issues remain open/In Progress.

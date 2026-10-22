@@ -252,13 +252,7 @@ export function KeepsakeCard({
               {item && (
                 <img
                   className="little-star-gif"
-                  src={
-                    motion
-                      ? `/gifs/${item.id}.gif`
-                      : item.id === "cosmic"
-                        ? "/gifs/cosmic-poster.png"
-                        : `/gifs/${item.id}.svg`
-                  }
+                  src={motion ? item.url : item.poster}
                   alt={item.name}
                   width="498"
                   height="205"

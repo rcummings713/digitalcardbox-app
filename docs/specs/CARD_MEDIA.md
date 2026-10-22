@@ -1,6 +1,6 @@
 # Card media, AI setup and feedback
 
-**21 October 2026 · DEV review · stories #24, #34, #80, #91 and #92.**
+**Updated 22 October 2026 · DEV review · stories #24, #34, #77, #80, #91 and #92.**
 
 ## What is available
 
@@ -11,17 +11,59 @@ has four swipe/keyboard examples: baby, wedding, sweet sixteen and graduation.
 Each opens with its matching GIF. Automatic motion stops after 4.4 seconds;
 explicit play/pause remains available and reduced-motion settings show posters.
 
-The searchable **24-item GIF store** is served from this application's own origin.
-Twenty-three stickers are original project SVG/animated GIF artwork; the cosmic
-GIF is the owner's supplied `tmp.gif`, preserved unchanged. New occasion stickers
-are built by `scripts/generate-occasion-stickers.py` (Python/Pillow plus the existing
-Chrome renderer). No external GIF API key, arbitrary media URL, third-party script
-or tracking request is needed. Posters are used in search results. Empty searches
-show a helpful state; failures use the bundled catalog, never arbitrary URLs.
-Catalog IDs are validated again by the server before a card is accepted.
-Third-party/popular GIF licensing, attribution and event-book export rights remain
-separate open work; the supplied cosmic asset still needs the owner's rights
-confirmation before a commercial release. The search source is clearly labeled.
+The searchable **144-item GIF and animation store** is served from this
+application's own origin. It contains 120 Google Fonts Animated Noto Emoji
+animations under **CC BY 4.0**, 23 original project stickers and the unchanged
+owner-supplied cosmic GIF. This implements the owner's 22 October choice: no new
+GIF API fees, subscription, paid provider or custom agreement. The new Noto
+animations can be stored with cards and used commercially while meeting the
+license's attribution requirements. The owner's supplied cosmic asset remains
+separate and still needs commercial rights confirmation before public rollout.
+
+Search supports multiple words, occasion/feeling shortcuts, 24 results per page,
+empty/error states and lazy static thumbnails. Only reviewed catalog IDs are
+accepted on card submission. No arbitrary URL fetch, runtime provider request,
+third-party script, API key or tracking integration is added. Search still works
+from the bundled catalog when the catalog API is unavailable.
+
+The actual media is committed and deployed with the app; cards persist a stable
+asset ID. Do not remove or replace an existing asset/ID during a catalog update.
+`src/modules/media/noto-manifest.json` records each source URL, creator, license,
+source hash, shipped-file hashes and modifications. The asset-derived runtime
+catalog is generated separately so hashes do not inflate the customer bundle.
+Animations are resized/re-encoded as 192px animated WebP with the original loop
+timing, and 112px PNG posters are extracted. This preserves motion while reducing
+storage/download size; the 120 animation/poster pairs total about 20 MB. Rebuild
+with `python3 scripts/import-noto-animations.py` (Python/Pillow with animated WebP
+and curl). Normal builds do not contact Google. Re-imports verify hashes; changed
+upstream files need an explicit new-asset review, never a silent replacement.
+
+Attribution appears in the picker, saved card views and book pages. The public
+`/media-credits.html` page links the original collection, full license and per-file
+manifest. Google attribution/license and modification notices are retained in
+exports. The license applies to Noto artwork, not a guest's private writing.
+
+**Save with the card:** CardVault's **Export cards** and the event book's
+**Save book with animations** produce JSON archives containing notes plus the
+actual selected animation and poster bytes as data URLs, deduplicated by asset
+ID. The animation can be recovered without the provider or application being
+online. These are portable data archives, not the paid polished-book delivery or
+an implemented archive-import/viewer feature. Ordinary readable-text exports
+remain available and include selected-animation credits. Archive assembly only
+fetches allowlisted same-origin assets, validates response types and caps bytes;
+a missing asset fails the export visibly instead of claiming an incomplete save.
+
+Original occasion stickers can still be rebuilt with
+`scripts/generate-occasion-stickers.py`. The broader Noto subset was manually
+selected for family-friendly celebration, affection, gratitude, nature and animal
+content, including neutral and varied skin-tone hand animations. No open-ended
+external search or unreviewed provider content reaches the picker.
+
+Licensing sources verified on 22 October: [Google's animation documentation](https://googlefonts.github.io/noto-emoji-files/?view=docs)
+and [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/). The standard license
+allows commercial copying and adaptation with attribution; no custom GIF-provider
+agreement is needed. Existing infrastructure usage remains subject to the
+application's hosting plan; this feature adds no GIF vendor charges.
 
 ## Enable AI locally
 

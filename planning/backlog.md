@@ -506,6 +506,8 @@ Release: Post-MVP. Assess evidence, vendor terms, cost and risk before schedulin
   - Use a licensed API/catalog and label attribution and allowed reuse.
   - Scope, pricing and release gate are documented before implementation.
   - Provide searchable/paginated licensed GIF results with loading/empty/failure states, provider attribution and content filters; use static posters and explicit play/pause, preserve a no-GIF path, and handle removal/rights expiry without losing a note.
+  - Owner choice on 22 October: use freely licensed, locally retained animations without a GIF API fee, subscription or custom provider agreement.
+  - Retain creator, source, license, change notices and immutable asset hashes; selected animation bytes and credits are included in CardVault/book archives.
 
 ### DCB-E16 New gift rails and markets
 

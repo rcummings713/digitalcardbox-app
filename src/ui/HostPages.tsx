@@ -1,3 +1,4 @@
+import { cardArchive } from "../modules/media/archive";
 import { validIdentifier, fictionalIdentifier } from "../modules/gifts/routing";
 import { useEffect, useState } from "react";
 import type { FormEvent } from "react";
@@ -540,6 +541,8 @@ function CardsInbox({ event }: { event: Occasion }) {
   const [query, setQuery] = useState("");
   const [filter, setFilter] = useState("all");
   const [opened, setOpened] = useState("");
+  const [exporting, setExporting] = useState(false);
+  const [exportError, setExportError] = useState("");
   const entries = data.entries.filter(
     (x) =>
       x.eventId === event.id &&
@@ -548,16 +551,31 @@ function CardsInbox({ event }: { event: Occasion }) {
         (filter === "book" && x.consent && !x.hidden) ||
         (filter === "hidden" && x.hidden)),
   );
-  function exportCards() {
+  async function exportCards() {
     const cards = data.entries.filter(
       (x) => x.eventId === event.id && !x.hidden,
     );
-    download(
-      "TheDigitalCardBox-CardVault.json",
-      JSON.stringify({ event: event.title, cards }, null, 2),
-      "application/json",
-    );
-    notify("Your local CardVault file is ready. Keep it somewhere private.");
+    setExporting(true);
+    setExportError("");
+    try {
+      const saved = await cardArchive(event.title, cards);
+      download(
+        "TheDigitalCardBox-CardVault.json",
+        JSON.stringify(saved, null, 2),
+        "application/json",
+      );
+      notify(
+        "Your cards and animations are saved together. Keep the file somewhere private.",
+      );
+    } catch (error) {
+      setExportError(
+        error instanceof Error
+          ? error.message
+          : "Your cards could not be exported. Please try again.",
+      );
+    } finally {
+      setExporting(false);
+    }
   }
   return (
     <>
@@ -565,11 +583,16 @@ function CardsInbox({ event }: { event: Occasion }) {
         eyebrow="Your CardVault"
         title="Every word, kept close."
         action={
-          <button className="secondary" onClick={exportCards}>
-            Export cards ↓
+          <button
+            className="secondary"
+            disabled={exporting}
+            onClick={exportCards}
+          >
+            {exporting ? "Saving animations…" : "Export cards ↓"}
           </button>
         }
       />
+      {exportError && <p role="alert">{exportError}</p>}
       <div className="filter-bar">
         <div>
           <label htmlFor="card-search">Find a card</label>

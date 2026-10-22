@@ -1,3 +1,4 @@
+import { gifStore } from "../modules/media/catalog";
 import type { GiftHandoff } from "../modules/gifts/routing";
 import type { Feature, Gift, Occasion, Service, Store } from "./model";
 export const dataMode =
@@ -138,7 +139,7 @@ export const initialConfiguration: PublicConfiguration = {
   hosted: false,
   publicSiteUrl: "",
   reviewSessions: false,
-  gifCount: 24,
+  gifCount: gifStore.length,
   ai: { available: false, dailyLimit: 20, perGuest: 2 },
   feedback: false,
 };
