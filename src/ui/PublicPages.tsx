@@ -61,13 +61,15 @@ export function Home() {
             aria-label="View the card-box comparison at full size"
             onClick={() => imageDialog.current?.showModal()}
           >
-            <img
-              src="/images/card-box-before-after.png"
-              width="1080"
-              height="593"
-              alt="Before: boxes full of wedding, graduation and baby cards. After: a lifetime of digital cards, organized together on a phone."
-            />
-            <span>View the comparison ↗</span>
+            <span className="comparison-artwork">
+              <img
+                src="/images/card-box-before-after.png"
+                width="1080"
+                height="593"
+                alt="Before: boxes full of wedding, graduation and baby cards. After: a lifetime of digital cards, organized together on a phone."
+              />
+            </span>
+            <span className="comparison-caption">View the comparison ↗</span>
           </button>
           <dialog
             className="image-lightbox"
@@ -86,12 +88,14 @@ export function Home() {
             >
               Close image
             </button>
-            <img
-              src="/images/card-box-before-after.png"
-              width="1080"
-              height="593"
-              alt="Full-size original comparison of physical card storage and an organized digital card box."
-            />
+            <span className="comparison-artwork">
+              <img
+                src="/images/card-box-before-after.png"
+                width="1080"
+                height="593"
+                alt="Full-size comparison of physical card storage and an organized digital card box."
+              />
+            </span>
           </dialog>
         </div>
       </div>

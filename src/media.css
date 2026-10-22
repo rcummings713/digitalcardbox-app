@@ -158,19 +158,35 @@
 }
 .before-after-art {
   aspect-ratio: auto;
-  border-radius: 6px;
+  border-radius: 0;
+  overflow: visible;
   background: transparent;
 }
-.before-after-art img {
+/* Show the complete artwork inside the source's charcoal screenshot frame.
+   Source: 1080 × 593; artwork viewport: x37 y19, 992 × 542.
+   Keep the original pixels and rounded corners in both the page and lightbox. */
+.comparison-artwork {
   display: block;
+  position: relative;
   width: 100%;
-  max-width: 100%;
+  aspect-ratio: 992 / 542;
+  overflow: hidden;
+  border-radius: calc(34 / 992 * 100%) / calc(34 / 542 * 100%);
+}
+.before-after-art .comparison-artwork > img {
+  display: block;
+  position: absolute;
+  width: calc(1080 / 992 * 100%);
+  max-width: none;
   height: auto;
-  margin: 0 auto;
-  object-fit: contain;
+  max-height: none;
+  left: calc(-37 / 992 * 100%);
+  top: calc(-19 / 542 * 100%);
+  margin: 0;
 }
 .before-after-button {
   display: block;
+  width: 100%;
   border: 0;
   padding: 0;
   margin: 0 auto;
@@ -178,7 +194,7 @@
   max-width: 100%;
   color: var(--ink);
 }
-.before-after-button span {
+.comparison-caption {
   display: block;
   font-size: 10px;
   margin-top: 2px;
@@ -186,6 +202,7 @@
   text-underline-offset: 3px;
 }
 .image-lightbox {
+  width: min(1120px, 96vw);
   max-width: min(1120px, 96vw);
   padding: 16px;
   border: 1px solid var(--pink-dark);
@@ -433,12 +450,10 @@
     margin-top: 1px;
     padding-top: 5px;
   }
-  .before-after-art img {
-    max-height: 172px;
-    width: auto;
-    max-width: 100%;
+  .before-after-button {
+    max-width: min(100%, calc(172px * 992 / 542));
   }
-  .before-after-button span {
+  .comparison-caption {
     font-size: 9px;
   }
   .compact-collection {
@@ -546,8 +561,8 @@
     font-size: 7px;
     padding: 2px;
   }
-  .before-after-art img {
-    max-height: 147px;
+  .before-after-button {
+    max-width: min(100%, calc(147px * 992 / 542));
   }
   .discovery-intro > p:last-child {
     font-size: 11px;

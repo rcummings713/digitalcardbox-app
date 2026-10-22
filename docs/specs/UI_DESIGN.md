@@ -226,3 +226,11 @@ The 21 October DEV extension adds 26 collection designs, 24 searchable curated G
 24-result pages and feeling/occasion shortcuts. New Noto assets retain credits
 in card/book views and exports. CardVault and book archives embed selected
 animation/poster bytes; see CARD_MEDIA.md for license and retention details.
+
+
+22 October presentation refinement: the home-page before/after comparison and
+its full-size dialog present only the original rounded artwork, excluding the
+baked-in charcoal screenshot surround. A proportional CSS viewport retains the
+complete comparison content and exact source pixels, with no added image frame
+or shadow. Mobile keeps its existing compact height budget; full-size viewing,
+alternative text and keyboard focus/close behavior remain available.

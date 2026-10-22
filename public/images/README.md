@@ -19,3 +19,12 @@ page story. `IMG_9541.heic` supplies the reference for the code-native A Little
 Star card: English note, Spanish verse, floral frame and Norma signature.
 `IMG_8142.jpeg` supplies the Instagram handle `thedigitalcardbox`; its screenshot
 is not embedded in the site. Original source files remain untouched.
+
+
+22 October 2026: Home and its full-size comparison use the existing
+`card-box-before-after.png` through a CSS artwork viewport (x37, y19,
+992 × 542 inside the 1080 × 593 source). The viewport removes only the baked-in
+charcoal screenshot surround and masks the original rounded corners against
+the page background. It preserves both comparison panels, the arrow, lettering
+and original bitmap without re-encoding, generated replacement text or added
+frames/shadows. Phone sizing keeps the same compact image-height budget.

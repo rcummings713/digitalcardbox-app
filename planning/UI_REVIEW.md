@@ -200,3 +200,10 @@ production authentication, server access control, money movement or ADA complian
 Send a consented card, reopen the host inbox/book, and export its CardVault/book
 archive; verify actual animation bytes and license/source/modification notices.
 No external provider request or GIF key is required. Issues remain open/In Progress.
+
+
+22 October home comparison review: inspect the border-free before/after artwork
+at phone, tablet and desktop widths. Both panels and the swipe arrow remain
+visible; opening the image shows the same border-free treatment, and Escape or
+Close image returns to the trigger. The original PNG remains unchanged. Existing
+story #85 / epic #84 stay open and In Progress for the owner to review.
