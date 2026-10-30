@@ -256,6 +256,8 @@ test("public pages reflow on phones, keep exact About copy and Instagram, and pr
       "/start",
     ]) {
       await page.goto(route);
+      // Wait for React to mount the navigation before checking its loaded fonts.
+      await expect(page.locator(".navigation-bar nav")).toBeVisible();
       await page.evaluate(() => document.fonts.ready);
       const size = await page.evaluate(() => ({
         width: innerWidth,
@@ -283,6 +285,24 @@ test("public pages reflow on phones, keep exact About copy and Instagram, and pr
   const exact =
     "The Digital Card box is a comprehensive digital event solutions platform that modernizes social celebrations by seamlessly integrating digital invitations, sentimental e-cards, and frictionless cash gifting into a unified web and mobile ecosystem. The platform empowers event hosts to design elegant e-invites and deploy venue-specific, custom QR codes that replace physical envelope boxes at weddings, baby showers, and milestone parties. Simultaneously, it provides guests with a secure, all-in-one portal to compose meaningful, permanently archived digital notes and directly execute secure monetary gifts. By bridging the emotional value of traditional greeting cards with the convenience of instant mobile payments, the company eliminates the logistical friction of ATMs, physical card shopping, and venue storage, offering a sustainable, highly secure, and digitally preserved gifting experience for the modern era.";
   await expect(page.locator(".about-verbatim")).toHaveText(exact);
+  // Keep room for wider font metrics without clipping links or shrinking text.
+  await page.setViewportSize({ width: 375, height: 667 });
+  await page.goto("/contact");
+  await expect(page.locator(".navigation-bar nav")).toBeVisible();
+  await page.evaluate(() => document.fonts.ready);
+  await page.addStyleTag({
+    content: ".public-shell .navigation-bar nav a { font-size: 9.2px; }",
+  });
+  const fallback = await page.evaluate(() => ({
+    height: document.documentElement.scrollHeight,
+    width: document.documentElement.scrollWidth,
+    rows: new Set(
+      [...document.querySelectorAll(".navigation-bar nav a")].map((a) =>
+        Math.round(a.getBoundingClientRect().y),
+      ),
+    ).size,
+  }));
+  expect(fallback).toEqual({ height: 667, width: 375, rows: 1 });
   await page.goto("/");
   await page.keyboard.press("Tab");
   await expect(

@@ -458,7 +458,7 @@
     flex-wrap: wrap;
     justify-content: center;
     flex: 1 1 100%;
-    gap: 13px;
+    gap: clamp(3px, 1vw, 6px);
   }
   .public-shell .workspace-link {
     margin: 0 auto;
