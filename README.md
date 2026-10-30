@@ -74,3 +74,6 @@ Read [the page map](docs/specs/UI_DESIGN.md), [review guide](planning/UI_REVIEW.
 owner to review and close. The repository/package/Worker identifiers remain
 `digitalcardbox-app`; PROD requires a separate owner-approved release under
 [ADR 0006](docs/adr/0006-deployment-environments.md).
+
+
+Public **Cards (`/cards`)** and **Invitations (`/invitations`)** now offer browser-saved text-layer design tools before event setup. Invitations carry into the owned event workspace; publish the event to share its live private link/QR. Generic stationery works without an AI key; public AI uses the same bounded server configuration as guest artwork. See [studio guide and boundaries](docs/specs/INVITATION_STUDIO.md) and [AI key setup](docs/specs/CARD_MEDIA.md#enable-ai-on-the-isolated-dev-preview).

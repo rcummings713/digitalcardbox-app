@@ -99,6 +99,7 @@ const eventFields = [
   "cover",
   "status",
   "bookLayout",
+  "invitation",
 ] as const;
 export function eventPayload(event: Partial<Occasion>) {
   return Object.fromEntries(

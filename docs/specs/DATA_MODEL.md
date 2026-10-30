@@ -171,3 +171,8 @@ Integrated money requires a new approved ADR/provider contract before physical l
 ## Delivery and redundancy audit
 
 [DATABASE_BACKLOG_AUDIT.md](../../planning/DATABASE_BACKLOG_AUDIT.md) maps live issues, dependencies and exclusions. DCB-E18 supplies connection/migration foundations, constrained schema installation and reusable transaction/delivery infrastructure. Existing domain stories own behavior. Release evidence includes empty/repeated migration, failed-migration recovery, cross-event FK rejection, concurrent route/handoff and window-lock tests, repeated submission/consumer delivery, private-media authorization and backup restoration.
+
+
+## 30 October 2026 design studio
+
+30 October DEV-only extension (ADR 0010): the SQLite review adapter adds events.invitation_json and cards.design_json plus private studio_sessions/studio_jobs in migration 004. The shared bounded document keeps exact personal text separate from generated artwork and rejects arbitrary URL/CSS/HTML inputs. Claimed studio artwork has an event FK and optional same-event guest FK. Anonymous studio identity is not a customer/event guest and creates no event; accepted content remains independent of its expiring studio session. These review tables do not install or replace the production PostgreSQL contract above. See INVITATION_STUDIO.md; production provisioning/policies/retention/backups remain open.

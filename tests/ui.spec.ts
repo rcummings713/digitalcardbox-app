@@ -27,7 +27,12 @@ test("public pages offer creation without exposing an event directory", async ({
     await expect(page.locator('a[href^="/g/"]')).toHaveCount(0);
   }
   await page.goto("/");
-  await page.getByRole("link", { name: "Create a wedding card box" }).click();
+  await page
+    .getByLabel("Every occasion", { exact: true })
+    .selectOption("Wedding");
+  await page
+    .getByRole("link", { name: "Create a card box", exact: true })
+    .click();
   await expect(
     page.getByRole("button", { name: "Continue with Apple" }),
   ).toBeVisible();
@@ -84,7 +89,9 @@ test("guest composes a card, searches GIFs and keeps host-only content out of th
   await page.getByLabel("Written in the Stars", { exact: true }).check();
   await page.getByRole("button", { name: "Add a GIF" }).click();
   await page.getByLabel("Find a little feeling").fill("flowers");
-  await expect(page.getByRole("button", {name:"A little bouquet", exact:true})).toBeVisible();
+  await expect(
+    page.getByRole("button", { name: "A little bouquet", exact: true }),
+  ).toBeVisible();
   expect(await page.locator(".gif-grid>button").count()).toBeGreaterThan(1);
   await page.getByRole("button", { name: "A little bouquet" }).click();
   await expect(page.locator('img[src$=".gif"]')).toHaveCount(1);
@@ -178,7 +185,9 @@ test("admin flags affect guest choices while preserving existing records", async
   await page.goto("/admin/features");
   await page.getByRole("switch", { name: "GIF library" }).click();
   await page.getByRole("switch", { name: "External gift choices" }).click();
-  await page.getByRole("switch", { name: "Writing and card assistance" }).click();
+  await page
+    .getByRole("switch", { name: "Writing and card assistance" })
+    .click();
   await page.goto(invitation + "/card");
   await expect(page.getByRole("button", { name: "Add a GIF" })).toHaveCount(0);
   await expect(

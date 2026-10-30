@@ -234,3 +234,8 @@ baked-in charcoal screenshot surround. A proportional CSS viewport retains the
 complete comparison content and exact source pixels, with no added image frame
 or shadow. Mobile keeps its existing compact height budget; full-size viewing,
 alternative text and keyboard focus/close behavior remain available.
+
+
+## 30 October 2026 design studio
+
+30 October 2026: Home now uses the owner’s Smart Event Planning / Seamless Gifting copy and one Every occasion dropdown with all 17 requested choices. The mobile comparison shows larger Before/After panels and a full-resolution pan view. Home cards open more slowly; the baby card right page contains the larger GIF only; carousel captions are screen-reader-only. Public /cards and /invitations use the reusable text-layer design studio, generic templates, bounded AI options and browser drafts. Invitation drafts carry through event setup and save to owned events before live sharing. Readable editors/full process copy/enlarged comparison may scroll on phones. See INVITATION_STUDIO.md and ADR 0010; #93–#96 are open / In Progress.

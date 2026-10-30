@@ -1,3 +1,4 @@
+import { storedCardDesign } from "../src/modules/design/contracts.ts";
 import {
   validIdentifier,
   reviewDestination,
@@ -17,7 +18,16 @@ import {
 
 // Application operations use explicit repository contracts; no React/browser state is accepted.
 export class ReviewApplication {
-  constructor(repository, identity) {
+  constructor(
+    repository,
+    identity,
+    {
+      claimArtwork = (design) => {
+        if (design?.artId) fail(422, "Choose artwork from the design studio.");
+      },
+    } = {},
+  ) {
+    this.claimArtwork = claimArtwork;
     this.repo = repository;
     this.identity = identity;
   }
@@ -106,22 +116,41 @@ export class ReviewApplication {
         "stale_revision",
       );
   }
-  createEvent(session, input) {
+  createEvent(session, input, studioToken) {
     const host = this.requireHost(session);
     if (!this.repo.flags().newEvents) fail(409, "New card boxes are paused.");
     const value = validateEvent(input, null, this.repo.clock());
+    if (value.invitation?.gif && !this.repo.flags().gifs)
+      fail(409, "GIF selection is paused. Remove the animation before saving.");
     return this.repo.transaction(() => {
       const event = this.repo.createEvent(host.id, value);
+      this.claimArtwork(value.invitation, { eventId: event.id }, studioToken);
       this.repo.audit(host.id, "Card box created.", event.id);
       return event;
     });
   }
-  updateEvent(session, id, input, expected) {
+  updateEvent(session, id, input, expected, studioToken) {
     return this.repo.transaction(() => {
       const row = this.ownedEvent(session, id);
       this.revision(row, expected);
-      const current = { ...row, bookLayout: row.book_layout };
+      const current = {
+        ...row,
+        bookLayout: row.book_layout,
+        invitation: row.invitation_json
+          ? JSON.parse(row.invitation_json)
+          : null,
+      };
       const value = validateEvent(input, current, this.repo.clock());
+      if (
+        value.invitation?.gif &&
+        value.invitation.gif !== current.invitation?.gif &&
+        !this.repo.flags().gifs
+      )
+        fail(
+          409,
+          "GIF selection is paused. Remove the animation before saving.",
+        );
+      this.claimArtwork(value.invitation, { eventId: id }, studioToken);
       this.repo.updateEvent(id, value);
       this.repo.audit(session.host.id, "Card box settings updated.", id);
       return this.repo.event(this.repo.ownedEvent(session.host.id, id));
@@ -189,7 +218,7 @@ export class ReviewApplication {
       );
     return { event, session };
   }
-  submitCard(token, cookieToken, csrf, input) {
+  submitCard(token, cookieToken, csrf, input, studioToken) {
     return this.repo.transaction(() => {
       const { event, session } = this.guestSession(token, cookieToken);
       if (!csrf || csrf !== session.csrf_token)
@@ -209,7 +238,9 @@ export class ReviewApplication {
             (k) => candidate[k] === previous[k],
           ) ||
           candidate.consent !== !!previous.consent ||
-          (candidate.artId ?? null) !== previous.art_id
+          (candidate.artId ?? null) !== previous.art_id ||
+          JSON.stringify(storedCardDesign(candidate.design)) !==
+            (previous.design_json || "null")
         )
           fail(
             409,
@@ -233,6 +264,11 @@ export class ReviewApplication {
         )
       )
         fail(404, "Your card artwork could not be found.");
+      this.claimArtwork(
+        value.design,
+        { eventId: event.id, guestId: session.guest_id },
+        studioToken,
+      );
       const entry = this.repo.insertCard(event.id, session.guest_id, value);
       // A guest receives only a receipt for their own submission, never the host inbox.
       return {

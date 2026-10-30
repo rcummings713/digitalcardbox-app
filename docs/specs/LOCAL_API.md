@@ -101,3 +101,8 @@ paths and creator/license/source/modification metadata. Card payloads still save
 only a known GIF ID; no schema or payment change. The actual assets persist in
 the repository/deployment, and user-triggered CardVault/book archives embed the
 selected bytes and credits. No new remote media endpoint is introduced.
+
+
+## 30 October 2026 design studio
+
+30 October studio extension: see [INVITATION_STUDIO.md](INVITATION_STUDIO.md). GET /api/studio/session issues a seven-day anonymous studio cookie/CSRF without an event. POST /api/studio/art accepts kind plus four bounded choices/retry key under shared quotas. Studio, owning-host and invitation-scoped artwork reads are private. Event create/update optionally accepts a versioned invitation document; card submission optionally accepts a versioned design. Both validate bounded layout fields and claim only approved owned artwork inside the save transaction. Existing CSRF, ownership, revision, guest/window, retry, consent and payment-handoff rules remain authoritative. Migration 004 is additive and DEV/local only.

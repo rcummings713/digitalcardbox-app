@@ -543,6 +543,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
               artId: entry.artId ?? null,
               gif: entry.gif ?? null,
               consent: entry.consent,
+              design: entry.design ?? null,
             }),
           },
           guestCsrf.current[token],

@@ -1,3 +1,5 @@
+import { DesignStudio } from "./DesignStudio";
+import { readDesignDraft } from "./DesignEditor";
 import { cardArchive } from "../modules/media/archive";
 import { validIdentifier, fictionalIdentifier } from "../modules/gifts/routing";
 import { useEffect, useState } from "react";
@@ -121,7 +123,30 @@ export function EventForm({ event }: { event?: Occasion }) {
       status: event?.status || "draft",
       bookLayout: event?.bookLayout,
       destinations: event?.destinations || [],
+      invitation:
+        event?.invitation ||
+        (new URLSearchParams(location.search).get("design") === "invitation"
+          ? readDesignDraft("invitation") || undefined
+          : undefined),
     };
+    if (!event && created.invitation) {
+      created.invitation = {
+        ...created.invitation,
+        occasion: created.type,
+        blocks: created.invitation.blocks.map((block) =>
+          block.id === "title"
+            ? { ...block, text: title }
+            : block.id === "details"
+              ? {
+                  ...block,
+                  text:
+                    formatDate(date) +
+                    (created.location ? "\n" + created.location : ""),
+                }
+              : block,
+        ),
+      };
+    }
     const saved = await actions.saveEvent(created);
     if (!saved) return;
     notify(
@@ -129,7 +154,9 @@ export function EventForm({ event }: { event?: Occasion }) {
         ? "Your event details have been saved."
         : "Your card box is ready to make your own.",
     );
-    go(`/workspace/events/${saved.id}/overview`);
+    go(
+      `/workspace/events/${saved.id}/${created.invitation ? "invitation" : "overview"}`,
+    );
   }
   if (!event && !data.flags.newEvents)
     return (
@@ -308,6 +335,7 @@ export function EventWorkspace({ id, tab }: { id: string; tab: string }) {
   const tabs = [
     ["overview", "Overview"],
     ["edit", "Event details"],
+    ["invitation", "Design invitation"],
     ["share", "Invite & share"],
     ["cards", "Cards & notes"],
     ["gifts", "Gift matching"],
@@ -347,6 +375,8 @@ export function EventWorkspace({ id, tab }: { id: string; tab: string }) {
           <Overview event={event} />
         ) : tab === "edit" ? (
           <EventForm event={event} />
+        ) : tab === "invitation" ? (
+          <DesignStudio kind="invitation" event={event} />
         ) : tab === "share" ? (
           <Share event={event} />
         ) : tab === "cards" ? (
@@ -475,6 +505,12 @@ function Share({ event }: { event: Occasion }) {
       />
       <section className="panel">
         <h2>Your guests start here.</h2>
+        <Link
+          to={`/workspace/events/${event.id}/invitation`}
+          className="text-link"
+        >
+          Design or edit your invitation ↗
+        </Link>
         <p>
           Share your link directly with the people you want to hear from. Your
           event isn’t in a public directory.
@@ -501,6 +537,34 @@ function Share({ event }: { event: Occasion }) {
               <Link className="secondary" to={"/g/" + event.token}>
                 See what guests see ↗
               </Link>
+              <button
+                type="button"
+                className="secondary"
+                disabled={event.status !== "published"}
+                onClick={async () => {
+                  if (!navigator.share) {
+                    await copy(url, notify);
+                    return;
+                  }
+                  try {
+                    await navigator.share({
+                      title: event.title,
+                      text: `You’re invited to ${event.title}.`,
+                      url,
+                    });
+                  } catch (error) {
+                    if (!(
+                      error instanceof DOMException &&
+                      error.name === "AbortError"
+                    ))
+                      notify(
+                        "Sharing is unavailable. Copy your invitation link instead.",
+                      );
+                  }
+                }}
+              >
+                Share invitation
+              </button>
               <button
                 className="secondary"
                 onClick={() =>

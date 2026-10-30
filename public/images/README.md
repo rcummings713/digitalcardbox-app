@@ -28,3 +28,5 @@ charcoal screenshot surround and masks the original rounded corners against
 the page background. It preserves both comparison panels, the arrow, lettering
 and original bitmap without re-encoding, generated replacement text or added
 frames/shadows. Phone sizing keeps the same compact image-height budget.
+
+30 October: mobile Home presents the original comparison one half at a time with Before/After controls (496 × 542 artwork viewport), plus a full-resolution scrollable dialog. Desktop keeps the combined view. The source pixels, colors and wording remain unchanged; the CSS clips only the original screenshot surround.

@@ -1,3 +1,4 @@
+import { eventTypes } from "../events/occasions.ts";
 import { notoAnimations } from "./noto-catalog.ts";
 
 // Versioned card artwork and retained animations. IDs are shared by the UI and API.
@@ -425,41 +426,37 @@ export interface GifAsset {
   changes: string;
 }
 export const gifStore: readonly GifAsset[] = [
-  ...originalGifStore.map(
-    (gif): GifAsset => ({
-      ...gif,
-      url: `/gifs/${gif.id}.gif`,
-      poster:
-        gif.id === "cosmic" ? "/gifs/cosmic-poster.png" : `/gifs/${gif.id}.svg`,
-      origin: gif.id === "cosmic" ? "owner" : "original",
-      creator:
-        gif.id === "cosmic" ? "Owner-supplied reference" : "TheDigitalCardBox",
-      license:
-        gif.id === "cosmic"
-          ? "Owner-supplied; commercial rights review pending"
-          : "Original project artwork",
-      licenseUrl: "/media-credits.html",
-      sourceUrl: "/media-credits.html",
-      changes: "None",
-    }),
-  ),
-  ...notoAnimations.map(
-    (gif): GifAsset => ({
-      id: gif.id,
-      name: gif.name,
-      tags: gif.tags,
-      symbol: gif.symbol,
-      url: `/gifs/noto/${gif.codepoint}.webp`,
-      poster: `/gifs/noto/${gif.codepoint}.png`,
-      origin: "noto",
-      creator: "Google Fonts",
-      license: "CC BY 4.0",
-      licenseUrl: "https://creativecommons.org/licenses/by/4.0/",
-      sourceUrl: `https://fonts.gstatic.com/s/e/notoemoji/latest/${gif.rgi}/512.gif`,
-      changes:
-        "Resized and re-encoded as animated WebP; frame rate reduced with loop timing preserved; static PNG poster extracted.",
-    }),
-  ),
+  ...originalGifStore.map((gif): GifAsset => ({
+    ...gif,
+    url: `/gifs/${gif.id}.gif`,
+    poster:
+      gif.id === "cosmic" ? "/gifs/cosmic-poster.png" : `/gifs/${gif.id}.svg`,
+    origin: gif.id === "cosmic" ? "owner" : "original",
+    creator:
+      gif.id === "cosmic" ? "Owner-supplied reference" : "TheDigitalCardBox",
+    license:
+      gif.id === "cosmic"
+        ? "Owner-supplied; commercial rights review pending"
+        : "Original project artwork",
+    licenseUrl: "/media-credits.html",
+    sourceUrl: "/media-credits.html",
+    changes: "None",
+  })),
+  ...notoAnimations.map((gif): GifAsset => ({
+    id: gif.id,
+    name: gif.name,
+    tags: gif.tags,
+    symbol: gif.symbol,
+    url: `/gifs/noto/${gif.codepoint}.webp`,
+    poster: `/gifs/noto/${gif.codepoint}.png`,
+    origin: "noto",
+    creator: "Google Fonts",
+    license: "CC BY 4.0",
+    licenseUrl: "https://creativecommons.org/licenses/by/4.0/",
+    sourceUrl: `https://fonts.gstatic.com/s/e/notoemoji/latest/${gif.rgi}/512.gif`,
+    changes:
+      "Resized and re-encoded as animated WebP; frame rate reduced with loop timing preserved; static PNG poster extracted.",
+  })),
 ];
 export const findGif = (id?: string) => gifStore.find((gif) => gif.id === id);
 export const searchGifs = (query: string) => {
@@ -478,14 +475,7 @@ export const gifCreditText = (id?: string) => {
 
 export const aiOptions = {
   occasion: [
-    "Wedding",
-    "Baby shower",
-    "Sweet sixteen",
-    "Birthday",
-    "Graduation",
-    "Anniversary",
-    "Thank you",
-    "Remembrance",
+    ...new Set([...eventTypes, "Sweet sixteen", "Thank you", "Remembrance"]),
   ],
   palette: [
     "Blush and copper",

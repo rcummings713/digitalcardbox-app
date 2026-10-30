@@ -1,3 +1,4 @@
+import { StudioService } from "./studio-service.mjs";
 import { MediaService } from "./media-service.mjs";
 import { createServer } from "node:http";
 import { ReviewApplication } from "./application.mjs";
@@ -46,11 +47,16 @@ export function createApiHandler(
     publicSiteUrl = "",
   } = {},
 ) {
+  const media = services.media ?? new MediaService(repository);
+  const studio = new StudioService(repository, media);
   const app = new ReviewApplication(
     repository,
     identity ?? new LocalTestIdentity(repository),
+    {
+      claimArtwork: (design, context, token) =>
+        studio.authorize(design, context, token),
+    },
   );
-  const media = services.media ?? new MediaService(repository);
   const buckets = new Map();
   function throttle(key, max, period = 60000) {
     if (!rateLimit) return;
@@ -134,6 +140,54 @@ export function createApiHandler(
         );
         response.end(image.image);
       };
+      if (path === "/api/studio/session" && read) {
+        throttle(`studio:${request.socket.remoteAddress}`, 20);
+        const value = studio.session(
+          jar.dcb_studio,
+          request.socket.remoteAddress,
+        );
+        if (value.cookieToken)
+          response.setHeader(
+            "Set-Cookie",
+            cookie(
+              "dcb_studio",
+              value.cookieToken,
+              "/api",
+              secureCookies,
+              604800,
+            ),
+          );
+        return send(200, { csrfToken: value.csrfToken });
+      }
+      if (path === "/api/studio/art" && method === "POST") {
+        const value = await studio.generate(
+          jar.dcb_studio,
+          request.headers["x-csrf-token"],
+          await body(request),
+          request.socket.remoteAddress,
+        );
+        return send(value.repeated ? 200 : 201, value);
+      }
+      const studioImage = path.match(/^\/api\/studio\/art\/([a-f0-9-]{36})$/);
+      if (studioImage && read)
+        return sendImage(studio.image(jar.dcb_studio, studioImage[1]));
+      const hostStudioImage = path.match(
+        /^\/api\/host\/studio-art\/([a-f0-9-]{36})$/,
+      );
+      if (hostStudioImage && read)
+        return sendImage(studio.hostImage(app, session, hostStudioImage[1]));
+      const guestStudioImage = path.match(
+        /^\/api\/invitations\/([A-Za-z0-9_-]{20,100})\/studio-art\/([a-f0-9-]{36})$/,
+      );
+      if (guestStudioImage && read)
+        return sendImage(
+          studio.guestImage(
+            app,
+            guestStudioImage[1],
+            jar.dcb_guest,
+            guestStudioImage[2],
+          ),
+        );
       if (path === "/api/config" && read) return send(200, configuration());
       if (path === "/api/gifs" && read) {
         const query = new URL(request.url, "http://local.invalid").searchParams;
@@ -308,7 +362,7 @@ export function createApiHandler(
         requireCsrf();
         throttle(`create:${session.host.id}`, 20);
         return send(201, {
-          event: app.createEvent(session, await body(request)),
+          event: app.createEvent(session, await body(request), jar.dcb_studio),
         });
       }
       let match = path.match(/^\/api\/host\/events\/([^/]+)\/destinations$/);
@@ -350,6 +404,7 @@ export function createApiHandler(
               id,
               await body(request),
               request.headers["if-match"],
+              jar.dcb_studio,
             ),
           });
         }
@@ -421,6 +476,7 @@ export function createApiHandler(
             jar.dcb_guest,
             request.headers["x-csrf-token"],
             await body(request),
+            jar.dcb_studio,
           );
           return send(result.repeated ? 200 : 201, result);
         }

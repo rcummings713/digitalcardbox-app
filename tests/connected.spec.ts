@@ -235,7 +235,7 @@ test("host and operator access are distinct; gift controls never enable money mo
     await operatorContext.close();
   }
 });
-test("public pages fit a phone, keep exact About copy and Instagram, and preserve keyboard and reduced motion", async ({
+test("public pages reflow on phones, keep exact About copy and Instagram, and preserve keyboard and reduced motion", async ({
   page,
 }) => {
   await page.emulateMedia({ reducedMotion: "reduce" });
@@ -245,6 +245,7 @@ test("public pages fit a phone, keep exact About copy and Instagram, and preserv
       "/",
       "/how-it-works",
       "/cards",
+      "/invitations",
       "/pricing",
       "/about",
       "/contact",
@@ -263,7 +264,10 @@ test("public pages fit a phone, keep exact About copy and Instagram, and preserv
         pageHeight: document.documentElement.scrollHeight,
       }));
       expect(size.pageWidth, route).toBeLessThanOrEqual(size.width);
-      expect(size.pageHeight, route).toBeLessThanOrEqual(size.height);
+      // Readable comparison panels, the full requested process copy and real editors
+      // intentionally scroll; short informational tabs retain their compact layout.
+      if (!["/", "/cards", "/invitations", "/how-it-works"].includes(route))
+        expect(size.pageHeight, route).toBeLessThanOrEqual(size.height);
       await expect(
         page.locator(
           'footer a[href="https://www.instagram.com/thedigitalcardbox/"]',

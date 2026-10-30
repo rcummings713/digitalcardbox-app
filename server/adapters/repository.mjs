@@ -1,4 +1,8 @@
 import {
+  storedCardDesign,
+  cardDesignWithNote,
+} from "../../src/modules/design/contracts.ts";
+import {
   createCipheriv,
   createDecipheriv,
   randomBytes,
@@ -105,6 +109,9 @@ export class ReviewRepository {
       status: row.status,
       cover: row.cover,
       bookLayout: row.book_layout,
+      ...(row.invitation_json
+        ? { invitation: JSON.parse(row.invitation_json) }
+        : {}),
       destinations: this.destinations(row.id).filter(
         (d) => !guest || (d.enabled && d.confirmed),
       ),
@@ -119,6 +126,9 @@ export class ReviewRepository {
       note: row.note,
       style: row.style,
       ...(row.art_id ? { artId: row.art_id } : {}),
+      ...(row.design_json
+        ? { design: cardDesignWithNote(JSON.parse(row.design_json), row.note) }
+        : {}),
       ...(row.gif ? { gif: row.gif } : {}),
       consent: !!row.consent,
       hidden: !!row.hidden,
@@ -159,7 +169,7 @@ export class ReviewRepository {
   }
   createEvent(ownerId, value, id = randomUUID()) {
     this.run(
-      "INSERT INTO events (id,owner_id,title,hosts,type,date,timezone,location,welcome,status,cover,book_layout,created_at) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?)",
+      "INSERT INTO events (id,owner_id,title,hosts,type,date,timezone,location,welcome,status,cover,book_layout,created_at,invitation_json) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
       id,
       ownerId,
       value.title,
@@ -173,6 +183,7 @@ export class ReviewRepository {
       value.cover,
       value.bookLayout ?? "editorial",
       this.now(),
+      value.invitation ? JSON.stringify(value.invitation) : null,
     );
     this.newLink(id);
     return this.event(this.one("SELECT * FROM events WHERE id=?", id));
@@ -434,7 +445,7 @@ export class ReviewRepository {
   }
   updateEvent(id, value) {
     this.run(
-      "UPDATE events SET title=?,hosts=?,type=?,date=?,timezone=?,location=?,welcome=?,status=?,cover=?,book_layout=?,revision=revision+1 WHERE id=?",
+      "UPDATE events SET title=?,hosts=?,type=?,date=?,timezone=?,location=?,welcome=?,status=?,cover=?,book_layout=?,invitation_json=?,revision=revision+1 WHERE id=?",
       value.title,
       value.hosts,
       value.type,
@@ -445,6 +456,7 @@ export class ReviewRepository {
       value.status,
       value.cover,
       value.bookLayout,
+      value.invitation ? JSON.stringify(value.invitation) : null,
       id,
     );
   }
@@ -500,7 +512,7 @@ export class ReviewRepository {
   insertCard(eventId, guestId, value) {
     const id = randomUUID();
     this.run(
-      "INSERT INTO cards (id,event_id,guest_id,request_key,name,note,style,gif,consent,created_at,art_id) VALUES(?,?,?,?,?,?,?,?,?,?,?)",
+      "INSERT INTO cards (id,event_id,guest_id,request_key,name,note,style,gif,consent,created_at,art_id,design_json) VALUES(?,?,?,?,?,?,?,?,?,?,?,?)",
       id,
       eventId,
       guestId,
@@ -512,6 +524,7 @@ export class ReviewRepository {
       value.consent ? 1 : 0,
       this.now(),
       value.artId ?? null,
+      value.design ? JSON.stringify(storedCardDesign(value.design)) : null,
     );
     this.run(
       "UPDATE events SET locked_at=coalesce(locked_at,?),revision=revision+1 WHERE id=?",

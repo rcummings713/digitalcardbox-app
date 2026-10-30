@@ -137,7 +137,7 @@ export function CardCarousel() {
             </button>
           ))}
         </div>
-        <span className="carousel-caption" aria-live="polite">
+        <span className="carousel-caption sr-only" aria-live="polite">
           {examples[active].title}
         </span>
         <button

@@ -1,13 +1,14 @@
 import { CardCarousel } from "./CardCarousel";
-import { useRef, useState } from "react";
+import { useState } from "react";
 import type { FormEvent } from "react";
 import { Card, Heading, InstagramLink, Link, Notice, go, copy } from "./shared";
 import { ConnectedStart } from "./AuthPages";
-import { designs } from "./model";
+import { occasionChoices } from "../modules/events/occasions";
+import { HomeComparison } from "./HomeComparison";
 import { useStore } from "./state";
 
 export function Home() {
-  const imageDialog = useRef<HTMLDialogElement>(null);
+  const [occasion, setOccasion] = useState("");
   return (
     <section
       className="discovery-home"
@@ -15,11 +16,10 @@ export function Home() {
     >
       <div className="discovery-intro">
         <p className="eyebrow">Digital cards. Lasting memories.</p>
-        <h1>Keep the feeling.</h1>
+        <h1>Smart Event Planning. Seamless Gifting.</h1>
         <p>
-          The words you love. The moments that matter.
-          <br />
-          All together, always close.
+          Ditch the physical card box for a unified platform that connects
+          invitations, custom QR codes, and secure payments.
         </p>
       </div>
       <div className="discovery-card">
@@ -29,137 +29,44 @@ export function Home() {
         </p>
       </div>
       <div className="discovery-create">
-        <p className="eyebrow">What are we celebrating?</p>
-        <div className="discovery-occasions">
-          {[
-            ["Wedding", "Wedding"],
-            ["Baby shower", "Baby shower"],
-            ["Birthday", "Birthday"],
-            ["Other dated event", "Every occasion"],
-          ].map(([type, label]) => (
-            <Link
-              key={type}
-              to={"/start?occasion=" + encodeURIComponent(type)}
-              className="secondary"
-              aria-label={
-                type === "Wedding"
-                  ? "Create a wedding card box"
-                  : `Create a ${label.toLowerCase()} card box`
-              }
-            >
-              {label}
-              <span aria-hidden="true">↗</span>
-            </Link>
-          ))}
-        </div>
-      </div>
-      <div className="discovery-value">
-        <div className="before-after-art">
-          <button
-            type="button"
-            className="before-after-button"
-            aria-label="View the card-box comparison at full size"
-            onClick={() => imageDialog.current?.showModal()}
+        <label className="eyebrow" htmlFor="home-occasion">
+          Every occasion
+        </label>
+        <div className="home-occasion-picker">
+          <select
+            id="home-occasion"
+            aria-label="Every occasion"
+            value={occasion}
+            onChange={(e) => setOccasion(e.target.value)}
           >
-            <span className="comparison-artwork">
-              <img
-                src="/images/card-box-before-after.png"
-                width="1080"
-                height="593"
-                alt="Before: boxes full of wedding, graduation and baby cards. After: a lifetime of digital cards, organized together on a phone."
-              />
-            </span>
-            <span className="comparison-caption">View the comparison ↗</span>
-          </button>
-          <dialog
-            className="image-lightbox"
-            ref={imageDialog}
-            onClick={(event) => {
-              if (event.target === imageDialog.current)
-                imageDialog.current?.close();
-            }}
-            aria-label="The card-box comparison"
+            <option value="">Every occasion</option>
+            {occasionChoices.map(([value, label]) => (
+              <option value={value} key={value}>
+                {label}
+              </option>
+            ))}
+          </select>
+          <Link
+            className="primary"
+            to={
+              "/invitations?occasion=" +
+              encodeURIComponent(occasion || "Wedding")
+            }
           >
-            <button
-              type="button"
-              className="secondary close-image"
-              autoFocus
-              onClick={() => imageDialog.current?.close()}
-            >
-              Close image
-            </button>
-            <span className="comparison-artwork">
-              <img
-                src="/images/card-box-before-after.png"
-                width="1080"
-                height="593"
-                alt="Full-size comparison of physical card storage and an organized digital card box."
-              />
-            </span>
-          </dialog>
+            Explore invitations ↗
+          </Link>
         </div>
-      </div>
-    </section>
-  );
-}
-function CardCollection() {
-  const [selected, setSelected] = useState(designs[0].id);
-  return (
-    <>
-      <Heading
-        eyebrow="The card collection"
-        title="Make their words a keepsake."
-      >
-        <p>Choose a design. Add a note, a memory, a little personality.</p>
-      </Heading>
-      <section className="compact-collection">
-        <div
-          className="collection-choices"
-          role="group"
-          aria-label="Card designs"
+        <Link
+          className="text-link"
+          to={"/start?occasion=" + encodeURIComponent(occasion || "Wedding")}
         >
-          {designs.map((d) => (
-            <button
-              key={d.id}
-              aria-pressed={selected === d.id}
-              onClick={() => setSelected(d.id)}
-            >
-              <span>{d.name}</span>
-              <small>{d.description}</small>
-            </button>
-          ))}
-        </div>
-        <div className="collection-preview">
-          <Card
-            entry={{
-              name: selected === "little-star" ? "Norma" : "You",
-              style: selected,
-              note:
-                selected === "little-star"
-                  ? "The universe is full of a million little stars ... but none will shine as much as your beautiful baby Boy !"
-                  : "Some moments stay with us. You are one of mine.",
-              gif: selected === "little-star" ? "cosmic" : undefined,
-            }}
-          />
-        </div>
-      </section>
-      <details className="collection-ai-info">
-        <summary>Make a card with AI</summary>
-        <p>
-          Open your host’s invitation, then choose “Make a card with AI.” Pick
-          an occasion, palette, art style and motif; add your own words and an
-          optional GIF afterward.
-        </p>
-      </details>
-      <div className="collection-next">
-        <Link to="/start" className="primary">
           Create a card box
         </Link>
-        <p className="small">
-          Sending a card? Open the invitation from your host.
-        </p>
       </div>
-    </>
+      <div className="discovery-value">
+        <HomeComparison />
+      </div>
+    </section>
   );
 }
 
@@ -254,7 +161,14 @@ export function Start() {
         )}
         <div className="account-skip">
           <Link
-            to={"/workspace/new?occasion=" + encodeURIComponent(occasion)}
+            to={
+              "/workspace/new?occasion=" +
+              encodeURIComponent(occasion) +
+              (new URLSearchParams(location.search).get("design") ===
+              "invitation"
+                ? "&design=invitation"
+                : "")
+            }
             className="primary full"
           >
             Continue without signing in ↗
@@ -276,7 +190,7 @@ export function Start() {
 }
 export function Informational({ page }: { page: string }) {
   const { mode } = useStore();
-  if (page === "cards") return <CardCollection />;
+
   if (page === "pricing")
     return (
       <>
@@ -345,20 +259,20 @@ export function Informational({ page }: { page: string }) {
         <div className="steps-grid">
           {[
             [
-              "Create your card box",
-              "Choose an occasion, add your welcome, and make it feel like you.",
+              "Set up your digital card box",
+              "Choose your occasion, customize your welcome page, and design an elegant digital box that perfectly matches the aesthetic of your event.",
             ],
             [
-              "Invite your people",
-              "Share your event link or QR with the people you want to hear from. Events are not publicly listed.",
+              "Send your invites",
+              "Skip the physical invitations. Share a secure link or custom QR code directly with your guest list. Your celebration remains private, accessible only to the people you invite.",
             ],
             [
-              "Let their words come in",
-              "Guests choose a card, add their note, and optionally include a photo, GIF or external gift.",
+              "Collect cards & gifts",
+              "Gather digital notes, photos, and frictionless monetary gifts all in one secure portal. Guests can easily compose meaningful cards without the last-minute ATM run.",
             ],
             [
-              "Keep the feeling close",
-              "Enjoy your CardVault, curate your event book, and revisit your favorite words.",
+              "Preserve your memories",
+              "Access your lifetime CardVault, curate a beautifully bound physical event book, and relive your favorite milestone moments whenever you want. Enjoy storage that protects your sentimental notes and financial registries forever.",
             ],
           ].map(([title, description], i) => (
             <section className="panel" key={title}>
@@ -368,8 +282,15 @@ export function Informational({ page }: { page: string }) {
             </section>
           ))}
         </div>
+        <p className="how-it-works-availability small">
+          DEV availability: invitations share by private link or QR. Gifts open
+          the host’s external payment service; this site never moves money.
+          Private photo uploads, physical book fulfillment and permanent
+          account-backed storage are planned services. Anonymous review access
+          lasts seven days.
+        </p>
         <div className="center-section">
-          <Link to="/start" className="primary">
+          <Link to="/invitations" className="primary">
             Let’s begin
           </Link>
         </div>

@@ -1,3 +1,4 @@
+import type { DesignDocument } from "../modules/design/contracts";
 import { templates, gifStore } from "../modules/media/catalog";
 import type { TemplateId } from "../modules/media/catalog";
 import type {
@@ -29,6 +30,7 @@ export interface Occasion {
   cover: string;
   bookLayout?: "editorial" | "collage";
   destinations: Destination[];
+  invitation?: DesignDocument;
 }
 export interface Entry {
   id: string;
@@ -37,6 +39,7 @@ export interface Entry {
   note: string;
   style: CardStyle;
   artId?: string;
+  design?: DesignDocument;
   photo?: string;
   gif?: string;
   consent: boolean;
@@ -66,29 +69,8 @@ export interface Store {
   audit: string[];
 }
 export const STORAGE_KEY = "thedigitalcardbox-ui-v1";
-export const eventTypes = [
-  "Wedding",
-  "Baby shower",
-  "Birthday",
-  "Anniversary",
-  "Graduation",
-  "Other dated event",
-  "One-off occasion",
-  "Gender reveal party",
-  "Sip and see",
-  "First Communion / Confirmation",
-  "Debutante ball / Cotillion",
-  "Prom / Pre-prom party",
-  "College Decision Day",
-  "Bridal shower",
-  "Bachelor / Bachelorette party",
-  "Rehearsal dinner",
-  "Housewarming",
-  "Retirement",
-  "Career promotion / Professional graduation",
-  "Bat Mitzvah",
-  "Wake / Celebration of Life",
-];
+export { eventTypes } from "../modules/events/occasions";
+
 export const designs: readonly {
   id: TemplateId;
   name: string;

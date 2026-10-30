@@ -138,7 +138,13 @@ export function ConnectedStart() {
   return (
     <SignIn
       showChoices
-      returnTo={"/workspace/new?occasion=" + encodeURIComponent(occasion)}
+      returnTo={
+        "/workspace/new?occasion=" +
+        encodeURIComponent(occasion) +
+        (new URLSearchParams(location.search).get("design") === "invitation"
+          ? "&design=invitation"
+          : "")
+      }
     />
   );
 }

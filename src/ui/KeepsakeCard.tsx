@@ -199,7 +199,7 @@ export function KeepsakeCard({
     if (!interactive || !active || reduced) return;
     const reveal = setTimeout(() => {
       if (!touched.current) setOpen(true);
-    }, 550);
+    }, 2400);
     return () => clearTimeout(reveal);
   }, [interactive, active, reduced]);
   useEffect(() => {
@@ -244,9 +244,16 @@ export function KeepsakeCard({
             </span>
           </section>
           <section
-            className="little-star-page little-star-illustrated"
+            className={
+              "little-star-page little-star-illustrated" +
+              (occasion === "baby" ? " gif-only" : "")
+            }
             tabIndex={0}
-            aria-label="Printed greeting and keepsake illustration"
+            aria-label={
+              occasion === "baby"
+                ? "Keepsake animation"
+                : "Printed greeting and keepsake illustration"
+            }
           >
             <div className="little-star-inner">
               {item && (
@@ -258,16 +265,15 @@ export function KeepsakeCard({
                   height="205"
                 />
               )}
-              <div className="little-star-greeting">
-                <p lang={occasion === "baby" ? "es" : "en"}>{greeting.verse}</p>
-                <OccasionIllustration occasion={occasion} />
-              </div>
-              <p
-                className="little-star-ribbon"
-                lang={occasion === "baby" ? "es" : "en"}
-              >
-                {greeting.ribbon}
-              </p>
+              {occasion !== "baby" && (
+                <>
+                  <div className="little-star-greeting">
+                    <p>{greeting.verse}</p>
+                    <OccasionIllustration occasion={occasion} />
+                  </div>
+                  <p className="little-star-ribbon">{greeting.ribbon}</p>
+                </>
+              )}
             </div>
           </section>
         </div>

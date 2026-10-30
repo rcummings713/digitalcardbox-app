@@ -8,7 +8,7 @@ const database =
 process.env.DCB_CONNECTED_DATABASE = database;
 export default defineConfig({
   testDir: "./tests",
-  testMatch: "connected.spec.ts",
+  testMatch: ["connected.spec.ts", "studio.spec.ts"],
   outputDir: "test-results/connected",
   fullyParallel: false,
   workers: 1,

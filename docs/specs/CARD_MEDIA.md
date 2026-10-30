@@ -139,3 +139,8 @@ Sources checked for this implementation: [OpenAI image generation](https://devel
 [image API](https://developers.openai.com/api/reference/resources/images/methods/generate),
 [moderation](https://developers.openai.com/api/docs/guides/moderation), and
 [Cloudflare Preview configuration](https://developers.cloudflare.com/workers/previews/configuration/).
+
+
+## 30 October 2026 design studio
+
+30 October: public card/invitation AI previews reuse the same server-only key and provider helper; the global 20/day and combined 32 MiB limits are shared with guest artwork. Studio adds its own HttpOnly session/CSRF, two attempts per session/day, two studio attempts per IP/day, one in-flight request and private approved artwork reads/transactional claims. Generic cards and editable invitations work without a key. The provider input now additionally accepts only a card/invitation purpose; no arbitrary prompt or upload is added. See INVITATION_STUDIO.md. Key setup above is unchanged; no real paid requests are used by tests.

@@ -207,3 +207,10 @@ at phone, tablet and desktop widths. Both panels and the swipe arrow remain
 visible; opening the image shows the same border-free treatment, and Escape or
 Close image returns to the trigger. The original PNG remains unchanged. Existing
 story #85 / epic #84 stay open and In Progress for the owner to review.
+
+
+## 30 October 2026 design studio
+
+30 October review: use the Every occasion dropdown on Home, compare the larger Before/After phone panels, open the baby card and inspect the GIF-only right page and slower opening. Check all four requested How It Works paragraphs plus the DEV availability note. On The Cards, choose Create your own card or Generic cards, edit text, colors, typography, alignment, movement, area size and layers, then undo/redo and add a GIF. Public Invitations offers the same editor without an account/card box. Carry a draft through setup, review names/date/venue, save it to an owned event, publish its private link/QR and inspect it in an independent guest browser. Import a saved card draft into that guest composer and verify the delivered layout in the host inbox. No platform invitation sharing before event creation/publication; no email/SMS delivery, integrated payments, lifetime retention or physical fulfillment is implied. Epic #93 and stories #94–#96 plus existing #85/#24/#73/#92 stay open / In Progress. See docs/specs/INVITATION_STUDIO.md.
+
+Validation: production build and planning checks passed; 40 API, 5 Worker, 6 routing, 14 UI and 15 connected browser tests passed (80 total), including the new public invitation/card studios and database preservation. AI calls were mocked. Hosted DEV evidence is recorded in the linked issues; AI still requires the server-only key described in CARD_MEDIA.md.

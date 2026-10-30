@@ -59,3 +59,8 @@ The $500 developer payment is a one-time, indefinitely fixed arrangement for pla
 ## UI-first design review
 
 The customer interface now includes occasion-led creation and planned Apple/Google/Amazon/email account choices with a no-sign-in continuation, a host workspace, opaque invitation-only guest routes, original illustrated cards with optional local GIFs, editorial/collage book views and an in-app administrator workspace. No public event directory is offered. Feature switches and stats are local fictional review data; production roles, feature enforcement, provider transaction matching and licensed GIF search remain separate work. Known name, payment-app alias and an opaque reference assist host gift matching without verifying receipt. See planning/UI_REVIEW.md for decisions and the page map.
+
+
+## 30 October 2026 design studio
+
+30 October owner-directed DEV extension: prospective hosts may explore/edit invitations before creating an event/card box, with generic stationery and bounded AI artwork. Sending/sharing through the platform remains tied to a created, owned, published event and its private link/QR. The same focused mobile editor serves personal cards. Requested home/process copy and all 17 occasion choices are implemented; payment execution, physical fulfillment and permanent storage are not made live by that copy. See INVITATION_STUDIO.md and ADR 0010.

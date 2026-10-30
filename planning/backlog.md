@@ -603,3 +603,24 @@ Release: UI design review. The complete customer and operator page set can be re
   - Review six original vector card directions, actual note typography, optional photo/animated-sticker placements and responsive long-message handling.
   - Compare editorial and collage book spreads, cover/dedication, consent filtering and accessible reading/print modes. Do not introduce a guest contribution cap or require a gift.
   - Record owner choices and remaining polish before approval; keep issues open for the owner and do not infer design approval from automated tests.
+
+### DCB-E20 Invitation discovery and design
+
+Release: UI design review. Prospective hosts can design invitations before creating an event, then attach to an owned card box and publish a private guest link.
+
+- **DCB-E20-S01 Explore and edit invitations before event setup** — UI design review. As a prospective host, I want to browse and personalize invitations without an account or card box so I can decide if the product fits my event.
+  - Public Invitations page with occasion-filtered premium templates and live editable previews before any account/event creation.
+  - Reusable mobile editor offers text selection, editing, font/size/alignment, palettes, movement/nudging, layer order, add/remove text, undo/redo, reset and saved local drafts, plus optional searchable licensed GIFs.
+  - Original text stays readable and separate from ornament/art; keyboard, touch, reduced-motion and narrow-screen flows are verified.
+  - Creating a preview never makes an event public or creates a guest link.
+- **DCB-E20-S02 Bind invitation designs to owned events before sharing** — UI design review. As a host, I want to keep my invitation design through setup and share it only after I have created and published my card box.
+  - Carry an invitation draft through account choices and event setup; let an existing host select an owned event or edit its invitation from the workspace.
+  - Persist a bounded versioned invitation document with event ownership, CSRF and revision checks. No arbitrary HTML, remote asset URL or cross-event artwork is accepted.
+  - Guest link/QR and platform sharing become available only for a published owned event; public preview cannot create a sendable event link.
+  - Guest landing displays the saved invitation; rotation, paused/draft/window/privacy checks remain authoritative. No email/SMS delivery or payment execution is added.
+- **DCB-E20-S03 Generate moderated studio artwork with shared cost limits** — UI design review. As a visitor, I want to try AI card/invitation artwork through constrained choices without opening an unrestricted paid image endpoint.
+  - Anonymous HttpOnly studio session plus same-origin CSRF; only fixed occasion/palette/style/motif and card/invitation purpose accepted. No prompt/model/size/URL/upload input.
+  - Reuse the existing fixed low-quality one-image provider request and pre/post moderation; explicit/malformed/unavailable safety checks fail closed.
+  - Persistent session/IP caps, global shared daily cap with guest AI, atomic reservations, deduplication, one active request and combined storage ceiling. Failed/ambiguous attempts are not automatically retried.
+  - Artwork remains private until bound to its owned event or current guest submission; authorization is rechecked after generation and on every image read.
+  - Keep manual editing/templates available without an API key; document server-only key setup, known preview/session lifetime and remaining production controls.

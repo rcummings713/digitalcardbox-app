@@ -2,7 +2,13 @@ import { useId } from "react";
 import type { TemplateId } from "../modules/media/catalog";
 import { templates } from "../modules/media/catalog";
 
-export function TemplateArt({ id }: { id: TemplateId }) {
+export function TemplateArt({
+  id,
+  accent,
+}: {
+  id: TemplateId;
+  accent?: string;
+}) {
   const gradient = useId();
   const design = templates.find((item) => item.id === id)!;
   const motif = design.motif;
@@ -27,7 +33,7 @@ export function TemplateArt({ id }: { id: TemplateId }) {
       viewBox="0 0 400 520"
       fill="none"
       aria-hidden="true"
-      style={{ color: design.accent }}
+      style={{ color: accent || design.accent }}
     >
       <defs>
         <linearGradient id={gradient} x2="1" y2="1">

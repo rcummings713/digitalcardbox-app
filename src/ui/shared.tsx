@@ -1,3 +1,4 @@
+import { DesignCanvas, designArtworkUrl } from "./DesignEditor";
 import { TemplateArt } from "./TemplateArt";
 import type { OccasionCard } from "./KeepsakeCard";
 import type { CSSProperties } from "react";
@@ -229,7 +230,10 @@ export function Card({
   animate,
   guestToken,
 }: {
-  entry: Pick<Entry, "style" | "name" | "note" | "photo" | "gif" | "artId">;
+  entry: Pick<
+    Entry,
+    "style" | "name" | "note" | "photo" | "gif" | "artId" | "design"
+  >;
   small?: boolean;
   animate?: boolean;
   guestToken?: string;
@@ -246,6 +250,23 @@ export function Card({
     return () => clearTimeout(stop);
   }, [entry.gif, entry.style, small, reduced, animate]);
   const motion = !reduced && !small && (animate ?? autoPlaying);
+  if (entry.design)
+    return (
+      <article aria-label={`Card from ${entry.name || "you"}`}>
+        <DesignCanvas
+          value={{ ...entry.design, gif: entry.gif }}
+          animate={motion}
+          artUrl={designArtworkUrl(entry.design, guestToken, !guestToken)}
+        />
+        {entry.photo && (
+          <img
+            className="design-attached-photo"
+            src={entry.photo}
+            alt={`A memory shared by ${entry.name || "the sender"}`}
+          />
+        )}
+      </article>
+    );
   const opening: Partial<Record<CardStyle, OccasionCard>> = {
     "little-star": "baby",
     "wedding-vows": "wedding",

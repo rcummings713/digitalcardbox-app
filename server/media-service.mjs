@@ -26,8 +26,8 @@ export function cardChoices(input) {
     fail(422, "Use a valid generation reference.");
   return { requestKey, ...value };
 }
-export function artworkPrompt(value) {
-  return `Create one premium portrait greeting-card artwork for a ${value.occasion}. Palette: ${value.palette}. Art direction: ${value.artwork}. Decorative motif: ${value.motif}. Refined, elegant stationery with generous clean space in the center for a personal note added separately. Family-friendly illustration only. No text, letters, numbers, logos, watermarks, people, faces, bodies, nudity, sexual content, violence, drugs, political symbols or copyrighted characters. Return only the card artwork.`;
+export function artworkPrompt(value, purpose = "card") {
+  return `Create one premium portrait ${purpose === "invitation" ? "event-invitation" : "greeting-card"} artwork for a ${value.occasion}. Palette: ${value.palette}. Art direction: ${value.artwork}. Decorative motif: ${value.motif}. Refined, elegant stationery with generous clean space in the center for a personal note added separately. Family-friendly illustration only. No text, letters, numbers, logos, watermarks, people, faces, bodies, nudity, sexual content, violence, drugs, political symbols or copyrighted characters. Return only the card artwork.`;
 }
 export function consume(repo, scope, period, limit) {
   const row = repo.one(
@@ -182,6 +182,48 @@ export class MediaService {
         );
     }
   }
+  async renderArtwork(choices, purpose, actor) {
+    const prompt = artworkPrompt(choices, purpose);
+    await this.moderate([{ type: "text", text: prompt }]);
+    const result = await this.call("images/generations", {
+      model: AI_POLICY.model,
+      prompt,
+      quality: AI_POLICY.quality,
+      size: AI_POLICY.size,
+      n: 1,
+      output_format: "webp",
+      output_compression: 80,
+      moderation: "auto",
+      background: "opaque",
+      safety_identifier: createHash("sha256").update(actor).digest("hex"),
+    });
+    if (
+      result?.data?.length !== 1 ||
+      typeof result.data[0].b64_json !== "string" ||
+      !/^[A-Za-z0-9+/]+={0,2}$/.test(result.data[0].b64_json)
+    )
+      fail(503, "Artwork response was unavailable.", "ai_unavailable");
+    const encoded = result.data[0].b64_json;
+    const image = Buffer.from(encoded, "base64");
+    if (
+      image.length > 1500000 ||
+      image.length < 16 ||
+      image.subarray(0, 4).toString() !== "RIFF" ||
+      image.subarray(8, 12).toString() !== "WEBP"
+    )
+      fail(
+        503,
+        "Artwork response was not a supported card image.",
+        "ai_unavailable",
+      );
+    await this.moderate([
+      {
+        type: "image_url",
+        image_url: { url: "data:image/webp;base64," + encoded },
+      },
+    ]);
+    return image;
+  }
   async generate(app, token, cookieToken, csrf, input, ip) {
     const choices = cardChoices(input);
     const context = this.repo.transaction(() => {
@@ -232,10 +274,10 @@ export class MediaService {
           "generation_processing",
         );
       const stored = this.repo.one(
-        "SELECT coalesce(sum(length(image)),0) AS size FROM card_art",
+        "SELECT coalesce((SELECT sum(length(image)) FROM card_art),0)+coalesce((SELECT sum(length(image)) FROM studio_jobs),0) AS size",
       ).size;
       const pending = this.repo.one(
-        "SELECT count(*) AS count FROM ai_card_jobs WHERE state='processing'",
+        "SELECT (SELECT count(*) FROM ai_card_jobs WHERE state='processing')+(SELECT count(*) FROM studio_jobs WHERE state='processing') AS count",
       ).count;
       if (stored + (pending + 1) * 1500000 > 33554432)
         fail(
@@ -272,47 +314,11 @@ export class MediaService {
     });
     if (context.previous) return { artId: context.previous.id, repeated: true };
     try {
-      const prompt = artworkPrompt(choices);
-      await this.moderate([{ type: "text", text: prompt }]);
-      const result = await this.call("images/generations", {
-        model: AI_POLICY.model,
-        prompt,
-        quality: AI_POLICY.quality,
-        size: AI_POLICY.size,
-        n: 1,
-        output_format: "webp",
-        output_compression: 80,
-        moderation: "auto",
-        background: "opaque",
-        safety_identifier: createHash("sha256")
-          .update(context.session.guest_id)
-          .digest("hex"),
-      });
-      if (
-        result?.data?.length !== 1 ||
-        typeof result.data[0].b64_json !== "string" ||
-        !/^[A-Za-z0-9+/]+={0,2}$/.test(result.data[0].b64_json)
-      )
-        fail(503, "Artwork response was unavailable.", "ai_unavailable");
-      const encoded = result.data[0].b64_json;
-      const image = Buffer.from(encoded, "base64");
-      if (
-        image.length > 1500000 ||
-        image.length < 16 ||
-        image.subarray(0, 4).toString() !== "RIFF" ||
-        image.subarray(8, 12).toString() !== "WEBP"
-      )
-        fail(
-          503,
-          "Artwork response was not a supported card image.",
-          "ai_unavailable",
-        );
-      await this.moderate([
-        {
-          type: "image_url",
-          image_url: { url: "data:image/webp;base64," + encoded },
-        },
-      ]);
+      const image = await this.renderArtwork(
+        choices,
+        "card",
+        context.session.guest_id,
+      );
       this.repo.transaction(() => {
         // Recheck access after the network work. Revoked links cannot receive an asset.
         const current = app.guestSession(token, cookieToken);

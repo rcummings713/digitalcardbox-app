@@ -1,3 +1,4 @@
+import { DesignStudio } from "./ui/DesignStudio";
 import { FeedbackPage } from "./ui/FeedbackPages";
 import { useEffect, useRef, useState } from "react";
 import { Account, EventForm, EventWorkspace, Workspace } from "./ui/HostPages";
@@ -51,6 +52,10 @@ function Shell() {
     content = <GuestPage token={parts[1] || ""} step={parts[2] || "landing"} />;
   else if (path === "/") content = <Home />;
   else if (path === "/start") content = <Start />;
+  else if (path === "/cards")
+    content = <DesignStudio key="cards" kind="card" />;
+  else if (path === "/invitations")
+    content = <DesignStudio key="invitations" kind="invitation" />;
   else if (path === "/workspace") content = <Workspace />;
   else if (path === "/workspace/new") content = <EventForm />;
   else if (path === "/workspace/account") content = <Account />;
@@ -108,6 +113,7 @@ function Shell() {
                 ["/", "Home"],
                 ["/how-it-works", "How it works"],
                 ["/cards", "The cards"],
+                ["/invitations", "Invitations"],
                 ["/pricing", "Pricing"],
                 ["/about", "About"],
               ].map(([to, title]) => (
@@ -136,7 +142,9 @@ function Shell() {
           <span>
             {mode === "server"
               ? account
-                ? (account.id.startsWith("visitor-") ? "Private test workspace · Saved to this browser" : `Test workspace · ${account.email}`)
+                ? account.id.startsWith("visitor-")
+                  ? "Private test workspace · Saved to this browser"
+                  : `Test workspace · ${account.email}`
                 : "Private host workspace"
               : "Design workspace · Changes stay on this device"}
           </span>

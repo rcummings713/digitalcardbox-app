@@ -1,3 +1,5 @@
+import { eventTypes } from "../../src/modules/events/occasions.ts";
+import { validateDesign } from "../../src/modules/design/contracts.ts";
 import { templates, gifStore } from "../../src/modules/media/catalog.ts";
 export class Problem extends Error {
   constructor(status, message, code = "request_rejected") {
@@ -11,29 +13,8 @@ export const fail = (status, message, code) => {
 };
 export const styles = [...templates.map((d) => d.id), "ai-art"];
 export const gifIds = gifStore.map((g) => g.id);
-export const eventTypes = [
-  "Wedding",
-  "Baby shower",
-  "Birthday",
-  "Anniversary",
-  "Graduation",
-  "Other dated event",
-  "One-off occasion",
-  "Gender reveal party",
-  "Sip and see",
-  "First Communion / Confirmation",
-  "Debutante ball / Cotillion",
-  "Prom / Pre-prom party",
-  "College Decision Day",
-  "Bridal shower",
-  "Bachelor / Bachelorette party",
-  "Rehearsal dinner",
-  "Housewarming",
-  "Retirement",
-  "Career promotion / Professional graduation",
-  "Bat Mitzvah",
-  "Wake / Celebration of Life",
-];
+export { eventTypes } from "../../src/modules/events/occasions.ts";
+
 export function object(value) {
   if (!value || typeof value !== "object" || Array.isArray(value))
     fail(422, "Send a JSON object.");
@@ -105,6 +86,7 @@ const eventFields = [
   "cover",
   "status",
   "bookLayout",
+  "invitation",
 ];
 export function validateEvent(input, current, now) {
   keys(input, eventFields);
@@ -120,7 +102,15 @@ export function validateEvent(input, current, now) {
     status: value.status ?? "draft",
     cover: value.cover ?? "celebration",
     bookLayout: value.bookLayout ?? "editorial",
+    invitation: null,
   };
+  if (value.invitation != null) {
+    try {
+      result.invitation = validateDesign(value.invitation, "invitation");
+    } catch {
+      fail(422, "Choose a valid invitation design.");
+    }
+  }
   if (!eventTypes.includes(result.type))
     fail(422, "Choose an available occasion.");
   if (
@@ -167,6 +157,7 @@ export function validateCard(input, flags) {
     "gif",
     "consent",
     "artId",
+    "design",
   ]);
   const card = {
     requestKey: text(input.requestKey, "submission reference", 80),
@@ -176,7 +167,19 @@ export function validateCard(input, flags) {
     artId: input.artId ?? null,
     gif: input.gif || null,
     consent: input.consent,
+    design: null,
   };
+  if (input.design != null) {
+    try {
+      card.design = validateDesign(input.design, "card");
+    } catch {
+      fail(422, "Choose a valid card layout.");
+    }
+    if (card.design.blocks.find((b) => b.id === "message")?.text !== card.note)
+      fail(422, "Keep the message in your layout and note together.");
+    if (card.design.gif !== (card.gif || undefined))
+      fail(422, "Use the same GIF in the card and its layout.");
+  }
   if (!/^[a-zA-Z0-9_-]{8,80}$/.test(card.requestKey))
     fail(422, "The submission reference is invalid.");
   if (!styles.includes(card.style))

@@ -1,3 +1,11 @@
+import {
+  DesignCanvas,
+  DesignEditor,
+  designArtworkUrl,
+  readDesignDraft,
+} from "./DesignEditor";
+import { validateDesign, withDesignGif } from "../modules/design/contracts";
+import type { DesignDocument } from "../modules/design/contracts";
 import { AiCardComposer } from "./AiCardComposer";
 import { GifPicker } from "./GifPicker";
 import { ProviderHandoff } from "./ProviderHandoff";
@@ -19,6 +27,7 @@ interface Draft {
   note: string;
   style: CardStyle;
   artId?: string;
+  design?: DesignDocument;
   generatedArtId?: string;
   photo?: string;
   gif?: string;
@@ -52,8 +61,16 @@ function loadDraft(token: string): Draft {
       (designs.some((d) => d.id === draft.style) ||
         (draft.style === "ai-art" && typeof draft.artId === "string")) &&
       typeof draft.reference === "string"
-    )
+    ) {
+      if (draft.design) {
+        try {
+          draft.design = validateDesign(draft.design, "card");
+        } catch {
+          delete draft.design;
+        }
+      }
       return draft;
+    }
   } catch {
     /* A new draft still works when storage is unavailable. */
   }
@@ -154,6 +171,7 @@ function GuestJourney({
   const [error, setError] = useState("");
   const [gifOpen, setGifOpen] = useState(false);
   const [playing, setPlaying] = useState(false);
+  const [invitationPlaying, setInvitationPlaying] = useState(false);
   const [suggestions, setSuggestions] = useState(false);
   const [aiOpen, setAiOpen] = useState(false);
   const [designCategory, setDesignCategory] = useState("All designs");
@@ -195,6 +213,15 @@ function GuestJourney({
     }
   }, [selected?.service, selected?.version]);
   useEffect(() => {
+    if (!event.invitation?.gif || reduced) {
+      setInvitationPlaying(false);
+      return;
+    }
+    setInvitationPlaying(true);
+    const stop = setTimeout(() => setInvitationPlaying(false), 4400);
+    return () => clearTimeout(stop);
+  }, [event.invitation?.gif, reduced]);
+  useEffect(() => {
     if (!draft.gif || reduced) {
       setPlaying(false);
       return;
@@ -204,7 +231,24 @@ function GuestJourney({
     return () => clearTimeout(stop);
   }, [draft.gif, reduced]);
   function update(value: Partial<Draft>) {
-    setDraft((d) => ({ ...d, ...value }));
+    setDraft((d) => {
+      const next = { ...d, ...value };
+      if (next.design) {
+        if (Object.hasOwn(value, "gif"))
+          next.design = withDesignGif(next.design, value.gif);
+        next.design = {
+          ...next.design,
+          blocks: next.design.blocks.map((block) =>
+            block.id === "message" && Object.hasOwn(value, "note")
+              ? { ...block, text: next.note }
+              : block.id === "signature" && Object.hasOwn(value, "name")
+                ? { ...block, text: "With love,\n" + next.name }
+                : block,
+          ),
+        };
+      }
+      return next;
+    });
     setError("");
   }
   async function photo(file?: File) {
@@ -256,6 +300,9 @@ function GuestJourney({
       note: draft.note.trim(),
       style: draft.style,
       artId: draft.style === "ai-art" ? draft.artId : undefined,
+      design: draft.design
+        ? { ...draft.design, gif: data.flags.gifs ? draft.gif : undefined }
+        : undefined,
       photo: draft.photo,
       gif: data.flags.gifs ? draft.gif : undefined,
       consent: draft.consent,
@@ -446,12 +493,35 @@ function GuestJourney({
   if (step === "landing")
     return (
       <section className="invitation">
-        <div className="invitation-image">
-          <img
-            src={`/images/${event.cover}.jpg`}
-            alt="A setting for this occasion"
-          />
-        </div>
+        {event.invitation ? (
+          <div className="invitation-design-preview">
+            <DesignCanvas
+              value={event.invitation}
+              artUrl={designArtworkUrl(event.invitation, event.token)}
+              label="Your host’s invitation"
+              animate={invitationPlaying}
+            />
+            {event.invitation.gif && (
+              <button
+                type="button"
+                className="text-link"
+                disabled={reduced}
+                onClick={() => setInvitationPlaying(!invitationPlaying)}
+              >
+                {invitationPlaying
+                  ? "Pause invitation GIF"
+                  : "Play invitation GIF"}
+              </button>
+            )}
+          </div>
+        ) : (
+          <div className="invitation-image">
+            <img
+              src={`/images/${event.cover}.jpg`}
+              alt="A setting for this occasion"
+            />
+          </div>
+        )}
         <div className="invitation-copy">
           <p className="eyebrow">You’re invited to leave a little love</p>
           <h1>{event.title}</h1>
@@ -768,6 +838,40 @@ function GuestJourney({
           <div className="composer-controls">
             <section className="panel">
               <p className="eyebrow">01 · Start with a little beauty</p>
+              <button
+                type="button"
+                className="secondary full"
+                onClick={() => {
+                  const saved = readDesignDraft("card");
+                  if (!saved) {
+                    notify(
+                      "Explore The Cards and save a design first, or choose a template here.",
+                    );
+                    return;
+                  }
+                  update({
+                    design: saved,
+                    style: saved.template,
+                    gif: saved.gif,
+                    note:
+                      saved.blocks.find((b) => b.id === "message")?.text ||
+                      draft.note,
+                    name: draft.name,
+                  });
+                  notify("Your saved card design is ready to personalize.");
+                }}
+              >
+                Use my saved card design
+              </button>
+              {draft.design && (
+                <button
+                  type="button"
+                  className="text-link"
+                  onClick={() => update({ design: undefined })}
+                >
+                  Use the standard card layout
+                </button>
+              )}
               <label htmlFor="design-category">
                 Browse {designs.length} designs
               </label>
@@ -802,7 +906,17 @@ function GuestJourney({
                         value={design.id}
                         checked={draft.style === design.id}
                         onChange={() =>
-                          update({ style: design.id, artId: undefined })
+                          update({
+                            style: design.id,
+                            artId: undefined,
+                            design: draft.design
+                              ? {
+                                  ...draft.design,
+                                  template: design.id,
+                                  artId: undefined,
+                                }
+                              : undefined,
+                          })
                         }
                       />
                       <span
@@ -854,7 +968,11 @@ function GuestJourney({
                         artId={draft.generatedArtId}
                         onGenerated={(id) => update({ generatedArtId: id })}
                         onChoose={(id) =>
-                          update({ style: "ai-art", artId: id })
+                          update({
+                            style: "ai-art",
+                            artId: id,
+                            design: undefined,
+                          })
                         }
                       />
                     </div>
@@ -907,6 +1025,26 @@ function GuestJourney({
                 </>
               )}
             </section>
+            {draft.design && (
+              <section className="panel">
+                <details>
+                  <summary>Make the layout yours</summary>
+                  <DesignEditor
+                    value={draft.design}
+                    allowGif={false}
+                    artUrl={designArtworkUrl(draft.design)}
+                    onChange={(design) =>
+                      update({
+                        design,
+                        note:
+                          design.blocks.find((b) => b.id === "message")?.text ??
+                          draft.note,
+                      })
+                    }
+                  />
+                </details>
+              </section>
+            )}
             <section className="panel">
               <p className="eyebrow">03 · A memory, a little personality</p>
               <label htmlFor="card-photo">
