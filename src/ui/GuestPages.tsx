@@ -4,7 +4,13 @@ import {
   designArtworkUrl,
   readDesignDraft,
 } from "./DesignEditor";
-import { validateDesign, withDesignGif } from "../modules/design/contracts";
+import {
+  validateDesign,
+  withDesignGif,
+  cardDesignWithNote,
+  createDesign,
+  applyTemplate,
+} from "../modules/design/contracts";
 import type { DesignDocument } from "../modules/design/contracts";
 import { AiCardComposer } from "./AiCardComposer";
 import { GifPicker } from "./GifPicker";
@@ -172,6 +178,8 @@ function GuestJourney({
   const [gifOpen, setGifOpen] = useState(false);
   const [playing, setPlaying] = useState(false);
   const [invitationPlaying, setInvitationPlaying] = useState(false);
+  const guestDesign =
+    step === "save-the-date" ? event.saveTheDate : event.invitation;
   const [suggestions, setSuggestions] = useState(false);
   const [aiOpen, setAiOpen] = useState(false);
   const [designCategory, setDesignCategory] = useState("All designs");
@@ -213,14 +221,14 @@ function GuestJourney({
     }
   }, [selected?.service, selected?.version]);
   useEffect(() => {
-    if (!event.invitation?.gif || reduced) {
+    if (!guestDesign?.gif || reduced) {
       setInvitationPlaying(false);
       return;
     }
     setInvitationPlaying(true);
     const stop = setTimeout(() => setInvitationPlaying(false), 4400);
     return () => clearTimeout(stop);
-  }, [event.invitation?.gif, reduced]);
+  }, [guestDesign?.gif, reduced]);
   useEffect(() => {
     if (!draft.gif || reduced) {
       setPlaying(false);
@@ -301,7 +309,10 @@ function GuestJourney({
       style: draft.style,
       artId: draft.style === "ai-art" ? draft.artId : undefined,
       design: draft.design
-        ? { ...draft.design, gif: data.flags.gifs ? draft.gif : undefined }
+        ? {
+            ...cardDesignWithNote(draft.design, draft.note.trim()),
+            gif: data.flags.gifs ? draft.gif : undefined,
+          }
         : undefined,
       photo: draft.photo,
       gif: data.flags.gifs ? draft.gif : undefined,
@@ -443,6 +454,52 @@ function GuestJourney({
       return false;
     }
   }
+  if (step === "save-the-date" && !["paused", "closed"].includes(state))
+    return event.saveTheDate ? (
+      <section className="save-the-date-guest">
+        <Heading eyebrow="A date to remember" title="Save the date." />
+        <DesignCanvas
+          value={event.saveTheDate}
+          artUrl={designArtworkUrl(event.saveTheDate, event.token)}
+          label="Your host’s save-the-date"
+          animate={invitationPlaying}
+        />
+        {event.saveTheDate.gif && (
+          <button
+            type="button"
+            className="text-link"
+            disabled={reduced}
+            onClick={() => setInvitationPlaying(!invitationPlaying)}
+          >
+            {invitationPlaying
+              ? "Pause save-the-date GIF"
+              : "Play save-the-date GIF"}
+          </button>
+        )}
+        <p>
+          {formatDate(event.date)}
+          {event.location ? " · " + event.location : ""}
+        </p>
+        <p>
+          Your host is making room for something special. Keep the date; your
+          invitation has all the details.
+        </p>
+        <Link className="primary" to={base}>
+          View event invitation ↗
+        </Link>
+        {state === "scheduled" && (
+          <p className="small">
+            Cards and gifts aren’t open yet. Your host will let you know when
+            they are.
+          </p>
+        )}
+      </section>
+    ) : (
+      <Empty title="Your save-the-date is not available.">
+        <p>Check with your host for the latest invitation.</p>
+        <Link to={base}>View event invitation</Link>
+      </Empty>
+    );
   if (["paused", "scheduled", "closed"].includes(state))
     return (
       <>
@@ -863,6 +920,36 @@ function GuestJourney({
               >
                 Use my saved card design
               </button>
+              {!draft.design && (
+                <button
+                  type="button"
+                  className="secondary full"
+                  onClick={() => {
+                    const design = createDesign(
+                      "card",
+                      event.type,
+                      draft.style === "ai-art" ? "botanical" : draft.style,
+                    );
+                    const filled = {
+                      ...design,
+                      blocks: design.blocks.map((b) =>
+                        b.id === "message"
+                          ? { ...b, text: draft.note }
+                          : b.id === "signature"
+                            ? {
+                                ...b,
+                                text:
+                                  "With love,\n" + (draft.name || "Your name"),
+                              }
+                            : b,
+                      ),
+                    };
+                    update({ design: withDesignGif(filled, draft.gif) });
+                  }}
+                >
+                  Edit text on this card
+                </button>
+              )}
               {draft.design && (
                 <button
                   type="button"
@@ -910,11 +997,7 @@ function GuestJourney({
                             style: design.id,
                             artId: undefined,
                             design: draft.design
-                              ? {
-                                  ...draft.design,
-                                  template: design.id,
-                                  artId: undefined,
-                                }
+                              ? applyTemplate(draft.design, design.id)
                               : undefined,
                           })
                         }
@@ -1032,7 +1115,11 @@ function GuestJourney({
                   <DesignEditor
                     value={draft.design}
                     allowGif={false}
-                    artUrl={designArtworkUrl(draft.design)}
+                    artUrl={
+                      draft.style === "ai-art" && draft.artId
+                        ? `/api/invitations/${encodeURIComponent(event.token)}/art/${draft.artId}`
+                        : designArtworkUrl(draft.design)
+                    }
                     onChange={(design) =>
                       update({
                         design,

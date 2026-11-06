@@ -14,7 +14,8 @@
     "api": "node server/index.mjs",
     "test:api": "node --test server/tests/*.test.mjs",
     "test:connected": "playwright test --config playwright.connected.config.ts",
-    "test:worker": "node --test worker/tests/*.test.mjs"
+    "test:worker": "node --test worker/tests/*.test.mjs",
+    "import:templates": "node scripts/import-stationery.mjs"
   },
   "dependencies": {
     "qrcode": "^1.5.4",

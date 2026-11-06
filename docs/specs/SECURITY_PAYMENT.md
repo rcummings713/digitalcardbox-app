@@ -1,6 +1,6 @@
 # Authentication and external gift rules
 
-The October MVP handles **gift directions**, not gift money. Cash App, Venmo or Zelle handle transfers outside TheDigitalCardBox. A host supplied handle, email or phone can still be personal information and must be protected. Neither a disclaimer nor a private repository makes a wrong destination harmless.
+The October MVP handles **gift directions**, not gift money. Cash App, Venmo, Zelle or PayPal handle transfers outside TheDigitalCardBox. A host supplied handle, email or phone can still be personal information and must be protected. Neither a disclaimer nor a private repository makes a wrong destination harmless.
 
 ## Authentication and authorization
 
@@ -12,7 +12,7 @@ The October MVP handles **gift directions**, not gift money. Cash App, Venmo or 
 
 ## Destination setup
 
-- Allowlist the three MVP service names and validate a structured identifier for each. Do not accept arbitrary outbound URLs.
+- Allowlist the supported service names (Cash App, Venmo, Zelle and the 5 November PayPal DEV extension) and validate a structured identifier for each. Do not accept arbitrary outbound URLs.
 - Require double-entry, an exact recipient display, host review in the actual payment service and explicit confirmation. Version each active route and retain an audit trail.
 - Any edit pauses only that service; an old destination version cannot be used for a new handoff. A disabled service disappears immediately.
 - A guest chooses one route and sees the full host-supplied identifier and service. The acknowledgment resets on a route switch or version change. The guest must confirm the recipient again **inside the external service** before sending.
@@ -32,3 +32,6 @@ An integrated checkout is a separate phase requiring written provider approval o
 ## Deployment credentials
 
 DEV, TEST and PROD use distinct Cloudflare account-owned API tokens restricted to their existing individual Worker with the Editor role, held as GitHub environment secrets. Keep the account ID as a non-secret environment variable. The current static UI needs no whole-account, domain-route, Pages, KV, R2, Containers or Workers CI policy. Do not use a broad template token as if it were project-isolated. Never expose deployment credentials in browser bundles, source files, command arguments or logs. Existing Cloudflare Git-connected builds must be disconnected before the GitHub production approval is treated as the sole automatic production path. New Workers, custom domains and future storage bindings require separately reviewed scopes under ADR 0006.
+
+
+5 November DEV: PayPal accepts a structured PayPal.Me handle and only a fixed HTTPS profile route; it uses all existing ownership/version/window/CSRF and acknowledgment checks. Current and snapshotted routing identifiers are application-encrypted using the existing key, with an idempotent upgrade of legacy plaintext. This is not full-database encryption or a production KMS/identity rollout. See STATIONERY_EDITOR.md and ADR 0011 for scope and rollback compatibility.

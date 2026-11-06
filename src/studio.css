@@ -215,9 +215,9 @@
 .design-gif {
   position: absolute;
   left: 32%;
-  top: 63%;
+  top: 65%;
   width: 36%;
-  height: 15%;
+  height: 14%;
   object-fit: contain;
   pointer-events: none;
 }
@@ -812,4 +812,140 @@ html[data-motion="reduce"] .little-star-cover {
 .design-text-layer:focus-visible {
   outline: 2px solid var(--design-ink);
   outline-offset: 1px;
+}
+
+/* Direct text editing, resize handles and finite motion, shared by cards and invites. */
+.design-artwork-layer {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+.design-inline-input {
+  resize: none;
+  border: 1px solid var(--design-ink);
+  background: var(--design-paper);
+  color: var(--design-ink);
+  outline: 2px solid var(--design-ink);
+  outline-offset: 2px;
+  min-height: 0;
+  box-shadow: none;
+  border-radius: 0;
+}
+.design-inline-input:focus {
+  border-color: var(--design-ink);
+}
+.design-resize-handle {
+  position: absolute;
+  z-index: 20;
+  width: 26px;
+  height: 26px;
+  min-height: 26px;
+  min-width: 26px;
+  padding: 0;
+  border: 1px solid var(--design-ink);
+  background: var(--design-paper);
+  color: var(--design-ink);
+  border-radius: 4px;
+  cursor: nwse-resize;
+  touch-action: none;
+  font-size: 15px;
+}
+.editor-text-style {
+  display: flex;
+  gap: 7px;
+  flex-wrap: wrap;
+  margin: 12px 0;
+}
+.editor-text-style button[aria-pressed="true"] {
+  border-color: var(--ink);
+  background: var(--pink-light);
+}
+.editor-text-style button {
+  min-width: 34px;
+}
+.design-type-action {
+  margin-top: 6px;
+}
+@keyframes dcb-motion-fade {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+@keyframes dcb-motion-rise {
+  from {
+    opacity: 0;
+    transform: translateY(15px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+@keyframes dcb-motion-zoom {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+@keyframes dcb-motion-drift {
+  0% {
+    opacity: 0;
+    transform: translateY(9px) rotate(-1deg);
+  }
+  65% {
+    opacity: 1;
+    transform: translateY(-2px) rotate(0.3deg);
+  }
+  100% {
+    opacity: 1;
+    transform: none;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .design-canvas * {
+    animation: none !important;
+  }
+}
+@media print {
+  .design-canvas * {
+    animation: none !important;
+    transform: none !important;
+    opacity: 1 !important;
+  }
+  .design-resize-handle,
+  .design-type-action {
+    display: none !important;
+  }
+}
+.save-the-date-guest {
+  max-width: 480px;
+  margin: 0 auto;
+  text-align: center;
+}
+.save-the-date-share .qr-card {
+  max-width: 230px;
+  margin: 20px auto 0;
+}
+@media (max-width: 600px) {
+  .studio-navigation {
+    gap: 16px;
+  }
+  .studio-navigation span {
+    display: none;
+  }
+}
+.design-text-layer {
+  font-synthesis: weight style;
+}
+.design-canvas .design-inline-input {
+  min-height: 0;
+  max-height: none;
+  padding: 1px 3px;
 }

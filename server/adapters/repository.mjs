@@ -42,6 +42,19 @@ export class ReviewRepository {
         this.transaction(() => this.db.exec(sql));
     });
     if (seed && !this.one("SELECT 1 FROM hosts LIMIT 1")) this.seed();
+    // The marker begins with a control character rejected by all request text
+    // validation, so a user identifier can never be mistaken for ciphertext.
+    this.transaction(() => {
+      for (const table of ["gift_destinations", "gift_intents"])
+        for (const row of this.all(`SELECT rowid,identifier FROM ${table}`)) {
+          if (!row.identifier.startsWith("\u0001DCB1:"))
+            this.run(
+              `UPDATE ${table} SET identifier=? WHERE rowid=?`,
+              this.sealIdentifier(row.identifier),
+              row.rowid,
+            );
+        }
+    });
   }
   now() {
     return this.clock().toISOString();
@@ -112,6 +125,9 @@ export class ReviewRepository {
       ...(row.invitation_json
         ? { invitation: JSON.parse(row.invitation_json) }
         : {}),
+      ...(row.save_the_date_json
+        ? { saveTheDate: JSON.parse(row.save_the_date_json) }
+        : {}),
       destinations: this.destinations(row.id).filter(
         (d) => !guest || (d.enabled && d.confirmed),
       ),
@@ -169,7 +185,7 @@ export class ReviewRepository {
   }
   createEvent(ownerId, value, id = randomUUID()) {
     this.run(
-      "INSERT INTO events (id,owner_id,title,hosts,type,date,timezone,location,welcome,status,cover,book_layout,created_at,invitation_json) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
+      "INSERT INTO events (id,owner_id,title,hosts,type,date,timezone,location,welcome,status,cover,book_layout,created_at,invitation_json,save_the_date_json) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
       id,
       ownerId,
       value.title,
@@ -184,9 +200,18 @@ export class ReviewRepository {
       value.bookLayout ?? "editorial",
       this.now(),
       value.invitation ? JSON.stringify(value.invitation) : null,
+      value.saveTheDate ? JSON.stringify(value.saveTheDate) : null,
     );
     this.newLink(id);
     return this.event(this.one("SELECT * FROM events WHERE id=?", id));
+  }
+  sealIdentifier(value) {
+    return "\u0001DCB1:" + this.encrypt(value);
+  }
+  openIdentifier(value) {
+    return value.startsWith("\u0001DCB1:")
+      ? this.decrypt(value.slice(6))
+      : value;
   }
   destinations(eventId) {
     return this.all(
@@ -195,7 +220,7 @@ export class ReviewRepository {
     ).map((row) => ({
       service: row.service,
       recipient: row.recipient,
-      identifier: row.identifier,
+      identifier: this.openIdentifier(row.identifier),
       version: row.version,
       enabled: !!row.enabled,
       confirmed: !!row.confirmed,
@@ -208,7 +233,7 @@ export class ReviewRepository {
       eventId,
       value.service,
       value.recipient,
-      value.identifier,
+      this.sealIdentifier(value.identifier),
       value.version,
       +value.enabled,
       +value.confirmed,
@@ -232,11 +257,14 @@ export class ReviewRepository {
     };
   }
   giftByRequest(guestId, requestKey) {
-    return this.one(
+    const row = this.one(
       "SELECT * FROM gift_intents WHERE guest_id=? AND request_key=?",
       guestId,
       requestKey,
     );
+    return row
+      ? { ...row, identifier: this.openIdentifier(row.identifier) }
+      : row;
   }
   insertGift(eventId, guestId, input, destination) {
     const id = randomUUID();
@@ -254,7 +282,7 @@ export class ReviewRepository {
       input.reference,
       destination.version,
       destination.recipient,
-      destination.identifier,
+      this.sealIdentifier(destination.identifier),
       +destination.previewOnly,
       this.now(),
     );
@@ -445,7 +473,7 @@ export class ReviewRepository {
   }
   updateEvent(id, value) {
     this.run(
-      "UPDATE events SET title=?,hosts=?,type=?,date=?,timezone=?,location=?,welcome=?,status=?,cover=?,book_layout=?,invitation_json=?,revision=revision+1 WHERE id=?",
+      "UPDATE events SET title=?,hosts=?,type=?,date=?,timezone=?,location=?,welcome=?,status=?,cover=?,book_layout=?,invitation_json=?,save_the_date_json=?,revision=revision+1 WHERE id=?",
       value.title,
       value.hosts,
       value.type,
@@ -457,6 +485,7 @@ export class ReviewRepository {
       value.cover,
       value.bookLayout,
       value.invitation ? JSON.stringify(value.invitation) : null,
+      value.saveTheDate ? JSON.stringify(value.saveTheDate) : null,
       id,
     );
   }

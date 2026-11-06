@@ -7,6 +7,7 @@ import migration1 from "../server/migrations/001-local-review.sql";
 import migration2 from "../server/migrations/002-gift-routing.sql";
 import migration3 from "../server/migrations/003-media-feedback.sql";
 import migration4 from "../server/migrations/004-design-studio.sql";
+import migration5 from "../server/migrations/005-stationery-paypal.sql";
 
 class DurableSqlite {
   constructor(storage) {
@@ -66,7 +67,13 @@ export class ReviewStore extends DurableObject {
       }
       this.repo = new ReviewRepository(new DurableSqlite(ctx.storage), {
         key: Buffer.from(key),
-        migrations: [migration1, migration2, migration3, migration4],
+        migrations: [
+          migration1,
+          migration2,
+          migration3,
+          migration4,
+          migration5,
+        ],
         transactionRunner: (work) => ctx.storage.transactionSync(work),
         passwordHasher: () => "00".repeat(64),
       });

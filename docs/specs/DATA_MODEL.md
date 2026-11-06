@@ -176,3 +176,8 @@ Integrated money requires a new approved ADR/provider contract before physical l
 ## 30 October 2026 design studio
 
 30 October DEV-only extension (ADR 0010): the SQLite review adapter adds events.invitation_json and cards.design_json plus private studio_sessions/studio_jobs in migration 004. The shared bounded document keeps exact personal text separate from generated artwork and rejects arbitrary URL/CSS/HTML inputs. Claimed studio artwork has an event FK and optional same-event guest FK. Anonymous studio identity is not a customer/event guest and creates no event; accepted content remains independent of its expiring studio session. These review tables do not install or replace the production PostgreSQL contract above. See INVITATION_STUDIO.md; production provisioning/policies/retention/backups remain open.
+
+
+## 5 November 2026 stationery update
+
+5 November DEV extension: optional `events.save_the_date_json` is separate from the formal invitation; both use bounded versioned invitation documents, the save-the-date carrying its explicit variant. Cards retain a single note and independent style metadata. Local/hosted DEV migration 005 admits PayPal without changing existing route versions or accepted records; application code seals legacy/current destination and intent identifiers with the existing key. This does not install the production PostgreSQL design. See STATIONERY_EDITOR.md and ADR 0011.

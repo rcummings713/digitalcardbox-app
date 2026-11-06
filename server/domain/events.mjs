@@ -87,6 +87,7 @@ const eventFields = [
   "status",
   "bookLayout",
   "invitation",
+  "saveTheDate",
 ];
 export function validateEvent(input, current, now) {
   keys(input, eventFields);
@@ -103,12 +104,23 @@ export function validateEvent(input, current, now) {
     cover: value.cover ?? "celebration",
     bookLayout: value.bookLayout ?? "editorial",
     invitation: null,
+    saveTheDate: null,
   };
   if (value.invitation != null) {
     try {
       result.invitation = validateDesign(value.invitation, "invitation");
     } catch {
       fail(422, "Choose a valid invitation design.");
+    }
+  }
+  if (result.invitation?.variant)
+    fail(422, "Save a save-the-date in its own event design.");
+  if (value.saveTheDate != null) {
+    try {
+      result.saveTheDate = validateDesign(value.saveTheDate, "invitation");
+      if (result.saveTheDate.variant !== "save-the-date") throw new Error();
+    } catch {
+      fail(422, "Choose a valid save-the-date design.");
     }
   }
   if (!eventTypes.includes(result.type))

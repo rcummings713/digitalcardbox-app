@@ -45,6 +45,16 @@ export const fontChoices = {
   sans: "Modern sans",
   script: "Handwritten",
 } as const;
+export const motionChoices = {
+  none: "Still",
+  fade: "Soft fade",
+  rise: "Gentle rise",
+  zoom: "Slow zoom",
+  stagger: "One after another",
+  drift: "Paper float",
+} as const;
+export type DesignMotion = keyof typeof motionChoices;
+export type DesignVariant = "save-the-date";
 export interface DesignBlock {
   id: string;
   label: string;
@@ -55,6 +65,11 @@ export interface DesignBlock {
   height: number;
   size: number;
   align: "left" | "center" | "right";
+  font?: keyof typeof fontChoices;
+  bold?: boolean;
+  italic?: boolean;
+  underline?: boolean;
+  motion?: DesignMotion;
 }
 export interface DesignDocument {
   version: 1;
@@ -66,6 +81,9 @@ export interface DesignDocument {
   blocks: DesignBlock[];
   gif?: string;
   artId?: string;
+  variant?: DesignVariant;
+  motion?: DesignMotion;
+  artworkMotion?: DesignMotion;
 }
 const plain = (v: unknown): v is Record<string, unknown> =>
   !!v && typeof v === "object" && !Array.isArray(v);
@@ -92,6 +110,9 @@ export function validateDesign(
       "blocks",
       "gif",
       "artId",
+      "variant",
+      "motion",
+      "artworkMotion",
     ])
   )
     return invalid();
@@ -123,6 +144,11 @@ export function validateDesign(
         "height",
         "size",
         "align",
+        "font",
+        "bold",
+        "italic",
+        "underline",
+        "motion",
       ]) ||
       typeof block.id !== "string" ||
       !/^[a-z0-9-]{1,40}$/.test(block.id) ||
@@ -132,6 +158,18 @@ export function validateDesign(
       typeof block.text !== "string" ||
       block.text.length > 5000 ||
       !["left", "center", "right"].includes(String(block.align))
+    )
+      return invalid();
+    if (
+      (block.font !== undefined &&
+        (typeof block.font !== "string" ||
+          !Object.hasOwn(fontChoices, block.font))) ||
+      (block.motion !== undefined &&
+        (typeof block.motion !== "string" ||
+          !Object.hasOwn(motionChoices, block.motion))) ||
+      ["bold", "italic", "underline"].some(
+        (key) => block[key] !== undefined && typeof block[key] !== "boolean",
+      )
     )
       return invalid();
     ids.add(block.id);
@@ -163,9 +201,22 @@ export function validateDesign(
       height: b.height,
       size: b.size,
       align: b.align,
+      ...(b.font ? { font: b.font } : {}),
+      ...(b.bold ? { bold: true } : {}),
+      ...(b.italic ? { italic: true } : {}),
+      ...(b.underline ? { underline: true } : {}),
+      ...(b.motion ? { motion: b.motion } : {}),
     };
   });
   if (
+    (value.variant !== undefined &&
+      (value.variant !== "save-the-date" || value.kind !== "invitation")) ||
+    ["motion", "artworkMotion"].some(
+      (key) =>
+        value[key] !== undefined &&
+        (typeof value[key] !== "string" ||
+          !Object.hasOwn(motionChoices, String(value[key]))),
+    ) ||
     length > 8000 ||
     (value.gif !== undefined &&
       (typeof value.gif !== "string" || !findGif(value.gif))) ||
@@ -183,10 +234,16 @@ export function validateDesign(
     blocks,
     ...(value.gif ? { gif: String(value.gif) } : {}),
     ...(value.artId ? { artId: String(value.artId) } : {}),
+    ...(value.variant ? { variant: "save-the-date" as const } : {}),
+    ...(value.motion ? { motion: value.motion as DesignMotion } : {}),
+    ...(value.artworkMotion
+      ? { artworkMotion: value.artworkMotion as DesignMotion }
+      : {}),
   };
 }
 export function templatePalette(id: TemplateId): DesignDocument["palette"] {
   const item = templates.find((template) => template.id === id)!;
+  if ("palette" in item) return item.palette;
   if (["little-star", "midnight", "graduation"].includes(id)) return "midnight";
   if (item.motif === "olive" || item.motif === "garden") return "sage";
   if (item.motif === "lavender" || item.motif === "orchid") return "lilac";
@@ -194,7 +251,7 @@ export function templatePalette(id: TemplateId): DesignDocument["palette"] {
   if (item.category === "Birthday") return "blush";
   return "ivory";
 }
-export function createDesign(
+function createBaseDesign(
   kind: DesignKind,
   occasion = "Wedding",
   template: TemplateId = "botanical",
@@ -310,7 +367,7 @@ export function createDesign(
           ],
   };
 }
-export const invitationTemplates = [
+const originalInvitationTemplates = [
   "botanical",
   "wedding-vows",
   "moon-baby",
@@ -330,8 +387,147 @@ export const invitationTemplates = [
 ]
   .filter((id) => templates.some((t) => t.id === id))
   .map((id) => templates.find((t) => t.id === id)!);
-export const draftKey = (kind: DesignKind) =>
-  "dcb-design-studio-" + kind + "-v1";
+export const invitationTemplates = [
+  ...originalInvitationTemplates,
+  ...templates.filter((t) => "layout" in t),
+];
+export const draftKey = (kind: DesignKind, variant?: DesignVariant) =>
+  "dcb-design-studio-" + (variant || kind) + "-v1";
+
+export function createDesign(
+  kind: DesignKind,
+  occasion = "Wedding",
+  template: TemplateId = "botanical",
+  variant?: DesignVariant,
+): DesignDocument {
+  let value = createBaseDesign(kind, occasion, template);
+  value = applyTemplate(value, template);
+  if (kind === "invitation" && variant === "save-the-date")
+    value = {
+      ...value,
+      variant,
+      blocks: value.blocks.map((b) =>
+        b.id === "heading"
+          ? { ...b, text: "Save the date" }
+          : b.id === "message"
+            ? {
+                ...b,
+                text: "Keep a little space for a beautiful day.\nYour invitation will follow.",
+              }
+            : b,
+      ),
+    };
+  return value;
+}
+export function applyTemplate(
+  value: DesignDocument,
+  template: TemplateId,
+): DesignDocument {
+  const item = templates.find((t) => t.id === template)!;
+  const base = createBaseDesign(value.kind, value.occasion, template);
+  const layout = "layout" in item ? item.layout : "portrait";
+  const positions: Record<string, number[]> =
+    value.kind === "invitation"
+      ? layout === "editorial"
+        ? {
+            heading: [10, 12, 80, 10, 16],
+            title: [10, 28, 80, 24, 34],
+            details: [10, 59, 80, 18, 17],
+            message: [10, 81, 80, 12, 15],
+          }
+        : layout === "arch"
+          ? {
+              heading: [16, 24, 68, 9, 16],
+              title: [16, 37, 68, 22, 30],
+              details: [17, 63, 66, 16, 16],
+              message: [17, 82, 66, 11, 15],
+            }
+          : layout === "postcard"
+            ? {
+                heading: [10, 13, 80, 10, 16],
+                title: [10, 29, 80, 22, 32],
+                details: [12, 58, 76, 18, 17],
+                message: [12, 80, 76, 13, 15],
+              }
+            : {}
+      : layout === "editorial"
+        ? {
+            heading: [10, 21, 80, 18, 32],
+            message: [10, 45, 80, 30, 19],
+            signature: [10, 81, 80, 12, 17],
+          }
+        : layout === "arch"
+          ? {
+              heading: [17, 30, 66, 16, 26],
+              message: [17, 49, 66, 27, 18],
+              signature: [17, 81, 66, 12, 17],
+            }
+          : layout === "postcard"
+            ? {
+                heading: [12, 24, 76, 17, 28],
+                message: [12, 46, 76, 29, 19],
+                signature: [12, 81, 76, 12, 17],
+              }
+            : {};
+  const next = {
+    ...value,
+    template,
+    palette: templatePalette(template),
+    artId: undefined,
+    blocks: value.blocks.map((b): DesignBlock => {
+      const imported =
+        "textLayouts" in item
+          ? item.textLayouts?.[value.kind]?.find((seed) => seed.id === b.id)
+          : undefined;
+      if (imported) return { ...imported, text: b.text };
+      const seed = base.blocks.find((seed) => seed.id === b.id);
+      if (!seed) return b;
+      const p = positions[b.id];
+      if (value.kind === "invitation") {
+        const index = ["heading", "title", "details", "message"].indexOf(b.id);
+        const ribbon = /ribbon|bow|pearls/.test(item.motif);
+        const y = ribbon ? [32, 44, 68, 85] : [26, 38, 64, 83];
+        const height = ribbon ? [8, 20, 13, 11] : [8, 22, 15, 11];
+        const size = [16, layout === "arch" ? 29 : 32, 16, 15];
+        if (index >= 0)
+          return {
+            ...b,
+            x: layout === "arch" ? 16 : 11,
+            y: y[index],
+            width: layout === "arch" ? 68 : 78,
+            height: height[index],
+            size: size[index],
+            align: layout === "editorial" ? "left" : "center",
+            ...(layout === "editorial" && b.id === "details"
+              ? { font: "sans" as const }
+              : {}),
+          };
+      }
+      return {
+        ...b,
+        ...(p
+          ? { x: p[0], y: p[1], width: p[2], height: p[3], size: p[4] }
+          : {
+              x: seed.x,
+              y: seed.y,
+              width: seed.width,
+              height: seed.height,
+              size: seed.size,
+            }),
+        ...(layout !== "portrait"
+          ? {
+              font: (b.id === "details"
+                ? "sans"
+                : "serif") as DesignBlock["font"],
+            }
+          : {}),
+      };
+    }),
+  };
+  return value.gif
+    ? withDesignGif({ ...next, gif: undefined }, value.gif)
+    : next;
+}
 
 export function withDesignGif(
   value: DesignDocument,
@@ -346,15 +542,15 @@ export function withDesignGif(
       const positions =
         value.kind === "invitation"
           ? {
-              heading: [10, 8, 15],
-              title: [22, 18, 28],
-              details: [45, 15, 15],
-              message: [80, 12, 15],
+              heading: [26, 8, 14],
+              title: [36, 16, 27],
+              details: [55, 10, 13],
+              message: [82, 10, 14],
             }
           : {
-              heading: [15, 14, 26],
-              message: [33, 27, 18],
-              signature: [80, 12, 18],
+              heading: [26, 12, 24],
+              message: [41, 20, 17],
+              signature: [82, 10, 17],
             };
       const position = positions[b.id as keyof typeof positions];
       return position
@@ -388,4 +584,11 @@ export function cardDesignWithNote(
       block.id === "message" ? { ...block, text: note } : block,
     ),
   };
+}
+
+export function designContinuation(search: string): string {
+  const choice = new URLSearchParams(search).get("design");
+  return choice === "invitation" || choice === "save-the-date"
+    ? "&design=" + choice
+    : "";
 }

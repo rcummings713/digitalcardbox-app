@@ -438,7 +438,7 @@ test("studio honors the existing global guest budget and combined image storage 
   assert.equal(f.media.status().usedToday, 1);
 });
 
-test("migration 004 upgrades an existing version-3 database and reruns without losing accepted notes or its encryption key", async (t) => {
+test("migrations 004–005 upgrade an existing version-3 database and reruns without losing accepted notes or its encryption key", async (t) => {
   const { mkdtemp, readFile, writeFile, rm } = await import("node:fs/promises");
   const { join } = await import("node:path");
   const { tmpdir } = await import("node:os");
@@ -484,7 +484,7 @@ test("migration 004 upgrades an existing version-3 database and reruns without l
         current
           .all("SELECT version FROM review_schema_versions ORDER BY version")
           .map((row) => row.version),
-        [1, 2, 3, 4],
+        [1, 2, 3, 4, 5],
       );
       assert.equal(
         current.card(current.one("SELECT * FROM cards WHERE id='legacy-card'"))

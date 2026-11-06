@@ -1,8 +1,10 @@
+import { importedTemplates } from "./imported-catalog.ts";
+import { stationeryTemplates } from "./stationery-catalog.ts";
 import { eventTypes } from "../events/occasions.ts";
 import { notoAnimations } from "./noto-catalog.ts";
 
 // Versioned card artwork and retained animations. IDs are shared by the UI and API.
-export const templates = [
+const originalTemplates = [
   {
     id: "little-star",
     name: "A Little Star",
@@ -263,6 +265,11 @@ export const templates = [
     accent: "#ba8172",
     category: "Thanks",
   },
+] as const;
+export const templates = [
+  ...originalTemplates,
+  ...stationeryTemplates,
+  ...importedTemplates,
 ] as const;
 export type TemplateId = (typeof templates)[number]["id"];
 const originalGifStore = [

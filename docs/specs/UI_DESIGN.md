@@ -239,3 +239,8 @@ alternative text and keyboard focus/close behavior remain available.
 ## 30 October 2026 design studio
 
 30 October 2026: Home now uses the owner’s Smart Event Planning / Seamless Gifting copy and one Every occasion dropdown with all 17 requested choices. The mobile comparison shows larger Before/After panels and a full-resolution pan view. Home cards open more slowly; the baby card right page contains the larger GIF only; carousel captions are screen-reader-only. Public /cards and /invitations use the reusable text-layer design studio, generic templates, bounded AI options and browser drafts. Invitation drafts carry through event setup and save to owned events before live sharing. Readable editors/full process copy/enlarged comparison may scroll on phones. See INVITATION_STUDIO.md and ADR 0010; #93–#96 are open / In Progress.
+
+
+## 5 November 2026 stationery update
+
+5 November: expanded original stationery, direct on-design plain-text typing (double-tap/Enter or explicit control), per-layer type/bold/italic/underline, resize/duplicate and complete local history. Finite page/art/text effects are previewable and honor still/reduced-motion/print. Public save-the-dates precede setup; host designs/shares them from an owned published card box, with a scheduled read-only guest route. PayPal.Me is the fourth host-configurable external service. Approved background imports carry source/license evidence and remain distinct from editable text. Actual Canva exports await an authorized connection; no proprietary editor or licensing permission is implied. See STATIONERY_EDITOR.md.

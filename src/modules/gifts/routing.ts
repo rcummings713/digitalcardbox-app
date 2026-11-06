@@ -22,6 +22,7 @@ export function validIdentifier(
   if (service === "Cash App")
     return /^\$[A-Za-z0-9]{1,20}$/.test(value) && /[A-Za-z]/.test(value);
   if (service === "Venmo") return /^@[A-Za-z0-9_-]{5,30}$/.test(value);
+  if (service === "PayPal") return /^[A-Za-z0-9]{1,20}$/.test(value);
   if (service === "Zelle")
     return (
       /^[^\s@<>]{1,64}@[^\s@<>]+\.[A-Za-z]{2,}$/.test(value) ||
@@ -36,6 +37,7 @@ export function fictionalIdentifier(identifier: string) {
       "$AlexMayaDesign",
       "@digitalcardbox-preview",
       "$CardBoxPreview",
+      "CardBoxPreview",
     ].includes(identifier) ||
     /@(?:.*\.)?(?:invalid|test|example)$/i.test(identifier)
   );
@@ -50,6 +52,7 @@ export function providerRoute(
   // private card text, invitation tokens, amounts or guest data leave this site.
   if (service === "Cash App") return "https://cash.app/" + identifier;
   if (service === "Venmo") return "https://venmo.com/u/" + identifier.slice(1);
+  if (service === "PayPal") return "https://paypal.me/" + identifier;
   return "https://www.zellepay.com/get-started";
 }
 export function reviewDestination(

@@ -56,6 +56,14 @@ function Shell() {
     content = <DesignStudio key="cards" kind="card" />;
   else if (path === "/invitations")
     content = <DesignStudio key="invitations" kind="invitation" />;
+  else if (path === "/save-the-dates")
+    content = (
+      <DesignStudio
+        key="save-the-dates"
+        kind="invitation"
+        variant="save-the-date"
+      />
+    );
   else if (path === "/workspace") content = <Workspace />;
   else if (path === "/workspace/new") content = <EventForm />;
   else if (path === "/workspace/account") content = <Account />;

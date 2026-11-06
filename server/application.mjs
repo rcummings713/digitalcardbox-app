@@ -1,3 +1,4 @@
+import { paymentServices } from "../src/modules/gifts/public.ts";
 import { storedCardDesign } from "../src/modules/design/contracts.ts";
 import {
   validIdentifier,
@@ -120,11 +121,15 @@ export class ReviewApplication {
     const host = this.requireHost(session);
     if (!this.repo.flags().newEvents) fail(409, "New card boxes are paused.");
     const value = validateEvent(input, null, this.repo.clock());
-    if (value.invitation?.gif && !this.repo.flags().gifs)
+    if (
+      (value.invitation?.gif || value.saveTheDate?.gif) &&
+      !this.repo.flags().gifs
+    )
       fail(409, "GIF selection is paused. Remove the animation before saving.");
     return this.repo.transaction(() => {
       const event = this.repo.createEvent(host.id, value);
       this.claimArtwork(value.invitation, { eventId: event.id }, studioToken);
+      this.claimArtwork(value.saveTheDate, { eventId: event.id }, studioToken);
       this.repo.audit(host.id, "Card box created.", event.id);
       return event;
     });
@@ -139,6 +144,9 @@ export class ReviewApplication {
         invitation: row.invitation_json
           ? JSON.parse(row.invitation_json)
           : null,
+        saveTheDate: row.save_the_date_json
+          ? JSON.parse(row.save_the_date_json)
+          : null,
       };
       const value = validateEvent(input, current, this.repo.clock());
       if (
@@ -150,7 +158,17 @@ export class ReviewApplication {
           409,
           "GIF selection is paused. Remove the animation before saving.",
         );
+      if (
+        value.saveTheDate?.gif &&
+        value.saveTheDate.gif !== current.saveTheDate?.gif &&
+        !this.repo.flags().gifs
+      )
+        fail(
+          409,
+          "GIF selection is paused. Remove the animation before saving.",
+        );
       this.claimArtwork(value.invitation, { eventId: id }, studioToken);
+      this.claimArtwork(value.saveTheDate, { eventId: id }, studioToken);
       this.repo.updateEvent(id, value);
       this.repo.audit(session.host.id, "Card box settings updated.", id);
       return this.repo.event(this.repo.ownedEvent(session.host.id, id));
@@ -291,7 +309,7 @@ export class ReviewApplication {
         "enabled",
         "version",
       ]);
-      if (!["Cash App", "Venmo", "Zelle"].includes(input.service))
+      if (!paymentServices.includes(input.service))
         fail(422, "Choose a supported service.");
       const previous = this.repo
         .destinations(id)

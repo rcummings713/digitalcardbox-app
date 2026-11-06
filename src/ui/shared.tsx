@@ -1,3 +1,4 @@
+import { TemplateCredit } from "./TemplateCredit";
 import { DesignCanvas, designArtworkUrl } from "./DesignEditor";
 import { TemplateArt } from "./TemplateArt";
 import type { OccasionCard } from "./KeepsakeCard";
@@ -256,7 +257,13 @@ export function Card({
         <DesignCanvas
           value={{ ...entry.design, gif: entry.gif }}
           animate={motion}
-          artUrl={designArtworkUrl(entry.design, guestToken, !guestToken)}
+          artUrl={
+            entry.style === "ai-art" && entry.artId
+              ? guestToken
+                ? `/api/invitations/${encodeURIComponent(guestToken)}/art/${entry.artId}`
+                : `/api/host/art/${entry.artId}`
+              : designArtworkUrl(entry.design, guestToken, !guestToken)
+          }
         />
         {entry.photo && (
           <img
@@ -286,6 +293,7 @@ export function Card({
           occasion={occasion}
           small={small}
         />
+        <TemplateCredit id={entry.style} />
         <GifCredit id={entry.gif} />
       </article>
     );
@@ -347,7 +355,13 @@ export function Card({
     </article>
   );
 }
-export function QR({ url }: { url: string }) {
+export function QR({
+  url,
+  label = "QR code for this event’s guest link",
+}: {
+  url: string;
+  label?: string;
+}) {
   const [src, setSrc] = useState("");
   const [error, setError] = useState(false);
   useEffect(() => {
@@ -374,12 +388,7 @@ export function QR({ url }: { url: string }) {
     <div className="qr-panel">
       {src ? (
         <>
-          <img
-            src={src}
-            width="224"
-            height="224"
-            alt="QR code for this event’s guest link"
-          />
+          <img src={src} width="224" height="224" alt={label} />
           <a
             className="text-link"
             href={src}

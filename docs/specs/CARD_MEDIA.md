@@ -144,3 +144,8 @@ Sources checked for this implementation: [OpenAI image generation](https://devel
 ## 30 October 2026 design studio
 
 30 October: public card/invitation AI previews reuse the same server-only key and provider helper; the global 20/day and combined 32 MiB limits are shared with guest artwork. Studio adds its own HttpOnly session/CSRF, two attempts per session/day, two studio attempts per IP/day, one in-flight request and private approved artwork reads/transactional claims. Generic cards and editable invitations work without a key. The provider input now additionally accepts only a card/invitation purpose; no arbitrary prompt or upload is added. See INVITATION_STUDIO.md. Key setup above is unchanged; no real paid requests are used by tests.
+
+
+## 5 November 2026 stationery update
+
+5 November: original stationery expands to 106 card and 95 invitation/save-the-date compositions. Text and page/art animations remain native bounded document data, not AI image text. AI backgrounds reuse the existing key, quotas and moderation; no paid request was made for this update. Owner-reviewed PNG/JPG background imports require worldwide retention/template/export rights, record sources/hashes and appear with credits; portable archives embed their selected bytes. No Canva assets ship without a real authorized eligible export. See STATIONERY_EDITOR.md.

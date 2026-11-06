@@ -1,3 +1,4 @@
+import { templates } from "../src/modules/media/catalog";
 import { test, expect } from "@playwright/test";
 import type { Page } from "@playwright/test";
 import AxeBuilder from "@axe-core/playwright";
@@ -246,6 +247,7 @@ test("public pages reflow on phones, keep exact About copy and Instagram, and pr
       "/how-it-works",
       "/cards",
       "/invitations",
+      "/save-the-dates",
       "/pricing",
       "/about",
       "/contact",
@@ -268,7 +270,15 @@ test("public pages reflow on phones, keep exact About copy and Instagram, and pr
       expect(size.pageWidth, route).toBeLessThanOrEqual(size.width);
       // Readable comparison panels, the full requested process copy and real editors
       // intentionally scroll; short informational tabs retain their compact layout.
-      if (!["/", "/cards", "/invitations", "/how-it-works"].includes(route))
+      if (
+        ![
+          "/",
+          "/cards",
+          "/invitations",
+          "/save-the-dates",
+          "/how-it-works",
+        ].includes(route)
+      )
         expect(size.pageHeight, route).toBeLessThanOrEqual(size.height);
       await expect(
         page.locator(
@@ -423,6 +433,8 @@ test("the development server never serves database files, keys or backend source
   const key = database.replace(/[^/]+$/, "review-link.key");
   for (const path of [
     "/server/index.mjs",
+    "/docs/licensing/template-imports.json",
+    "/planning/backlog.json",
     "/server/index.mjs?raw",
     "/worker/index.mjs",
     "/.dev.vars.example",
@@ -572,7 +584,7 @@ test("all four home cards open with matching GIFs and support carousel keyboard 
   await expect(page.getByRole("dialog")).not.toBeVisible();
 });
 
-test("guest can browse 26 templates and use the curated GIF store while AI awaits its private key", async ({
+test("guest can browse the expanded templates and use the curated GIF store while AI awaits its private key", async ({
   page,
 }) => {
   await login(page);
@@ -581,8 +593,12 @@ test("guest can browse 26 templates and use the curated GIF store while AI await
     .getByLabel("Guest invitation link")
     .inputValue();
   await page.goto(invitation + "/card");
-  await expect(page.locator('input[name="design"]')).toHaveCount(26);
-  await page.getByLabel("Browse 26 designs").selectOption("Wedding");
+  await expect(page.locator('input[name="design"]')).toHaveCount(
+    templates.length,
+  );
+  await page
+    .getByLabel(`Browse ${templates.length} designs`)
+    .selectOption("Wedding");
   await page.getByLabel("Orchid Atelier", { exact: true }).check();
   await expect(page.locator(".live-card .card-orchid")).toBeVisible();
   await page

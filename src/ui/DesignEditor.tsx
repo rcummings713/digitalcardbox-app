@@ -1,15 +1,21 @@
-import { useRef, useState } from "react";
+import { TemplateCredit } from "./TemplateCredit";
+import { useEffect, useRef, useState } from "react";
 import type { CSSProperties, PointerEvent } from "react";
 import {
   createDesign,
   fontChoices,
   palettes,
+  motionChoices,
+  draftKey,
+  withDesignGif,
   validateDesign,
 } from "../modules/design/contracts";
 import type {
   DesignBlock,
   DesignDocument,
   DesignKind,
+  DesignMotion,
+  DesignVariant,
 } from "../modules/design/contracts";
 import { findGif } from "../modules/media/catalog";
 import { TemplateArt } from "./TemplateArt";
@@ -33,6 +39,7 @@ export function DesignCanvas({
   selected,
   onSelect,
   onMove,
+  onText,
   animate = false,
   artUrl,
   label,
@@ -41,73 +48,136 @@ export function DesignCanvas({
   selected?: string;
   onSelect?: (id: string) => void;
   onMove?: (block: DesignBlock) => void;
+  onText?: (id: string, text: string) => void;
   animate?: boolean;
   artUrl?: string;
   label?: string;
 }) {
-  const frame = useRef<HTMLDivElement>(null);
-  const reduced = useReducedMotion();
+  const frame = useRef<HTMLDivElement>(null),
+    reduced = useReducedMotion();
   const drag = useRef<{
     block: DesignBlock;
     x: number;
     y: number;
+    resize: boolean;
     next?: DesignBlock;
+    moved?: boolean;
   } | null>(null);
-  const [moving, setMoving] = useState<DesignBlock | null>(null);
-  const [badArt, setBadArt] = useState<string>();
-  const palette = palettes[value.palette];
-  const gif = findGif(value.gif);
-  function start(event: PointerEvent<HTMLElement>, block: DesignBlock) {
+  const lastTap = useRef({ id: "", at: 0 });
+  const suppressClick = useRef(false),
+    cancelEdit = useRef(false);
+  const [moving, setMoving] = useState<DesignBlock | null>(null),
+    [editing, setEditing] = useState<{ id: string; text: string } | null>(null);
+  const [badArt, setBadArt] = useState<string>(),
+    [motionPlaying, setMotionPlaying] = useState(false),
+    [replay, setReplay] = useState(0);
+  const palette = palettes[value.palette],
+    gif = findGif(value.gif),
+    isEditable = !!onSelect;
+  const hasMotion = !!(
+    (value.motion && value.motion !== "none") ||
+    (value.artworkMotion && value.artworkMotion !== "none") ||
+    value.blocks.some((b) => b.motion && b.motion !== "none")
+  );
+  useEffect(() => {
+    if (!hasMotion || isEditable || reduced) {
+      setMotionPlaying(false);
+      return;
+    }
+    setMotionPlaying(true);
+    const timer = setTimeout(() => setMotionPlaying(false), 4400);
+    return () => clearTimeout(timer);
+  }, [hasMotion, isEditable, reduced, replay]);
+  function motionStyle(
+    preset: DesignMotion | undefined,
+    index = 0,
+  ): CSSProperties {
+    const choice = preset || value.motion || "none";
+    return motionPlaying && choice !== "none"
+      ? {
+          animationName: `dcb-motion-${choice === "stagger" ? "rise" : choice}`,
+          animationDuration: "1100ms",
+          animationTimingFunction: "cubic-bezier(.2,.7,.2,1)",
+          animationFillMode: "both",
+          animationDelay: `${value.motion === "stagger" || choice === "stagger" ? index * 160 : 0}ms`,
+        }
+      : {};
+  }
+  function start(
+    event: PointerEvent<HTMLElement>,
+    block: DesignBlock,
+    resize = false,
+  ) {
     if (!onMove || event.button !== 0) return;
     onSelect?.(block.id);
     event.currentTarget.setPointerCapture(event.pointerId);
-    drag.current = { block, x: event.clientX, y: event.clientY };
+    drag.current = { block, x: event.clientX, y: event.clientY, resize };
   }
   function move(event: PointerEvent<HTMLElement>) {
     const current = drag.current,
       box = frame.current?.getBoundingClientRect();
     if (!current || !box) return;
-    const next = {
-      ...current.block,
-      x:
-        Math.round(
-          Math.max(
-            3,
-            Math.min(
-              97 - current.block.width,
-              current.block.x + ((event.clientX - current.x) / box.width) * 100,
+    const dx = event.clientX - current.x,
+      dy = event.clientY - current.y;
+    current.moved = Math.hypot(dx, dy) > 3;
+    const round = (v: number) => Math.round(v * 10) / 10;
+    const b = current.block;
+    const next = current.resize
+      ? {
+          ...b,
+          width: round(
+            Math.max(30, Math.min(97 - b.x, b.width + (dx / box.width) * 100)),
+          ),
+          height: round(
+            Math.max(
+              8,
+              Math.min(70, 97 - b.y, b.height + (dy / box.height) * 100),
             ),
-          ) * 10,
-        ) / 10,
-      y:
-        Math.round(
-          Math.max(
-            3,
-            Math.min(
-              97 - current.block.height,
-              current.block.y +
-                ((event.clientY - current.y) / box.height) * 100,
-            ),
-          ) * 10,
-        ) / 10,
-    };
+          ),
+        }
+      : {
+          ...b,
+          x: round(
+            Math.max(3, Math.min(97 - b.width, b.x + (dx / box.width) * 100)),
+          ),
+          y: round(
+            Math.max(3, Math.min(97 - b.height, b.y + (dy / box.height) * 100)),
+          ),
+        };
     current.next = next;
     setMoving(next);
   }
   function finish() {
-    if (drag.current?.next) onMove?.(drag.current.next);
+    if (drag.current?.moved && drag.current.next) onMove?.(drag.current.next);
+    suppressClick.current = !!drag.current?.moved;
     drag.current = null;
     setMoving(null);
   }
+  function beginEdit(block: DesignBlock) {
+    if (!onText) return;
+    cancelEdit.current = false;
+    onSelect?.(block.id);
+    setEditing({ id: block.id, text: block.text });
+  }
+  function finishEdit() {
+    if (!cancelEdit.current && editing) {
+      const original = value.blocks.find((b) => b.id === editing.id);
+      if (original?.text !== editing.text) onText?.(editing.id, editing.text);
+    }
+    cancelEdit.current = false;
+    setEditing(null);
+  }
+  const selectedBlock = moving || value.blocks.find((b) => b.id === selected);
   return (
     <div className="design-presentation">
       <div
+        key={replay}
         ref={frame}
-        className={`design-canvas design-font-${value.font}${onSelect ? " is-editable" : ""}`}
+        className={`design-canvas design-font-${value.font}${isEditable ? " is-editable" : ""}`}
         role="group"
         aria-label={
           label ||
-          `${value.kind === "invitation" ? "Invitation" : "Card"} design preview`
+          `${value.variant ? "Save-the-date" : value.kind === "invitation" ? "Invitation" : "Card"} design preview`
         }
         style={
           {
@@ -117,17 +187,27 @@ export function DesignCanvas({
           } as CSSProperties
         }
       >
-        <TemplateArt id={value.template} accent={palette.accent} />
-        {artUrl && badArt !== artUrl && (
-          <img
-            className="design-ai-art"
-            src={artUrl}
-            alt="Personalized stationery artwork"
-            onError={() => setBadArt(artUrl)}
-          />
-        )}
-        {value.blocks.map((original) => {
+        <div
+          className="design-artwork-layer"
+          style={motionStyle(value.artworkMotion)}
+        >
+          <TemplateArt id={value.template} accent={palette.accent} />
+          {artUrl && badArt !== artUrl && (
+            <img
+              className="design-ai-art"
+              src={artUrl}
+              alt="Personalized stationery artwork"
+              onError={() => setBadArt(artUrl)}
+            />
+          )}
+        </div>
+        {value.blocks.map((original, index) => {
           const block = moving?.id === original.id ? moving : original;
+          const fonts = {
+            serif: "var(--font-heading)",
+            sans: "var(--font-body)",
+            script: "var(--font-script)",
+          };
           const style = {
             left: `${block.x}%`,
             top: `${block.y}%`,
@@ -135,8 +215,39 @@ export function DesignCanvas({
             height: `${block.height}%`,
             fontSize: `${block.size / 4}cqw`,
             textAlign: block.align,
+            ...(block.font ? { fontFamily: fonts[block.font] } : {}),
+            fontWeight: block.bold ? 700 : 400,
+            fontStyle: block.italic ? "italic" : "normal",
+            textDecoration: block.underline ? "underline" : "none",
+            ...motionStyle(block.motion, index),
           } as CSSProperties;
-          return onSelect ? (
+          return editing?.id === block.id ? (
+            <textarea
+              key={block.id}
+              className="design-text-layer design-inline-input"
+              style={style}
+              aria-label={`Type ${block.label} on design`}
+              autoFocus
+              rows={1}
+              maxLength={block.id === "message" ? 5000 : 200}
+              value={editing.text}
+              onChange={(e) =>
+                setEditing({ id: block.id, text: e.target.value })
+              }
+              onBlur={finishEdit}
+              onKeyDown={(event) => {
+                if (event.key === "Escape") {
+                  event.preventDefault();
+                  cancelEdit.current = true;
+                  setEditing(null);
+                }
+                if ((event.metaKey || event.ctrlKey) && event.key === "Enter") {
+                  event.preventDefault();
+                  event.currentTarget.blur();
+                }
+              }}
+            />
+          ) : onSelect ? (
             <button
               type="button"
               className={`design-text-layer${selected === block.id ? " is-selected" : ""}`}
@@ -144,7 +255,22 @@ export function DesignCanvas({
               style={style}
               aria-label={`Edit ${block.label}`}
               aria-pressed={selected === block.id}
-              onClick={() => onSelect(block.id)}
+              onClick={() => {
+                if (suppressClick.current) {
+                  suppressClick.current = false;
+                  return;
+                }
+                const now = performance.now();
+                if (
+                  onText &&
+                  lastTap.current.id === block.id &&
+                  now - lastTap.current.at < 450
+                )
+                  beginEdit(block);
+                else onSelect(block.id);
+                lastTap.current = { id: block.id, at: now };
+              }}
+              onDoubleClick={() => beginEdit(block)}
               onPointerDown={(event) => start(event, block)}
               onPointerMove={move}
               onPointerUp={finish}
@@ -153,6 +279,11 @@ export function DesignCanvas({
                 setMoving(null);
               }}
               onKeyDown={(event) => {
+                if (event.key === "Enter" || event.key === "F2") {
+                  event.preventDefault();
+                  beginEdit(block);
+                  return;
+                }
                 const directions: Record<string, [number, number]> = {
                   ArrowLeft: [-1, 0],
                   ArrowRight: [1, 0],
@@ -192,13 +323,97 @@ export function DesignCanvas({
         {gif && (
           <img
             className="design-gif"
-            src={animate && !reduced ? gif.url : gif.poster}
+            src={(animate || motionPlaying) && !reduced ? gif.url : gif.poster}
             alt={gif.name}
             width="180"
             height="120"
           />
         )}
+        {onMove && selectedBlock && !editing && (
+          <button
+            type="button"
+            className="design-resize-handle"
+            aria-label={`Resize ${selectedBlock.label}`}
+            style={{
+              left: `clamp(0px, calc(${selectedBlock.x + selectedBlock.width}% - 13px), calc(100% - 26px))`,
+              top: `clamp(0px, calc(${selectedBlock.y + selectedBlock.height}% - 13px), calc(100% - 26px))`,
+            }}
+            onPointerDown={(e) => start(e, selectedBlock, true)}
+            onPointerMove={move}
+            onPointerUp={finish}
+            onKeyDown={(e) => {
+              const delta =
+                e.key === "ArrowRight" || e.key === "ArrowDown"
+                  ? 1
+                  : e.key === "ArrowLeft" || e.key === "ArrowUp"
+                    ? -1
+                    : 0;
+              if (!delta) return;
+              e.preventDefault();
+              onMove({
+                ...selectedBlock,
+                ...(e.key === "ArrowLeft" || e.key === "ArrowRight"
+                  ? {
+                      width: Math.max(
+                        30,
+                        Math.min(
+                          97 - selectedBlock.x,
+                          selectedBlock.width + delta,
+                        ),
+                      ),
+                    }
+                  : {
+                      height: Math.max(
+                        8,
+                        Math.min(
+                          70,
+                          97 - selectedBlock.y,
+                          selectedBlock.height + delta,
+                        ),
+                      ),
+                    }),
+              });
+            }}
+          >
+            <span aria-hidden="true">↘</span>
+          </button>
+        )}
       </div>
+      {isEditable && selectedBlock && onText && (
+        <div>
+          <button
+            type="button"
+            className="text-link design-type-action"
+            disabled={!!editing}
+            onClick={() => beginEdit(selectedBlock)}
+          >
+            Type directly on design
+          </button>
+          {editing && (
+            <p className="small" role="status">
+              Tap outside the text to finish. Escape cancels; Control/Command +
+              Enter finishes.
+            </p>
+          )}
+        </div>
+      )}
+      {hasMotion && !isEditable && (
+        <button
+          type="button"
+          className="text-link"
+          disabled={reduced}
+          onClick={() =>
+            motionPlaying ? setMotionPlaying(false) : setReplay((r) => r + 1)
+          }
+        >
+          {reduced
+            ? "Animations off · reduced motion"
+            : motionPlaying
+              ? "Show still design"
+              : "Replay animation"}
+        </button>
+      )}
+      <TemplateCredit id={value.template} />
       <GifCredit id={value.gif} />
       {artUrl && badArt === artUrl && (
         <p className="small" role="status">
@@ -208,6 +423,7 @@ export function DesignCanvas({
     </div>
   );
 }
+
 export function DesignEditor({
   value,
   onChange,
@@ -219,7 +435,9 @@ export function DesignEditor({
   artUrl?: string;
   allowGif?: boolean;
 }) {
-  const [selected, setSelected] = useState(value.blocks[0].id);
+  const [selected, setSelected] = useState("");
+  const [preview, setPreview] = useState(false);
+  const seen = useRef(value);
   const [history, setHistory] = useState<DesignDocument[]>([]);
   const [future, setFuture] = useState<DesignDocument[]>([]);
   const [playing, setPlaying] = useState(false);
@@ -227,10 +445,22 @@ export function DesignEditor({
     () => matchMedia("(min-width: 901px)").matches,
   );
   const block = value.blocks.find((b) => b.id === selected) || value.blocks[0];
+  useEffect(() => {
+    if (JSON.stringify(seen.current) === JSON.stringify(value)) return;
+    const previous = seen.current;
+    seen.current = value;
+    setHistory((h) => [...h.slice(-29), previous]);
+    setFuture([]);
+  }, [value]);
+  function emit(next: DesignDocument) {
+    seen.current = next;
+    onChange(next);
+  }
   function commit(next: DesignDocument) {
+    if (JSON.stringify(next) === JSON.stringify(value)) return;
     setHistory((h) => [...h.slice(-29), value]);
     setFuture([]);
-    onChange(next);
+    emit(next);
   }
   function changeBlock(patch: Partial<DesignBlock>) {
     commit({
@@ -260,7 +490,7 @@ export function DesignEditor({
               const previous = history[history.length - 1];
               setFuture((f) => [value, ...f]);
               setHistory((h) => h.slice(0, -1));
-              onChange(previous);
+              emit(previous);
             }}
           >
             ↶ Undo
@@ -271,7 +501,7 @@ export function DesignEditor({
             disabled={!future.length}
             onClick={() => {
               setHistory((h) => [...h, value]);
-              onChange(future[0]);
+              emit(future[0]);
               setFuture((f) => f.slice(1));
             }}
           >
@@ -282,8 +512,32 @@ export function DesignEditor({
           type="button"
           className="text-link"
           onClick={() => {
-            if (window.confirm("Reset this layout? You can undo the reset."))
-              commit(createDesign(value.kind, value.occasion, value.template));
+            if (
+              window.confirm(
+                "Reset layout and typography? Your words and artwork stay. You can undo the reset.",
+              )
+            ) {
+              const base = createDesign(
+                value.kind,
+                value.occasion,
+                value.template,
+                value.variant,
+              );
+              const reset = {
+                ...value,
+                palette: base.palette,
+                font: base.font,
+                blocks: value.blocks.map((block) => {
+                  const seed = base.blocks.find((b) => b.id === block.id);
+                  return seed ? { ...seed, text: block.text } : block;
+                }),
+              };
+              commit(
+                value.gif
+                  ? withDesignGif({ ...reset, gif: undefined }, value.gif)
+                  : reset,
+              );
+            }
           }}
         >
           Reset layout
@@ -293,25 +547,48 @@ export function DesignEditor({
         <div className="editor-stage">
           <DesignCanvas
             value={value}
-            selected={block.id}
-            onSelect={(id) => {
-              setSelected(id);
-              setToolsOpen(true);
-            }}
-            onMove={(b) =>
+            selected={selected}
+            onSelect={
+              preview
+                ? undefined
+                : (id) => {
+                    setSelected(id);
+                    setToolsOpen(true);
+                  }
+            }
+            onText={(id, text) =>
               commit({
                 ...value,
-                blocks: value.blocks.map((item) =>
-                  item.id === b.id ? b : item,
+                blocks: value.blocks.map((b) =>
+                  b.id === id ? { ...b, text } : b,
                 ),
               })
+            }
+            onMove={
+              preview
+                ? undefined
+                : (b) =>
+                    commit({
+                      ...value,
+                      blocks: value.blocks.map((item) =>
+                        item.id === b.id ? b : item,
+                      ),
+                    })
             }
             artUrl={artUrl}
             animate={playing}
           />
           <p className="editor-hint">
-            Tap text to select it. Drag to move, or use the position controls.
+            Tap text to select. Double-tap or press Enter to type directly. Drag
+            to move; use the corner handle to resize.
           </p>
+          <button
+            type="button"
+            className="secondary editor-tools-toggle"
+            onClick={() => setPreview(!preview)}
+          >
+            {preview ? "Back to editing" : "Preview design"}
+          </button>
           <button
             type="button"
             className="secondary editor-tools-toggle"
@@ -334,7 +611,7 @@ export function DesignEditor({
         <div
           className="editor-inspector"
           id={`editor-tools-${value.kind}`}
-          hidden={!toolsOpen}
+          hidden={!toolsOpen || preview}
         >
           <div className="editor-field-row">
             <div>
@@ -365,10 +642,57 @@ export function DesignEditor({
                   commit({
                     ...value,
                     font: e.target.value as DesignDocument["font"],
+                    blocks: value.blocks.map((b) => ({
+                      ...b,
+                      font: undefined,
+                    })),
                   })
                 }
               >
                 {Object.entries(fontChoices).map(([id, name]) => (
+                  <option value={id} key={id}>
+                    {name}
+                  </option>
+                ))}
+              </select>
+            </div>
+          </div>
+          <div className="editor-field-row">
+            <div>
+              <label htmlFor={`page-motion-${value.kind}`}>
+                Page animation
+              </label>
+              <select
+                id={`page-motion-${value.kind}`}
+                value={value.motion || "none"}
+                onChange={(e) =>
+                  commit({ ...value, motion: e.target.value as DesignMotion })
+                }
+              >
+                {Object.entries(motionChoices).map(([id, name]) => (
+                  <option value={id} key={id}>
+                    {name}
+                  </option>
+                ))}
+              </select>
+            </div>
+            <div>
+              <label htmlFor={`art-motion-${value.kind}`}>
+                Artwork animation
+              </label>
+              <select
+                id={`art-motion-${value.kind}`}
+                value={value.artworkMotion || ""}
+                onChange={(e) =>
+                  commit({
+                    ...value,
+                    artworkMotion: (e.target.value || undefined) as
+                      DesignMotion | undefined,
+                  })
+                }
+              >
+                <option value="">Use page animation</option>
+                {Object.entries(motionChoices).map(([id, name]) => (
                   <option value={id} key={id}>
                     {name}
                   </option>
@@ -388,6 +712,99 @@ export function DesignEditor({
               </option>
             ))}
           </select>
+          <div className="editor-field-row">
+            <div>
+              <label htmlFor={`layer-font-${value.kind}`}>
+                Layer typography
+              </label>
+              <select
+                id={`layer-font-${value.kind}`}
+                value={block.font || ""}
+                onChange={(e) =>
+                  changeBlock({
+                    font: (e.target.value || undefined) as DesignBlock["font"],
+                  })
+                }
+              >
+                <option value="">Use design typography</option>
+                {Object.entries(fontChoices).map(([id, name]) => (
+                  <option value={id} key={id}>
+                    {name}
+                  </option>
+                ))}
+              </select>
+            </div>
+            <div>
+              <label htmlFor={`layer-motion-${value.kind}`}>
+                Text animation
+              </label>
+              <select
+                id={`layer-motion-${value.kind}`}
+                value={block.motion || ""}
+                onChange={(e) =>
+                  changeBlock({
+                    motion: (e.target.value || undefined) as
+                      DesignMotion | undefined,
+                  })
+                }
+              >
+                <option value="">Use page animation</option>
+                {Object.entries(motionChoices).map(([id, name]) => (
+                  <option value={id} key={id}>
+                    {name}
+                  </option>
+                ))}
+              </select>
+            </div>
+          </div>
+          <div
+            className="editor-text-style"
+            role="group"
+            aria-label="Text formatting"
+          >
+            {(
+              [
+                ["bold", "B", "Bold text"],
+                ["italic", "I", "Italic text"],
+                ["underline", "U", "Underline text"],
+              ] as const
+            ).map(([key, text, label]) => (
+              <button
+                type="button"
+                className="secondary"
+                key={key}
+                aria-label={label}
+                aria-pressed={!!block[key]}
+                onClick={() => changeBlock({ [key]: !block[key] })}
+              >
+                {text}
+              </button>
+            ))}
+            <button
+              type="button"
+              className="secondary"
+              disabled={value.blocks.length >= 6}
+              onClick={() => {
+                const id = "text-" + crypto.randomUUID().slice(0, 8);
+                commit({
+                  ...value,
+                  blocks: [
+                    ...value.blocks,
+                    {
+                      ...block,
+                      id,
+                      label: "Copied text",
+                      x: Math.min(97 - block.width, block.x + 2),
+                      y: Math.min(97 - block.height, block.y + 2),
+                    },
+                  ],
+                });
+                setSelected(id);
+              }}
+            >
+              Duplicate
+            </button>
+          </div>
           <label htmlFor={`layer-text-${value.kind}`}>{block.label}</label>
           <textarea
             id={`layer-text-${value.kind}`}
@@ -548,9 +965,12 @@ export function DesignEditor({
     </section>
   );
 }
-export function readDesignDraft(kind: DesignKind): DesignDocument | null {
+export function readDesignDraft(
+  kind: DesignKind,
+  variant?: DesignVariant,
+): DesignDocument | null {
   try {
-    const raw = localStorage.getItem("dcb-design-studio-" + kind + "-v1");
+    const raw = localStorage.getItem(draftKey(kind, variant));
     if (!raw) return null;
     return validateDesign(JSON.parse(raw), kind);
   } catch {

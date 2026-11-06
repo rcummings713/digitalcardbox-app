@@ -1,3 +1,4 @@
+import { StationeryArt } from "./StationeryArt";
 import { useId } from "react";
 import type { TemplateId } from "../modules/media/catalog";
 import { templates } from "../modules/media/catalog";
@@ -11,6 +12,32 @@ export function TemplateArt({
 }) {
   const gradient = useId();
   const design = templates.find((item) => item.id === id)!;
+  if ("artwork" in design)
+    return (
+      <svg
+        className="card-art template-art"
+        viewBox="0 0 400 520"
+        aria-hidden="true"
+      >
+        <image
+          href={design.artwork}
+          x="0"
+          y="0"
+          width="400"
+          height="520"
+          preserveAspectRatio="xMidYMid meet"
+        />
+      </svg>
+    );
+  if ("layout" in design)
+    return (
+      <StationeryArt
+        motif={design.motif}
+        layout={design.layout}
+        paper={design.paper}
+        accent={accent || design.accent}
+      />
+    );
   const motif = design.motif;
   const floral = [
     "flowers",
@@ -64,7 +91,7 @@ export function TemplateArt({
         [0, 1].map((corner) => (
           <g
             key={corner}
-            transform={corner ? "translate(400 520) rotate(180)" : undefined}
+            transform={corner ? "translate(450 585) rotate(180)" : undefined}
             stroke="currentColor"
             strokeWidth="1.4"
           >

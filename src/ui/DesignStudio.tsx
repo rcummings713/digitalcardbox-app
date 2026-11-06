@@ -4,12 +4,18 @@ import type { AiCardChoices } from "../modules/media/catalog";
 import { occasionChoices, eventTypes } from "../modules/events/occasions";
 import {
   createDesign,
+  applyTemplate,
+  validateDesign,
   withDesignGif,
   templatePalette,
   invitationTemplates,
   draftKey,
 } from "../modules/design/contracts";
-import type { DesignDocument, DesignKind } from "../modules/design/contracts";
+import type {
+  DesignDocument,
+  DesignKind,
+  DesignVariant,
+} from "../modules/design/contracts";
 import type { Occasion } from "./model";
 import { formatDate } from "./model";
 import {
@@ -18,13 +24,13 @@ import {
   designArtworkUrl,
   readDesignDraft,
 } from "./DesignEditor";
-import { Heading, Link, go } from "./shared";
+import { Heading, Link, go, download } from "./shared";
 import { GifPicker } from "./GifPicker";
 import { useStore } from "./state";
 import { request } from "./api";
 
-function seedInvitation(event: Occasion) {
-  const value = createDesign("invitation", event.type);
+function seedInvitation(event: Occasion, variant?: DesignVariant) {
+  const value = createDesign("invitation", event.type, "botanical", variant);
   value.blocks = value.blocks.map((b) =>
     b.id === "title"
       ? { ...b, text: event.title }
@@ -42,17 +48,23 @@ function seedInvitation(event: Occasion) {
 export function DesignStudio({
   kind,
   event,
+  variant,
 }: {
   kind: DesignKind;
   event?: Occasion;
+  variant?: DesignVariant;
 }) {
   const { configuration, data, actions, account, mode, busy, notify } =
     useStore();
   const requested =
     new URLSearchParams(location.search).get("occasion") || "Wedding";
   const [value, setValue] = useState<DesignDocument>(() => {
-    if (event) return event.invitation || seedInvitation(event);
-    const saved = readDesignDraft(kind);
+    if (event)
+      return (
+        (variant ? event.saveTheDate : event.invitation) ||
+        seedInvitation(event, variant)
+      );
+    const saved = readDesignDraft(kind, variant);
     if (saved)
       return new URLSearchParams(location.search).has("occasion") &&
         eventTypes.includes(requested)
@@ -61,6 +73,8 @@ export function DesignStudio({
     return createDesign(
       kind,
       eventTypes.includes(requested) ? requested : "Wedding",
+      "botanical",
+      variant,
     );
   });
   const [source, setSource] = useState<"ai" | "templates">(
@@ -68,6 +82,7 @@ export function DesignStudio({
   );
   const [libraryOpen, setLibraryOpen] = useState(false);
   const [category, setCategory] = useState("Recommended");
+  const [query, setQuery] = useState("");
   const [gifOpen, setGifOpen] = useState(false);
   const [storageError, setStorageError] = useState("");
   const [artError, setArtError] = useState("");
@@ -83,14 +98,14 @@ export function DesignStudio({
   });
   useEffect(() => {
     try {
-      localStorage.setItem(draftKey(kind), JSON.stringify(value));
+      localStorage.setItem(draftKey(kind, variant), JSON.stringify(value));
       setStorageError("");
     } catch {
       setStorageError(
         "Your browser could not save this draft. Keep this page open while you edit.",
       );
     }
-  }, [value, kind]);
+  }, [value, kind, variant]);
   function edit(next: DesignDocument) {
     setValue(next);
     setSaved(false);
@@ -128,7 +143,9 @@ export function DesignStudio({
       setGenerating(false);
     }
   }
-  const items = kind === "invitation" ? invitationTemplates : templates;
+  const items = [
+    ...(kind === "invitation" ? invitationTemplates : templates),
+  ].sort((a, b) => Number("layout" in b) - Number("layout" in a));
   const desiredCategory = /baby|gender/i.test(value.occasion)
     ? "Baby"
     : /wedding|engagement|bridal/i.test(value.occasion)
@@ -137,22 +154,30 @@ export function DesignStudio({
         ? "Graduation"
         : /birthday|sixteen|16|quince/i.test(value.occasion)
           ? "Birthday"
-          : "Everyday";
-  const filtered =
-    category === "All designs"
-      ? items
-      : items.filter(
-          (t) => t.category === desiredCategory || t.category === "Everyday",
-        );
+          : /wake|remembr|celebration of life/i.test(value.occasion)
+            ? "Remembrance"
+            : "Everyday";
+  const filtered = items.filter(
+    (t) =>
+      (category === "All designs" ||
+        t.category === desiredCategory ||
+        t.category === "Everyday") &&
+      `${t.name} ${t.description} ${t.category}`
+        .toLowerCase()
+        .includes(query.toLowerCase().trim()),
+  );
   async function saveToEvent() {
     if (!destination) return;
-    const result = await actions.updateEvent(destination, {
-      invitation: value,
-    });
+    const result = await actions.updateEvent(
+      destination,
+      variant ? { saveTheDate: value } : { invitation: value },
+    );
     if (result) {
       setSaved(true);
       notify(
-        "Your invitation design is saved to this card box. Publish the event to share it.",
+        "Your " +
+          (variant ? "save-the-date" : "invitation") +
+          " design is saved to this card box. Publish the event to share it.",
       );
       go(`/workspace/events/${destination}/share`);
     }
@@ -161,14 +186,22 @@ export function DesignStudio({
     <div className="studio-page">
       <Heading
         eyebrow={
-          kind === "card" ? "The card collection" : "The invitation collection"
+          kind === "card"
+            ? "The card collection"
+            : variant
+              ? "Save the date"
+              : "The invitation collection"
         }
         title={
           kind === "card"
             ? "Your words. Your kind of beautiful."
-            : event
-              ? "Design your invitation."
-              : "A beautiful beginning starts here."
+            : variant
+              ? event
+                ? "Design your save-the-date."
+                : "Make room for a beautiful day."
+              : event
+                ? "Design your invitation."
+                : "A beautiful beginning starts here."
         }
       >
         <p>
@@ -183,9 +216,12 @@ export function DesignStudio({
         </Link>
         <Link
           to="/invitations"
-          aria-current={kind === "invitation" ? "page" : undefined}
+          aria-current={kind === "invitation" && !variant ? "page" : undefined}
         >
           Invitations
+        </Link>
+        <Link to="/save-the-dates" aria-current={variant ? "page" : undefined}>
+          Save the dates
         </Link>
         <span>Design first. Decide later.</span>
       </div>
@@ -206,7 +242,9 @@ export function DesignStudio({
           <strong>
             {kind === "card"
               ? "Create your own card"
-              : "Create your own invitation"}
+              : variant
+                ? "Create your own save-the-date"
+                : "Create your own invitation"}
           </strong>
           <small>AI artwork. Your personal touch.</small>
         </button>
@@ -220,7 +258,11 @@ export function DesignStudio({
         >
           <span aria-hidden="true">✉</span>
           <strong>
-            {kind === "card" ? "Generic cards" : "Invitation templates"}
+            {kind === "card"
+              ? "Generic cards"
+              : variant
+                ? "Save-the-date templates"
+                : "Invitation templates"}
           </strong>
           <small>Thoughtfully designed. Ready to personalize.</small>
         </button>
@@ -374,20 +416,24 @@ export function DesignStudio({
                 <option>Recommended</option>
                 <option>All designs</option>
               </select>
+              <label htmlFor="template-search">Search templates</label>
+              <input
+                id="template-search"
+                type="search"
+                placeholder="Try botanical, disco, wedding…"
+                value={query}
+                onChange={(e) => setQuery(e.target.value)}
+              />
+              <p className="small">
+                {filtered.length} designs · personalize every text layer
+              </p>
               <div className="studio-template-grid">
                 {filtered.map((t) => (
                   <button
                     key={t.id}
                     type="button"
                     aria-pressed={value.template === t.id && !value.artId}
-                    onClick={() =>
-                      edit({
-                        ...value,
-                        template: t.id,
-                        palette: templatePalette(t.id),
-                        artId: undefined,
-                      })
-                    }
+                    onClick={() => edit(applyTemplate(value, t.id))}
                   >
                     <div
                       className="studio-template-mini"
@@ -396,7 +442,7 @@ export function DesignStudio({
                     >
                       <DesignCanvas
                         value={{
-                          ...createDesign(kind, value.occasion, t.id),
+                          ...createDesign(kind, value.occasion, t.id, variant),
                           palette: templatePalette(t.id),
                         }}
                       />
@@ -415,7 +461,11 @@ export function DesignStudio({
         artUrl={designArtworkUrl(
           value,
           undefined,
-          Boolean(event && event.invitation?.artId === value.artId),
+          Boolean(
+            event &&
+            (variant ? event.saveTheDate : event.invitation)?.artId ===
+              value.artId,
+          ),
         )}
       />
       <div className="studio-extras panel">
@@ -461,6 +511,74 @@ export function DesignStudio({
           {storageError}
         </p>
       )}
+      <details className="studio-file-tools panel">
+        <summary>Save or open an editable design file</summary>
+        <p className="small">
+          Keep a private copy of your text, layout and effects, or continue a
+          file exported by this editor. Artwork availability follows its
+          original library or private artwork access.
+        </p>
+        <button
+          type="button"
+          className="secondary"
+          onClick={() =>
+            download(
+              "TheDigitalCardBox-" + (variant || kind) + ".dcb.json",
+              JSON.stringify(
+                {
+                  format: "TheDigitalCardBox-editable-design",
+                  version: 1,
+                  design: value,
+                },
+                null,
+                2,
+              ),
+              "application/json",
+            )
+          }
+        >
+          Export editable design
+        </button>
+        <label htmlFor="import-editable-design">
+          Import editable design (.dcb.json)
+        </label>
+        <input
+          id="import-editable-design"
+          type="file"
+          accept=".json,application/json"
+          onChange={async (e) => {
+            const file = e.target.files?.[0];
+            if (!file) return;
+            try {
+              if (file.size > 120000)
+                throw new Error("Choose an editable design file below 120 KB.");
+              const parsed = JSON.parse(await file.text());
+              if (
+                parsed.format !== "TheDigitalCardBox-editable-design" ||
+                parsed.version !== 1
+              )
+                throw new Error(
+                  "Choose a file exported by this editor. A Canva image does not contain editable text layers.",
+                );
+              const next = validateDesign(parsed.design, kind);
+              if (next.variant !== variant)
+                throw new Error(
+                  "Open this file in its matching card, invitation or save-the-date studio.",
+                );
+              edit(next);
+              setStorageError("");
+              notify("Your editable design is ready.");
+            } catch (error) {
+              setStorageError(
+                error instanceof Error
+                  ? error.message
+                  : "This design could not be opened.",
+              );
+            }
+            e.target.value = "";
+          }}
+        />
+      </details>
       <section className="studio-finish panel">
         <div>
           <p className="eyebrow">
@@ -508,7 +626,7 @@ export function DesignStudio({
             )}
             <Link
               className="secondary"
-              to={`${account ? "/workspace/new" : "/start"}?occasion=${encodeURIComponent(value.occasion)}&design=invitation`}
+              to={`${account ? "/workspace/new" : "/start"}?occasion=${encodeURIComponent(value.occasion)}&design=${variant || "invitation"}`}
             >
               Create an event & card box ↗
             </Link>

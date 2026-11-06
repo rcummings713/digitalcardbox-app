@@ -1,3 +1,4 @@
+import { designContinuation } from "../modules/design/contracts";
 import { CardCarousel } from "./CardCarousel";
 import { useState } from "react";
 import type { FormEvent } from "react";
@@ -164,10 +165,7 @@ export function Start() {
             to={
               "/workspace/new?occasion=" +
               encodeURIComponent(occasion) +
-              (new URLSearchParams(location.search).get("design") ===
-              "invitation"
-                ? "&design=invitation"
-                : "")
+              designContinuation(location.search)
             }
             className="primary full"
           >

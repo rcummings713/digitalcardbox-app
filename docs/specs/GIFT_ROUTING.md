@@ -49,3 +49,8 @@ Official references checked for the implementation:
 - [Zelle app changes](https://www.zellepay.com/faq/ive-heard-theres-change-zeller-app-what-happening): standalone transfers ended; use a participating bank/credit union.
 - [Zelle bank finder](https://www.zellepay.com/get-started): official path for finding a participating bank.
 - [Venmo API status](https://venmo.com/docs/authentication): legacy Developer/Payouts APIs are retired for new businesses; profile navigation does not imply transaction-data access.
+
+
+## PayPal · 5 November 2026
+
+PayPal.Me joins host-confirmed external services. Store a handle of 1–20 ASCII letters/numbers, not an arbitrary URL/email. Double-entry and recipient review are required. The fixed profile URL is `https://paypal.me/HANDLE`, with no amount, memo, guest/private-card data or invitation token. Fictional CardBoxPreview remains internal; real navigation requires the existing host/guest review and latest route version. No PayPal API key/SDK or payment execution is needed. Current/snapshotted identifiers are now encrypted with the adapter’s unchanged key. See STATIONERY_EDITOR.md, ADR 0011, and [PayPal.Me help](https://www.paypal.com/us/cshelp/article/paypalme-frequently-asked-questions-help432).

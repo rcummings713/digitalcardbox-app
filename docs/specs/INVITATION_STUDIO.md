@@ -161,3 +161,8 @@ or promise permanent DEV retention. The owner reviews and closes issues manually
 Official implementation references checked 30 October 2026:
 [Image generation](https://developers.openai.com/api/docs/guides/image-generation),
 [Moderation](https://developers.openai.com/api/docs/guides/moderation).
+
+
+## 5 November 2026 stationery update
+
+5 November extension supersedes the collection/editor counts above: 106 original cards and 95 invitation/save-the-date designs, direct on-design typing, per-layer formatting, corner resizing/duplication, editable-file import/export and finite page/art/text motion. Save-the-dates are separate owned-event designs with private links/QR and scheduled read-only presentation. Approved background imports preserve their own provenance and export bytes. Actual Canva imports require an authorized eligible export. See STATIONERY_EDITOR.md and ADR 0011.

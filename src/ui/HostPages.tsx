@@ -1,3 +1,4 @@
+import { paymentServices } from "../modules/gifts/public";
 import { DesignStudio } from "./DesignStudio";
 import { readDesignDraft } from "./DesignEditor";
 import { cardArchive } from "../modules/media/archive";
@@ -128,25 +129,33 @@ export function EventForm({ event }: { event?: Occasion }) {
         (new URLSearchParams(location.search).get("design") === "invitation"
           ? readDesignDraft("invitation") || undefined
           : undefined),
+      saveTheDate:
+        event?.saveTheDate ||
+        (new URLSearchParams(location.search).get("design") === "save-the-date"
+          ? readDesignDraft("invitation", "save-the-date") || undefined
+          : undefined),
     };
-    if (!event && created.invitation) {
-      created.invitation = {
-        ...created.invitation,
-        occasion: created.type,
-        blocks: created.invitation.blocks.map((block) =>
-          block.id === "title"
-            ? { ...block, text: title }
-            : block.id === "details"
-              ? {
-                  ...block,
-                  text:
-                    formatDate(date) +
-                    (created.location ? "\n" + created.location : ""),
-                }
-              : block,
-        ),
-      };
-    }
+    if (!event)
+      for (const field of ["invitation", "saveTheDate"] as const) {
+        const design = created[field];
+        if (design)
+          created[field] = {
+            ...design,
+            occasion: created.type,
+            blocks: design.blocks.map((block) =>
+              block.id === "title"
+                ? { ...block, text: title }
+                : block.id === "details"
+                  ? {
+                      ...block,
+                      text:
+                        formatDate(date) +
+                        (created.location ? "\n" + created.location : ""),
+                    }
+                  : block,
+            ),
+          };
+      }
     const saved = await actions.saveEvent(created);
     if (!saved) return;
     notify(
@@ -155,7 +164,7 @@ export function EventForm({ event }: { event?: Occasion }) {
         : "Your card box is ready to make your own.",
     );
     go(
-      `/workspace/events/${saved.id}/${created.invitation ? "invitation" : "overview"}`,
+      `/workspace/events/${saved.id}/${created.saveTheDate && new URLSearchParams(location.search).get("design") === "save-the-date" ? "save-the-date" : created.invitation ? "invitation" : "overview"}`,
     );
   }
   if (!event && !data.flags.newEvents)
@@ -336,6 +345,7 @@ export function EventWorkspace({ id, tab }: { id: string; tab: string }) {
     ["overview", "Overview"],
     ["edit", "Event details"],
     ["invitation", "Design invitation"],
+    ["save-the-date", "Save the date"],
     ["share", "Invite & share"],
     ["cards", "Cards & notes"],
     ["gifts", "Gift matching"],
@@ -376,7 +386,14 @@ export function EventWorkspace({ id, tab }: { id: string; tab: string }) {
         ) : tab === "edit" ? (
           <EventForm event={event} />
         ) : tab === "invitation" ? (
-          <DesignStudio kind="invitation" event={event} />
+          <DesignStudio key="invitation" kind="invitation" event={event} />
+        ) : tab === "save-the-date" ? (
+          <DesignStudio
+            key="save-the-date"
+            kind="invitation"
+            variant="save-the-date"
+            event={event}
+          />
         ) : tab === "share" ? (
           <Share event={event} />
         ) : tab === "cards" ? (
@@ -595,6 +612,79 @@ function Share({ event }: { event: Occasion }) {
               </div>
             </div>
           </>
+        )}
+      </section>
+      <section className="panel save-the-date-share">
+        <h2>Save the date</h2>
+        <p>
+          Give your guests time to plan. Your save-the-date belongs to this
+          event and uses the same private, revocable invitation link.
+        </p>
+        <Link
+          className="text-link"
+          to={`/workspace/events/${event.id}/save-the-date`}
+        >
+          Design or edit your save-the-date ↗
+        </Link>
+        {event.saveTheDate && event.status === "published" ? (
+          <>
+            <label htmlFor="save-the-date-link">Save-the-date link</label>
+            <div className="input-action">
+              <input
+                id="save-the-date-link"
+                readOnly
+                value={url + "/save-the-date"}
+              />
+              <button
+                className="primary"
+                onClick={() => copy(url + "/save-the-date", notify)}
+              >
+                Copy save-the-date link
+              </button>
+            </div>
+            <div className="buttons">
+              <Link
+                className="secondary"
+                to={`/g/${event.token}/save-the-date`}
+              >
+                Preview save-the-date ↗
+              </Link>
+              <button
+                type="button"
+                className="secondary"
+                onClick={async () => {
+                  if (!navigator.share) {
+                    await copy(url + "/save-the-date", notify);
+                    return;
+                  }
+                  try {
+                    await navigator.share({
+                      title: event.title,
+                      text: `Save the date for ${event.title}.`,
+                      url: url + "/save-the-date",
+                    });
+                  } catch (error) {
+                    if (!(
+                      error instanceof DOMException &&
+                      error.name === "AbortError"
+                    ))
+                      notify("Copy the save-the-date link to share it.");
+                  }
+                }}
+              >
+                Share save-the-date
+              </button>
+            </div>
+            <QR
+              url={url + "/save-the-date"}
+              label="QR code for this event’s save-the-date"
+            />
+          </>
+        ) : (
+          <p className="small">
+            Save your design and publish the card box to share a live
+            save-the-date link and QR.
+          </p>
         )}
       </section>
     </>
@@ -1006,7 +1096,9 @@ function DestinationForm({
         }}
       />
       <label htmlFor={"identifier-" + destination.service}>
-        Exact account identifier
+        {destination.service === "PayPal"
+          ? "PayPal.Me handle (letters and numbers only)"
+          : "Exact account identifier"}
       </label>
       <input
         id={"identifier-" + destination.service}
@@ -1094,7 +1186,7 @@ function DestinationForm({
 }
 function EventSettings({ event }: { event: Occasion }) {
   const { actions, notify, busy } = useStore();
-  const services: Service[] = ["Venmo", "Cash App", "Zelle"];
+  const services: readonly Service[] = paymentServices;
   return (
     <>
       <Heading

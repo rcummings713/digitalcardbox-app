@@ -1,6 +1,8 @@
-import { findGif, gifCreditText } from "./catalog.ts";
+import { findGif, gifCreditText, templates } from "./catalog.ts";
 interface CardRecord {
   gif?: string;
+  style?: string;
+  design?: { template: string };
 }
 // A portable copy contains the actual selected media, never a provider URL alone.
 export async function cardArchive<T extends CardRecord>(
@@ -10,24 +12,34 @@ export async function cardArchive<T extends CardRecord>(
 ) {
   let total = 0;
   async function embed(path: string) {
-    if (!path.startsWith("/gifs/")) throw new Error("Unknown animation asset.");
+    if (
+      !path.startsWith("/gifs/") &&
+      !/^\/templates\/imported\/[a-z0-9-]+\.(png|jpg|webp)$/.test(path)
+    )
+      throw new Error("Unknown media asset.");
     const response = await fetcher(path, {
       credentials: "same-origin",
       signal: AbortSignal.timeout(15000),
     });
     if (!response.ok)
-      throw new Error("An animation could not be saved. Please try again.");
+      throw new Error("Media could not be saved. Please try again.");
     const mime = response.headers.get("Content-Type")?.split(";")[0];
     if (
       !mime ||
-      !["image/gif", "image/webp", "image/png", "image/svg+xml"].includes(mime)
+      ![
+        "image/gif",
+        "image/webp",
+        "image/png",
+        "image/jpeg",
+        "image/svg+xml",
+      ].includes(mime)
     )
-      throw new Error("An animation could not be saved. Please try again.");
+      throw new Error("Media could not be saved. Please try again.");
     const bytes = new Uint8Array(await response.arrayBuffer());
     total += bytes.length;
     if (bytes.length > 5000000 || total > 40000000)
       throw new Error(
-        "This animation archive is too large. Please export fewer cards.",
+        "This media archive is too large. Please export fewer cards.",
       );
     let binary = "";
     for (let offset = 0; offset < bytes.length; offset += 0x8000)
@@ -57,7 +69,21 @@ export async function cardArchive<T extends CardRecord>(
       poster: await embed(asset.poster),
     });
   }
+  const backgrounds = [];
+  for (const id of new Set(
+    cards.map((card) => card.design?.template || card.style),
+  )) {
+    const item = templates.find((t) => t.id === id);
+    if (item && "artwork" in item)
+      backgrounds.push({
+        id: item.id,
+        credit: item.credit,
+        licenseUrl: item.licenseUrl,
+        image: await embed(item.artwork),
+      });
+  }
   return {
+    ...(backgrounds.length ? { backgrounds } : {}),
     format: "TheDigitalCardBox-card-archive",
     version: 1,
     event: title,

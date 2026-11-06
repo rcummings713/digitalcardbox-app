@@ -77,3 +77,8 @@ owner to review and close. The repository/package/Worker identifiers remain
 
 
 Public **Cards (`/cards`)** and **Invitations (`/invitations`)** now offer browser-saved text-layer design tools before event setup. Invitations carry into the owned event workspace; publish the event to share its live private link/QR. Generic stationery works without an AI key; public AI uses the same bounded server configuration as guest artwork. See [studio guide and boundaries](docs/specs/INVITATION_STUDIO.md) and [AI key setup](docs/specs/CARD_MEDIA.md#enable-ai-on-the-isolated-dev-preview).
+
+
+## 5 November 2026 stationery update
+
+5 November DEV update: the shared editor now supports direct text entry, per-layer formatting, resize/duplicate controls and finite page/art/text motion. The original collection has 106 cards and 95 invitations/save-the-dates. Explore `/save-the-dates`; owned boxes expose a separate saved design and matching private QR. PayPal.Me joins the existing reviewed external gift services. See [the stationery/editor and import guide](docs/specs/STATIONERY_EDITOR.md) for approved artwork imports, actual Canva connection requirements, encryption migration and remaining production gates.

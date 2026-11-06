@@ -1,3 +1,4 @@
+import { designContinuation } from "../modules/design/contracts";
 import { useState } from "react";
 import { Link, go } from "./shared";
 import { useStore } from "./state";
@@ -141,9 +142,7 @@ export function ConnectedStart() {
       returnTo={
         "/workspace/new?occasion=" +
         encodeURIComponent(occasion) +
-        (new URLSearchParams(location.search).get("design") === "invitation"
-          ? "&design=invitation"
-          : "")
+        designContinuation(location.search)
       }
     />
   );

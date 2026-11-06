@@ -1,6 +1,6 @@
 {
   "project": "TheDigitalCardBox",
-  "version": "2026-10-30",
+  "version": "2026-11-05",
   "source": "Canonical product/security/database specs, ADRs, Word references and live GitHub backlog review",
   "note": "AI-drafted planning backlog. October working estimate is 180 hours after adding 24 explicit database-foundation hours. Replan capacity before committing to October 31; acceptance gates remain mandatory. Post-MVP candidates are not release commitments.",
   "epics": [
@@ -713,6 +713,21 @@
           ],
           "priority": "P1",
           "release": "Post-MVP",
+          "target_date": null,
+          "estimate_hours": null
+        },
+        {
+          "id": "DCB-E06-S12",
+          "title": "Offer reviewed external PayPal.Me gift handoffs",
+          "story": "As a host, I want to enable my exact PayPal.Me recipient alongside the other external services so guests can choose PayPal.",
+          "acceptance": [
+            "Validate a structured alphanumeric PayPal.Me handle up to 20 characters; require double entry, host review, confirmation and current destination version. Encrypt persisted identifiers.",
+            "Guests review the full recipient and handle, acknowledge checking inside PayPal and receive only an allowlisted HTTPS paypal.me profile route, with no amount/memo/token/private note in the outbound URL.",
+            "Fictional recipients stay internal previews; destination changes/switches invalidate acknowledgment. Preserve CSRF, ownership, revocation, flags and event-window checks; a handoff remains unconfirmed. No payment SDK, money transfer or verified-payment claim.",
+            "Upgrade existing DEV destination records without changing ciphertext, versions, history, accepted cards or encryption key; existing services continue to work."
+          ],
+          "priority": "P1",
+          "release": "UI design review",
           "target_date": null,
           "estimate_hours": null
         }
@@ -1846,6 +1861,34 @@
             "Persistent session/IP caps, global shared daily cap with guest AI, atomic reservations, deduplication, one active request and combined storage ceiling. Failed/ambiguous attempts are not automatically retried.",
             "Artwork remains private until bound to its owned event or current guest submission; authorization is rechecked after generation and on every image read.",
             "Keep manual editing/templates available without an API key; document server-only key setup, known preview/session lifetime and remaining production controls."
+          ],
+          "priority": "P1",
+          "release": "UI design review",
+          "target_date": null,
+          "estimate_hours": null
+        },
+        {
+          "id": "DCB-E20-S04",
+          "title": "Create and share event-bound save-the-dates",
+          "story": "As a host, I want an editable save-the-date tied to my card box so guests can reserve the date before the invitation and contribution window open.",
+          "acceptance": [
+            "Public save-the-date studio reuses templates, AI backgrounds, inline editing, formatting, GIFs and finite motion, with a separate browser draft.",
+            "Persist a separate versioned save-the-date document on the owned event; initial setup binds the actual title/date/venue. Preserve existing invitation/card records.",
+            "Sharing requires an owned published card box and uses its opaque revocable link with /save-the-date and an actual matching QR. Scheduled events may show the save-the-date without enabling early contributions; paused/closed/revoked states remain enforced."
+          ],
+          "priority": "P1",
+          "release": "UI design review",
+          "target_date": null,
+          "estimate_hours": null
+        },
+        {
+          "id": "DCB-E20-S05",
+          "title": "Animate card and invitation layers accessibly",
+          "story": "As a creator, I want page, artwork and text entrance effects so my cards and invitations feel expressive when opened.",
+          "acceptance": [
+            "Allowlisted finite fade/rise/zoom/stagger/float effects can be selected at page, text and artwork levels, previewed and persisted with cards/invitations/save-the-dates.",
+            "Native editable text stays readable and independent of decorative art. Pause shows the complete still design; reduced motion and print show static content. No flashing or infinite automatic motion.",
+            "Verify direct text editing, movement/resize, mixed typography, formatting, layers and undo/redo remain usable on touch and keyboard."
           ],
           "priority": "P1",
           "release": "UI design review",

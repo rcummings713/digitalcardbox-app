@@ -106,3 +106,8 @@ selected bytes and credits. No new remote media endpoint is introduced.
 ## 30 October 2026 design studio
 
 30 October studio extension: see [INVITATION_STUDIO.md](INVITATION_STUDIO.md). GET /api/studio/session issues a seven-day anonymous studio cookie/CSRF without an event. POST /api/studio/art accepts kind plus four bounded choices/retry key under shared quotas. Studio, owning-host and invitation-scoped artwork reads are private. Event create/update optionally accepts a versioned invitation document; card submission optionally accepts a versioned design. Both validate bounded layout fields and claim only approved owned artwork inside the save transaction. Existing CSRF, ownership, revision, guest/window, retry, consent and payment-handoff rules remain authoritative. Migration 004 is additive and DEV/local only.
+
+
+## 5 November 2026 stationery update
+
+5 November: event payloads accept a separate `saveTheDate` invitation-kind document with `variant: "save-the-date"`; guest responses carry it only within the existing event/link scope. Named style/motion fields remain bounded JSON; card main text still has one authoritative note. Migration 005 adds the document column and PayPal destination service. The adapter now encrypts structured destination/intent identifiers with its existing key and transparently upgrades old plaintext without changing route versions. PayPal uses existing destination and gift-intent endpoints; no transfer endpoint or new provider key. See STATIONERY_EDITOR.md.

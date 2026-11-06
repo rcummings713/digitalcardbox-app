@@ -281,6 +281,11 @@ Release: October 2026 private MVP and follow-on. Guests choose among host-confir
   - If an approved integration exists, design server-owned event/card/reference mapping with authenticated provider evidence, idempotency, ambiguous-match handling, correction and audit; a browser callback or guest report is not evidence.
   - Retain known name, payment-app alias, optional amount/reference and manual host receipt review as the fallback. Do not collect credentials, financial screenshots or infer receipt from names alone.
   - Get owner/provider approval before expanding from external directions to integrated payment processing; keep verified provider state separate from host-confirmed state.
+- **DCB-E06-S12 Offer reviewed external PayPal.Me gift handoffs** — UI design review. As a host, I want to enable my exact PayPal.Me recipient alongside the other external services so guests can choose PayPal.
+  - Validate a structured alphanumeric PayPal.Me handle up to 20 characters; require double entry, host review, confirmation and current destination version. Encrypt persisted identifiers.
+  - Guests review the full recipient and handle, acknowledge checking inside PayPal and receive only an allowlisted HTTPS paypal.me profile route, with no amount/memo/token/private note in the outbound URL.
+  - Fictional recipients stay internal previews; destination changes/switches invalidate acknowledgment. Preserve CSRF, ownership, revocation, flags and event-window checks; a handoff remains unconfirmed. No payment SDK, money transfer or verified-payment claim.
+  - Upgrade existing DEV destination records without changing ciphertext, versions, history, accepted cards or encryption key; existing services continue to work.
 
 ### DCB-E07 Host dashboard, CardVault and event book
 
@@ -624,3 +629,11 @@ Release: UI design review. Prospective hosts can design invitations before creat
   - Persistent session/IP caps, global shared daily cap with guest AI, atomic reservations, deduplication, one active request and combined storage ceiling. Failed/ambiguous attempts are not automatically retried.
   - Artwork remains private until bound to its owned event or current guest submission; authorization is rechecked after generation and on every image read.
   - Keep manual editing/templates available without an API key; document server-only key setup, known preview/session lifetime and remaining production controls.
+- **DCB-E20-S04 Create and share event-bound save-the-dates** — UI design review. As a host, I want an editable save-the-date tied to my card box so guests can reserve the date before the invitation and contribution window open.
+  - Public save-the-date studio reuses templates, AI backgrounds, inline editing, formatting, GIFs and finite motion, with a separate browser draft.
+  - Persist a separate versioned save-the-date document on the owned event; initial setup binds the actual title/date/venue. Preserve existing invitation/card records.
+  - Sharing requires an owned published card box and uses its opaque revocable link with /save-the-date and an actual matching QR. Scheduled events may show the save-the-date without enabling early contributions; paused/closed/revoked states remain enforced.
+- **DCB-E20-S05 Animate card and invitation layers accessibly** — UI design review. As a creator, I want page, artwork and text entrance effects so my cards and invitations feel expressive when opened.
+  - Allowlisted finite fade/rise/zoom/stagger/float effects can be selected at page, text and artwork levels, previewed and persisted with cards/invitations/save-the-dates.
+  - Native editable text stays readable and independent of decorative art. Pause shows the complete still design; reduced motion and print show static content. No flashing or infinite automatic motion.
+  - Verify direct text editing, movement/resize, mixed typography, formatting, layers and undo/redo remain usable on touch and keyboard.

@@ -31,6 +31,7 @@ export interface Occasion {
   bookLayout?: "editorial" | "collage";
   destinations: Destination[];
   invitation?: DesignDocument;
+  saveTheDate?: DesignDocument;
 }
 export interface Entry {
   id: string;
