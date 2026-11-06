@@ -77,6 +77,7 @@ export function planImport(manifestFile, root = process.cwd()) {
     if (
       ![
         "Wedding",
+        "Celebration",
         "Baby",
         "Birthday",
         "Graduation",
@@ -87,6 +88,17 @@ export function planImport(manifestFile, root = process.cwd()) {
       !Object.hasOwn(palettes, entry.palette)
     )
       throw new Error("Choose a known category and palette.");
+    if (entry.kinds !== undefined &&
+        (!Array.isArray(entry.kinds) || !entry.kinds.length ||
+         entry.kinds.length > 2 || new Set(entry.kinds).size !== entry.kinds.length ||
+         entry.kinds.some((kind) => !["card", "invitation"].includes(kind))))
+      throw new Error("Choose supported template kinds.");
+    if (entry.colors !== undefined &&
+        (!entry.colors || typeof entry.colors !== "object" ||
+         Object.keys(entry.colors).sort().join() !== "accent,ink,paper" ||
+         Object.values(entry.colors).some((color) =>
+           typeof color !== "string" || !/^#[a-f0-9]{6}$/i.test(color))))
+      throw new Error("Use three six-digit template colors.");
     const sourceUrl = url(entry.sourceUrl),
       licenseUrl = url(entry.licenseUrl);
     if (
@@ -163,7 +175,7 @@ export function planImport(manifestFile, root = process.cwd()) {
       );
     const hash = createHash("sha256").update(bytes).digest("hex"),
       relative = `/templates/imported/${id}-${hash.slice(0, 10)}.${extension}`,
-      palette = palettes[entry.palette];
+      palette = entry.colors || palettes[entry.palette];
     const textLayouts = {};
     for (const kind of ["card", "invitation"])
       if (entry.textLayouts?.[kind]) {
@@ -180,11 +192,10 @@ export function planImport(manifestFile, root = process.cwd()) {
               ? ["heading", "message", "signature"]
               : ["heading", "title", "details", "message"];
         if (
-          design.blocks.some((b) => !allowed.includes(b.id)) ||
           !allowed.every((id) => design.blocks.some((b) => b.id === id))
         )
           throw new Error(
-            "Map text layouts to the editor’s standard text-layer IDs.",
+            "Include the editor’s standard text-layer IDs; at most six validated layers.",
           );
         textLayouts[kind] = design.blocks;
       }
@@ -206,6 +217,7 @@ export function planImport(manifestFile, root = process.cwd()) {
       credit: `${name} · ${creator} · ${entry.grant}`,
       licenseUrl,
       sourceUrl,
+      ...(entry.kinds ? { kinds: entry.kinds } : {}),
       ...(Object.keys(textLayouts).length ? { textLayouts } : {}),
     });
     records.push({

@@ -6,10 +6,10 @@
 
 `/cards` and `/invitations` are public design tools. Neither creates a host,
 event, card box, guest link or username on entry. The first start option offers
-AI artwork; the second opens the generic card or invitation templates. All 26
-card designs remain available. Invitations use a curated subset of those native
-stationery motifs with separately editable opening, title, details and personal
-invitation text. An occasion changes recommendations without restricting the
+AI artwork; the second opens the generic card or invitation templates. The current catalog has 106
+greeting-card designs and 195 invitation/save-the-date choices, including the owner’s
+one-time 100-design Canva collection. Invitations have separately editable
+opening, title, details, RSVP and optional occasion/message text. An occasion changes recommendations without restricting the
 full collection. The single home dropdown includes all 17 requested occasions,
 including engagement, baptism, Sweet 16, quinceañera and Bar Mitzvah, while
 existing additional host event choices remain supported. Only Wedding receives

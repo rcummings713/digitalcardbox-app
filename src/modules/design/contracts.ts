@@ -402,22 +402,48 @@ export function createDesign(
 ): DesignDocument {
   let value = createBaseDesign(kind, occasion, template);
   value = applyTemplate(value, template);
+  const item = templates.find((item) => item.id === template)!;
+  const recipe = "textLayouts" in item ? item.textLayouts?.[kind] : undefined;
+  if (recipe) value = { ...value, blocks: recipe.map((block) => ({ ...block })) };
   if (kind === "invitation" && variant === "save-the-date")
     value = {
       ...value,
       variant,
       blocks: value.blocks.map((b) =>
         b.id === "heading"
-          ? { ...b, text: "Save the date" }
+          ? {
+              ...b,
+              text: "Save the date",
+            }
           : b.id === "message"
             ? {
                 ...b,
-                text: "Keep a little space for a beautiful day.\nYour invitation will follow.",
+                text: recipe
+                  ? "Invitation to follow."
+                  : "Keep a little space for a beautiful day.\nYour invitation will follow.",
               }
             : b,
       ),
     };
-  return value;
+  return recipe && variant ? fitAnnouncement(value) : value;
+}
+function fitAnnouncement(value: DesignDocument): DesignDocument {
+  const titleY = value.blocks.find((block) => block.id === "title")?.y || 40;
+  return {
+    ...value,
+    blocks: value.blocks.map((block) =>
+      block.id === "heading"
+        ? {
+            ...block,
+            size: Math.min(block.size, 22),
+            height: 12,
+            y: Math.max(3, Math.min(block.y, titleY - 14)),
+          }
+        : block.id === "message"
+          ? { ...block, label: "Invitation note", size: Math.min(block.size, 14) }
+          : block,
+    ),
+  };
 }
 export function applyTemplate(
   value: DesignDocument,
@@ -425,6 +451,12 @@ export function applyTemplate(
 ): DesignDocument {
   const item = templates.find((t) => t.id === template)!;
   const base = createBaseDesign(value.kind, value.occasion, template);
+  const previous = templates.find((item) => item.id === value.template)!;
+  const previousRecipe =
+    "textLayouts" in previous ? previous.textLayouts?.[value.kind] : undefined;
+  const recipe = "textLayouts" in item ? item.textLayouts?.[value.kind] : undefined;
+  const previousBase = createBaseDesign(value.kind, value.occasion, value.template);
+
   const layout = "layout" in item ? item.layout : "portrait";
   const positions: Record<string, number[]> =
     value.kind === "invitation"
@@ -474,12 +506,27 @@ export function applyTemplate(
     template,
     palette: templatePalette(template),
     artId: undefined,
-    blocks: value.blocks.map((b): DesignBlock => {
+    blocks: value.blocks
+      .filter((block) => {
+        const original = previousRecipe?.find((seed) => seed.id === block.id);
+        return (
+          !original || original.text !== block.text ||
+          (recipe || base.blocks).some((seed) => seed.id === block.id)
+        );
+      })
+      .map((b): DesignBlock => {
       const imported =
         "textLayouts" in item
           ? item.textLayouts?.[value.kind]?.find((seed) => seed.id === b.id)
           : undefined;
-      if (imported) return { ...imported, text: b.text };
+      if (imported) {
+        const original = previousRecipe?.find((seed) => seed.id === b.id) ||
+          previousBase.blocks.find((seed) => seed.id === b.id);
+        const unchangedAnnouncement = value.variant === "save-the-date" && b.id === "message" &&
+          b.text === "Keep a little space for a beautiful day.\nYour invitation will follow.";
+        return { ...imported, text: unchangedAnnouncement ? "Invitation to follow." :
+          b.text === original?.text ? imported.text : b.text };
+      }
       const seed = base.blocks.find((seed) => seed.id === b.id);
       if (!seed) return b;
       const p = positions[b.id];
@@ -524,9 +571,19 @@ export function applyTemplate(
       };
     }),
   };
+  if (recipe) {
+    const missing = recipe.filter(
+      (seed) => !next.blocks.some((block) => block.id === seed.id),
+    );
+    next.blocks = [
+      ...next.blocks,
+      ...missing.slice(0, 6 - next.blocks.length).map((block) => ({ ...block })),
+    ];
+  }
+  const fitted = value.variant && recipe ? fitAnnouncement(next) : next;
   return value.gif
-    ? withDesignGif({ ...next, gif: undefined }, value.gif)
-    : next;
+    ? withDesignGif({ ...fitted, gif: undefined }, value.gif)
+    : fitted;
 }
 
 export function withDesignGif(

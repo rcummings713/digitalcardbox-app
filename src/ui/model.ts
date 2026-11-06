@@ -1,5 +1,5 @@
 import type { DesignDocument } from "../modules/design/contracts";
-import { templates, gifStore } from "../modules/media/catalog";
+import { cardTemplates as templates, gifStore } from "../modules/media/catalog";
 import type { TemplateId } from "../modules/media/catalog";
 import type {
   PaymentService,

@@ -7,6 +7,7 @@ export interface ImportedTemplate {
   motif: "licensed-background";
   category:
     | "Wedding"
+    | "Celebration"
     | "Baby"
     | "Birthday"
     | "Graduation"
@@ -22,6 +23,7 @@ export interface ImportedTemplate {
   credit: string;
   licenseUrl: string;
   sourceUrl: string;
+  kinds?: ("card" | "invitation")[];
   textLayouts?: { card?: DesignBlock[]; invitation?: DesignBlock[] };
 }
 // Only the reviewed repository importer can add public catalog assets.

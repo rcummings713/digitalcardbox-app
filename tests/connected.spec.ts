@@ -1,4 +1,4 @@
-import { templates } from "../src/modules/media/catalog";
+import { cardTemplates as templates } from "../src/modules/media/catalog";
 import { test, expect } from "@playwright/test";
 import type { Page } from "@playwright/test";
 import AxeBuilder from "@axe-core/playwright";

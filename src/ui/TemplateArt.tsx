@@ -14,20 +14,15 @@ export function TemplateArt({
   const design = templates.find((item) => item.id === id)!;
   if ("artwork" in design)
     return (
-      <svg
+      <img
         className="card-art template-art"
-        viewBox="0 0 400 520"
-        aria-hidden="true"
-      >
-        <image
-          href={design.artwork}
-          x="0"
-          y="0"
-          width="400"
-          height="520"
-          preserveAspectRatio="xMidYMid meet"
-        />
-      </svg>
+        src={design.artwork}
+        width={400}
+        height={560}
+        alt=""
+        loading="lazy"
+        decoding="async"
+      />
     );
   if ("layout" in design)
     return (

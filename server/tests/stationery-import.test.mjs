@@ -78,6 +78,9 @@ test("missing rights, Pro catalog assets, executable artwork and file traversal 
   const f = fixture(t);
   for (const entry of [
     { ...f.entry, grant: "canva-pro" },
+    { ...f.entry, kinds: ["html"] },
+    { ...f.entry, kinds: ["invitation", "invitation"] },
+    { ...f.entry, colors: { paper: "url(https://evil.invalid)", ink: "#123456", accent: "#123456" } },
     { ...f.entry, backgroundOnly: false },
     { ...f.entry, rights: { ...f.entry.rights, portableExport: false } },
     { ...f.entry, sourceFile: "../outside.png" },

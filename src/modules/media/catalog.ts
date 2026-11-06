@@ -271,6 +271,10 @@ export const templates = [
   ...stationeryTemplates,
   ...importedTemplates,
 ] as const;
+// Invitation-only stationery stays out of guest greeting-card choices.
+export const cardTemplates = templates.filter(
+  (item) => !("kinds" in item) || !item.kinds || item.kinds.includes("card"),
+);
 export type TemplateId = (typeof templates)[number]["id"];
 const originalGifStore = [
   {

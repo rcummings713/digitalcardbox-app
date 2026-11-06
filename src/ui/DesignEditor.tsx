@@ -17,7 +17,7 @@ import type {
   DesignMotion,
   DesignVariant,
 } from "../modules/design/contracts";
-import { findGif } from "../modules/media/catalog";
+import { findGif, templates } from "../modules/media/catalog";
 import { TemplateArt } from "./TemplateArt";
 import { GifCredit } from "./GifCredit";
 import { useReducedMotion } from "./KeepsakeCard";
@@ -71,7 +71,17 @@ export function DesignCanvas({
   const [badArt, setBadArt] = useState<string>(),
     [motionPlaying, setMotionPlaying] = useState(false),
     [replay, setReplay] = useState(0);
-  const palette = palettes[value.palette],
+  const template = templates.find((item) => item.id === value.template)!;
+  const imported = "artwork" in template;
+  const palette =
+      imported && value.palette === template.palette
+        ? {
+            ...palettes[value.palette],
+            paper: template.paper,
+            ink: template.ink,
+            accent: template.accent,
+          }
+        : palettes[value.palette],
     gif = findGif(value.gif),
     isEditable = !!onSelect;
   const hasMotion = !!(
@@ -173,7 +183,7 @@ export function DesignCanvas({
       <div
         key={replay}
         ref={frame}
-        className={`design-canvas design-font-${value.font}${isEditable ? " is-editable" : ""}`}
+        className={`design-canvas design-font-${value.font}${imported ? " is-imported" : ""}${isEditable ? " is-editable" : ""}`}
         role="group"
         aria-label={
           label ||

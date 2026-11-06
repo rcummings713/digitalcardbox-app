@@ -38,3 +38,5 @@ compatibility work before rollback; use forward fixes to preserve accepted data.
 
 Details, import instructions and limitations: [STATIONERY_EDITOR.md](../specs/STATIONERY_EDITOR.md).
 Tracking: #24, #73, #77, #94, #95 and new #97–#99; all remain open / In Progress.
+
+6 November 2026 implementation addendum: the owner’s one-time 100-design Canva-account invitation collection is now included as retained project-specific artwork plus native editable text. Invitation/save-the-date galleries have 195 choices; greeting cards retain 106. This does not add a recurring Canva integration. Original source/600 generated-image asset reviews, rights records, hashes and web/print limits are in [the collection review](../licensing/canva-invitations-2026-11-06.md). Static reviewed palette colors and up to two extra bounded recipe layers preserve composition without new arbitrary document fields or persistence changes.

@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { templates, aiOptions } from "../modules/media/catalog";
+import { cardTemplates as templates, aiOptions } from "../modules/media/catalog";
 import type { AiCardChoices } from "../modules/media/catalog";
 import { occasionChoices, eventTypes } from "../modules/events/occasions";
 import {
@@ -145,7 +145,10 @@ export function DesignStudio({
   }
   const items = [
     ...(kind === "invitation" ? invitationTemplates : templates),
-  ].sort((a, b) => Number("layout" in b) - Number("layout" in a));
+  ].sort((a, b) =>
+    Number("artwork" in b) - Number("artwork" in a) ||
+    Number("layout" in b) - Number("layout" in a),
+  );
   const desiredCategory = /baby|gender/i.test(value.occasion)
     ? "Baby"
     : /wedding|engagement|bridal/i.test(value.occasion)

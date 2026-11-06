@@ -399,3 +399,27 @@ test("host configures PayPal and guest sees an unconfirmed profile handoff with 
     ).status,
   ).toBe("unconfirmed");
 });
+
+test("mobile visitors personalize the new Canva invitations before account creation", async ({ page }) => {
+  await page.setViewportSize({ width: 375, height: 812 });
+  await page.emulateMedia({ reducedMotion: "reduce" });
+  await page.goto("/invitations");
+  await page.getByRole("button", { name: /Invitation templates/ }).click();
+  await page.getByLabel("Filter designs").selectOption("All designs");
+  await expect(page.locator(".studio-template-grid>button")).toHaveCount(195);
+  await page.getByLabel("Search templates", { exact: true }).fill("Honeycomb Hello");
+  await expect(page.locator(".studio-template-grid>button")).toHaveCount(1);
+  await page.getByRole("button", { name: "Honeycomb Hello", exact: true }).click();
+  await typeOnDesign(page, "Event title", "Camille’s baby shower");
+  await page.getByLabel("Search templates", { exact: true }).fill("Cloud Cradle");
+  await page.getByRole("button", { name: "Cloud Cradle", exact: true }).click();
+  await expect(page.getByRole("button", { name: "Edit Event title", exact: true })).toContainText("Camille’s baby shower");
+  await page.reload();
+  await expect(page.locator(".editor-stage")).toContainText("Camille’s baby shower");
+  const image = page.locator('.editor-stage img[src^="/templates/imported/"]');
+  await expect(image).toBeVisible();
+  expect(await image.evaluate((im: HTMLImageElement) => im.complete && im.naturalWidth >= 429)).toBe(true);
+  expect((await (await page.request.get("/api/session")).json()).account).toBeNull();
+  expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
+  expect((await new AxeBuilder({ page }).withTags(["wcag2a", "wcag2aa", "wcag21aa", "wcag22aa"]).analyze()).violations).toEqual([]);
+});

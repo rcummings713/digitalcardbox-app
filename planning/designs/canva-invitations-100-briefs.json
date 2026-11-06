@@ -1,0 +1,1730 @@
+{
+  "schema_version": 1,
+  "status": "Generation complete; see canva-invitations-100.json for actual Canva design/page mapping and methods.",
+  "source": "src/modules/media/catalog.ts",
+  "categories": {
+    "Wedding": 18,
+    "Everyday": 18,
+    "Celebration": 12,
+    "Baby": 12,
+    "Birthday": 14,
+    "Graduation": 10,
+    "Remembrance": 8,
+    "Thanks": 8
+  },
+  "format": {
+    "orientation": "portrait",
+    "width_inches": 5,
+    "height_inches": 7
+  },
+  "shared_brief": "Create an editable portrait invitation template. Keep headline, names, date, time, venue and RSVP as separate editable text elements. Use the stated visual direction and palette. Preserve strong text contrast, generous padding, and clear hierarchy. Use only original decorative shapes and illustrations. Use literal placeholder text, never real event details. Do not add payment instructions, QR codes, URLs, logos, copyrighted characters, or filler prose.",
+  "notes": [
+    "The eight categories come from originalTemplates and stationeryTemplates aggregated by catalog.ts. imported-templates.json is empty.",
+    "Allocation gives the broad Wedding and Everyday categories 18 each; Birthday 14; Baby and Celebration 12 each; Graduation 10; Remembrance and Thanks 8 each.",
+    "All 17 public occasion choices in src/modules/events/occasions.ts are represented; additional supported eventTypes provide suitable gatherings for broad categories.",
+    "Thanks is expressed as invitations to appreciation gatherings; Remembrance uses respectful invitations without invented memories.",
+    "No production catalogue imports or licensing attestations are implied by these briefs."
+  ],
+  "templates": [
+    {
+      "number": 1,
+      "id": "canva-invitation-vellum-orchard",
+      "title": "Vellum Orchard",
+      "category": "Wedding",
+      "occasion": "Wedding",
+      "headline": "Together with our families",
+      "palette": "Ivory, forest, muted gold",
+      "visual_direction": "Transparent-paper effect with fine pear branches framing centered serif names",
+      "content": [
+        "Together with our families",
+        "[Honoree / Host Name]",
+        "[Date] · [Time]",
+        "[Venue]",
+        "RSVP · [Contact]"
+      ]
+    },
+    {
+      "number": 2,
+      "id": "canva-invitation-azure-arcade",
+      "title": "Azure Arcade",
+      "category": "Wedding",
+      "occasion": "Wedding",
+      "headline": "Join us for our wedding",
+      "palette": "Cobalt, porcelain, sand",
+      "visual_direction": "Architectural tile border surrounding a tall open arch and airy centered text",
+      "content": [
+        "Join us for our wedding",
+        "[Honoree / Host Name]",
+        "[Date] · [Time]",
+        "[Venue]",
+        "RSVP · [Contact]"
+      ]
+    },
+    {
+      "number": 3,
+      "id": "canva-invitation-rosewater-seal",
+      "title": "Rosewater Seal",
+      "category": "Wedding",
+      "occasion": "Wedding",
+      "headline": "A celebration of love",
+      "palette": "Blush, burgundy, cream",
+      "visual_direction": "Oversized illustrated envelope flap and wax-seal motif above asymmetric typography",
+      "content": [
+        "A celebration of love",
+        "[Honoree / Host Name]",
+        "[Date] · [Time]",
+        "[Venue]",
+        "RSVP · [Contact]"
+      ]
+    },
+    {
+      "number": 4,
+      "id": "canva-invitation-modern-monogram",
+      "title": "Modern Monogram",
+      "category": "Wedding",
+      "occasion": "Wedding",
+      "headline": "We are getting married",
+      "palette": "Warm white, charcoal, copper",
+      "visual_direction": "Interlocking placeholder initials as a sculptural oversized letterform above a strict editorial grid",
+      "content": [
+        "We are getting married",
+        "[Honoree / Host Name]",
+        "[Date] · [Time]",
+        "[Venue]",
+        "RSVP · [Contact]"
+      ]
+    },
+    {
+      "number": 5,
+      "id": "canva-invitation-desert-ceremony",
+      "title": "Desert Ceremony",
+      "category": "Wedding",
+      "occasion": "Wedding",
+      "headline": "Meet us under the desert sky",
+      "palette": "Terracotta, rust, pale peach",
+      "visual_direction": "Layered sunset mesas and a single agave silhouette along the bottom third",
+      "content": [
+        "Meet us under the desert sky",
+        "[Honoree / Host Name]",
+        "[Date] · [Time]",
+        "[Venue]",
+        "RSVP · [Contact]"
+      ]
+    },
+    {
+      "number": 6,
+      "id": "canva-invitation-garden-nocturne",
+      "title": "Garden Nocturne",
+      "category": "Wedding",
+      "occasion": "Wedding",
+      "headline": "Love in full bloom",
+      "palette": "Midnight, sage, ivory",
+      "visual_direction": "Shadowy fern silhouettes and tiny star details frame an elegant illuminated text panel",
+      "content": [
+        "Love in full bloom",
+        "[Honoree / Host Name]",
+        "[Date] · [Time]",
+        "[Venue]",
+        "RSVP · [Contact]"
+      ]
+    },
+    {
+      "number": 7,
+      "id": "canva-invitation-seaside-promise",
+      "title": "Seaside Promise",
+      "category": "Wedding",
+      "occasion": "Wedding",
+      "headline": "Our next chapter begins",
+      "palette": "Mist blue, navy, pearl",
+      "visual_direction": "Sweeping contour-wave lines curl around an off-center oval containing the names",
+      "content": [
+        "Our next chapter begins",
+        "[Honoree / Host Name]",
+        "[Date] · [Time]",
+        "[Venue]",
+        "RSVP · [Contact]"
+      ]
+    },
+    {
+      "number": 8,
+      "id": "canva-invitation-lily-portrait",
+      "title": "Lily Portrait",
+      "category": "Wedding",
+      "occasion": "Wedding",
+      "headline": "You are warmly invited",
+      "palette": "Ivory, aubergine, lilac",
+      "visual_direction": "Large sculptural calla lilies on one side with a narrow, aligned type column opposite",
+      "content": [
+        "You are warmly invited",
+        "[Honoree / Host Name]",
+        "[Date] · [Time]",
+        "[Venue]",
+        "RSVP · [Contact]"
+      ]
+    },
+    {
+      "number": 9,
+      "id": "canva-invitation-brocade-daydream",
+      "title": "Brocade Daydream",
+      "category": "Wedding",
+      "occasion": "Wedding",
+      "headline": "Celebrate our love",
+      "palette": "Cream, dusty rose, antique gold",
+      "visual_direction": "Restrained woven-diamond ornament and an inset scalloped border around romantic serif type",
+      "content": [
+        "Celebrate our love",
+        "[Honoree / Host Name]",
+        "[Date] · [Time]",
+        "[Venue]",
+        "RSVP · [Contact]"
+      ]
+    },
+    {
+      "number": 10,
+      "id": "canva-invitation-olive-courtyard",
+      "title": "Olive Courtyard",
+      "category": "Wedding",
+      "occasion": "Rehearsal dinner",
+      "headline": "The evening before",
+      "palette": "Sage, limestone, espresso",
+      "visual_direction": "Minimal courtyard arch with olive sprigs and intimate dinner-table line drawings",
+      "content": [
+        "The evening before",
+        "[Honoree / Host Name]",
+        "[Date] · [Time]",
+        "[Venue]",
+        "RSVP · [Contact]"
+      ]
+    },
+    {
+      "number": 11,
+      "id": "canva-invitation-champagne-supper",
+      "title": "Champagne Supper",
+      "category": "Wedding",
+      "occasion": "Rehearsal dinner",
+      "headline": "A toast before the vows",
+      "palette": "Champagne, ink, pale gold",
+      "visual_direction": "Illustrated pair of coupe glasses resting above a left-aligned supper-menu composition",
+      "content": [
+        "A toast before the vows",
+        "[Honoree / Host Name]",
+        "[Date] · [Time]",
+        "[Venue]",
+        "RSVP · [Contact]"
+      ]
+    },
+    {
+      "number": 12,
+      "id": "canva-invitation-petal-shower",
+      "title": "Petal Shower",
+      "category": "Wedding",
+      "occasion": "Bridal shower",
+      "headline": "Shower the bride with love",
+      "palette": "Peony pink, moss, white",
+      "visual_direction": "Loose watercolor petals fall diagonally around a large handwritten headline",
+      "content": [
+        "Shower the bride with love",
+        "[Honoree / Host Name]",
+        "[Date] · [Time]",
+        "[Venue]",
+        "RSVP · [Contact]"
+      ]
+    },
+    {
+      "number": 13,
+      "id": "canva-invitation-pearl-tea",
+      "title": "Pearl Tea",
+      "category": "Wedding",
+      "occasion": "Bridal shower",
+      "headline": "An afternoon for the bride",
+      "palette": "Pearl, cocoa, dusty blue",
+      "visual_direction": "Vintage tea cup illustration inside a circular pearl-dot frame with refined small caps",
+      "content": [
+        "An afternoon for the bride",
+        "[Honoree / Host Name]",
+        "[Date] · [Time]",
+        "[Venue]",
+        "RSVP · [Contact]"
+      ]
+    },
+    {
+      "number": 14,
+      "id": "canva-invitation-night-before-forever",
+      "title": "Night Before Forever",
+      "category": "Wedding",
+      "occasion": "Bachelor / Bachelorette party",
+      "headline": "One more night before forever",
+      "palette": "Plum, tangerine, cream",
+      "visual_direction": "Playful crescent and dancing ribbon cutouts with bold condensed typography",
+      "content": [
+        "One more night before forever",
+        "[Honoree / Host Name]",
+        "[Date] · [Time]",
+        "[Venue]",
+        "RSVP · [Contact]"
+      ]
+    },
+    {
+      "number": 15,
+      "id": "canva-invitation-city-lights-weekend",
+      "title": "City Lights Weekend",
+      "category": "Wedding",
+      "occasion": "Bachelor / Bachelorette party",
+      "headline": "The celebration starts here",
+      "palette": "Black, electric pink, silver",
+      "visual_direction": "Geometric night skyline and a vertical weekend itinerary-style text stack",
+      "content": [
+        "The celebration starts here",
+        "[Honoree / Host Name]",
+        "[Date] · [Time]",
+        "[Venue]",
+        "RSVP · [Contact]"
+      ]
+    },
+    {
+      "number": 16,
+      "id": "canva-invitation-forever-picnic",
+      "title": "Forever Picnic",
+      "category": "Wedding",
+      "occasion": "Engagement party",
+      "headline": "Engaged and celebrating",
+      "palette": "Tomato, cream, basil",
+      "visual_direction": "Gingham corner panels, illustrated strawberries and informal hand-lettered invitation type",
+      "content": [
+        "Engaged and celebrating",
+        "[Honoree / Host Name]",
+        "[Date] · [Time]",
+        "[Venue]",
+        "RSVP · [Contact]"
+      ]
+    },
+    {
+      "number": 17,
+      "id": "canva-invitation-two-paths-one-table",
+      "title": "Two Paths One Table",
+      "category": "Wedding",
+      "occasion": "Engagement party",
+      "headline": "Come celebrate our engagement",
+      "palette": "Ochre, indigo, ivory",
+      "visual_direction": "Two winding line paths meet at an illustrated long table beneath the headline",
+      "content": [
+        "Come celebrate our engagement",
+        "[Honoree / Host Name]",
+        "[Date] · [Time]",
+        "[Venue]",
+        "RSVP · [Contact]"
+      ]
+    },
+    {
+      "number": 18,
+      "id": "canva-invitation-wild-coast-elopement",
+      "title": "Wild Coast Elopement",
+      "category": "Wedding",
+      "occasion": "Wedding",
+      "headline": "A little ceremony, a lot of love",
+      "palette": "Sea green, cream, charcoal",
+      "visual_direction": "Ragged coastline silhouette and generous paper space with understated serif lettering",
+      "content": [
+        "A little ceremony, a lot of love",
+        "[Honoree / Host Name]",
+        "[Date] · [Time]",
+        "[Venue]",
+        "RSVP · [Contact]"
+      ]
+    },
+    {
+      "number": 19,
+      "id": "canva-invitation-first-door-open",
+      "title": "First Door Open",
+      "category": "Everyday",
+      "occasion": "Housewarming",
+      "headline": "Our door is open",
+      "palette": "Warm cream, brick, olive",
+      "visual_direction": "Inviting front-door illustration with potted plants and a clean nameplate-like headline",
+      "content": [
+        "Our door is open",
+        "[Honoree / Host Name]",
+        "[Date] · [Time]",
+        "[Venue]",
+        "RSVP · [Contact]"
+      ]
+    },
+    {
+      "number": 20,
+      "id": "canva-invitation-home-in-bloom",
+      "title": "Home in Bloom",
+      "category": "Everyday",
+      "occasion": "Housewarming",
+      "headline": "Come make yourself at home",
+      "palette": "Sage, butter yellow, espresso",
+      "visual_direction": "Cut-paper house silhouette full of oversized daisies beneath rounded friendly type",
+      "content": [
+        "Come make yourself at home",
+        "[Honoree / Host Name]",
+        "[Date] · [Time]",
+        "[Venue]",
+        "RSVP · [Contact]"
+      ]
+    },
+    {
+      "number": 21,
+      "id": "canva-invitation-keys-and-company",
+      "title": "Keys and Company",
+      "category": "Everyday",
+      "occasion": "Housewarming",
+      "headline": "New home, familiar faces",
+      "palette": "Pale blue, navy, copper",
+      "visual_direction": "Minimal hanging-key line drawing and stacked address typography inside a rounded border",
+      "content": [
+        "New home, familiar faces",
+        "[Honoree / Host Name]",
+        "[Date] · [Time]",
+        "[Venue]",
+        "RSVP · [Contact]"
+      ]
+    },
+    {
+      "number": 22,
+      "id": "canva-invitation-golden-next-chapter",
+      "title": "Golden Next Chapter",
+      "category": "Everyday",
+      "occasion": "Retirement",
+      "headline": "The next adventure begins",
+      "palette": "Gold, forest, linen",
+      "visual_direction": "Radiating sun disk above a horizon with graceful editorial type and a travel-label detail",
+      "content": [
+        "The next adventure begins",
+        "[Honoree / Host Name]",
+        "[Date] · [Time]",
+        "[Venue]",
+        "RSVP · [Contact]"
+      ]
+    },
+    {
+      "number": 23,
+      "id": "canva-invitation-leisure-club",
+      "title": "Leisure Club",
+      "category": "Everyday",
+      "occasion": "Retirement",
+      "headline": "Time to enjoy the good life",
+      "palette": "Coral, cream, teal",
+      "visual_direction": "Playful retro lounge chair and parasol illustration with bold curved headline",
+      "content": [
+        "Time to enjoy the good life",
+        "[Honoree / Host Name]",
+        "[Date] · [Time]",
+        "[Venue]",
+        "RSVP · [Contact]"
+      ]
+    },
+    {
+      "number": 24,
+      "id": "canva-invitation-an-honored-career",
+      "title": "An Honored Career",
+      "category": "Everyday",
+      "occasion": "Retirement",
+      "headline": "Celebrating a remarkable chapter",
+      "palette": "Navy, ivory, bronze",
+      "visual_direction": "Fine laurel corner ornaments and an engraved-portrait frame for a text-only honoree name",
+      "content": [
+        "Celebrating a remarkable chapter",
+        "[Honoree / Host Name]",
+        "[Date] · [Time]",
+        "[Venue]",
+        "RSVP · [Contact]"
+      ]
+    },
+    {
+      "number": 25,
+      "id": "canva-invitation-sacred-waters",
+      "title": "Sacred Waters",
+      "category": "Everyday",
+      "occasion": "Baptism",
+      "headline": "Join us for a baptism",
+      "palette": "Pale blue, ivory, silver",
+      "visual_direction": "Gentle concentric water rings and a small white dove around airy centered serif text",
+      "content": [
+        "Join us for a baptism",
+        "[Honoree / Host Name]",
+        "[Date] · [Time]",
+        "[Venue]",
+        "RSVP · [Contact]"
+      ]
+    },
+    {
+      "number": 26,
+      "id": "canva-invitation-little-olive-blessing",
+      "title": "Little Olive Blessing",
+      "category": "Everyday",
+      "occasion": "Baptism",
+      "headline": "A day of faith and love",
+      "palette": "Cream, sage, soft gold",
+      "visual_direction": "Olive wreath cradling a small cross with restrained handwritten name typography",
+      "content": [
+        "A day of faith and love",
+        "[Honoree / Host Name]",
+        "[Date] · [Time]",
+        "[Venue]",
+        "RSVP · [Contact]"
+      ]
+    },
+    {
+      "number": 27,
+      "id": "canva-invitation-bread-and-vine",
+      "title": "Bread and Vine",
+      "category": "Everyday",
+      "occasion": "First Communion / Confirmation",
+      "headline": "Celebrate a First Communion",
+      "palette": "Ivory, grape, wheat",
+      "visual_direction": "Fine wheat and grapevine drawings form a narrow border around calm traditional lettering",
+      "content": [
+        "Celebrate a First Communion",
+        "[Honoree / Host Name]",
+        "[Date] · [Time]",
+        "[Venue]",
+        "RSVP · [Contact]"
+      ]
+    },
+    {
+      "number": 28,
+      "id": "canva-invitation-light-of-faith",
+      "title": "Light of Faith",
+      "category": "Everyday",
+      "occasion": "First Communion / Confirmation",
+      "headline": "Celebrate a Confirmation",
+      "palette": "White, deep green, gold",
+      "visual_direction": "Single candle illustration with luminous geometric rays and a clean modern serif hierarchy",
+      "content": [
+        "Celebrate a Confirmation",
+        "[Honoree / Host Name]",
+        "[Date] · [Time]",
+        "[Venue]",
+        "RSVP · [Contact]"
+      ]
+    },
+    {
+      "number": 29,
+      "id": "canva-invitation-cobalt-mitzvah",
+      "title": "Cobalt Mitzvah",
+      "category": "Everyday",
+      "occasion": "Bar Mitzvah",
+      "headline": "Join us for a Bar Mitzvah",
+      "palette": "Cobalt, white, silver",
+      "visual_direction": "Contemporary interlaced geometric border and strong name typography with a small Star of David",
+      "content": [
+        "Join us for a Bar Mitzvah",
+        "[Honoree / Host Name]",
+        "[Date] · [Time]",
+        "[Venue]",
+        "RSVP · [Contact]"
+      ]
+    },
+    {
+      "number": 30,
+      "id": "canva-invitation-pomegranate-joy",
+      "title": "Pomegranate Joy",
+      "category": "Everyday",
+      "occasion": "Bat Mitzvah",
+      "headline": "Join us for a Bat Mitzvah",
+      "palette": "Berry, ivory, blush",
+      "visual_direction": "Pomegranate branches and seed-shaped dots frame a warm celebratory headline",
+      "content": [
+        "Join us for a Bat Mitzvah",
+        "[Honoree / Host Name]",
+        "[Date] · [Time]",
+        "[Venue]",
+        "RSVP · [Contact]"
+      ]
+    },
+    {
+      "number": 31,
+      "id": "canva-invitation-prom-afterglow",
+      "title": "Prom Afterglow",
+      "category": "Everyday",
+      "occasion": "Prom / Pre-prom party",
+      "headline": "An evening to remember",
+      "palette": "Lavender, ink, silver",
+      "visual_direction": "Soft theatrical spotlight shapes and slim starbursts beneath tall elegant display type",
+      "content": [
+        "An evening to remember",
+        "[Honoree / Host Name]",
+        "[Date] · [Time]",
+        "[Venue]",
+        "RSVP · [Contact]"
+      ]
+    },
+    {
+      "number": 32,
+      "id": "canva-invitation-before-the-dance",
+      "title": "Before the Dance",
+      "category": "Everyday",
+      "occasion": "Prom / Pre-prom party",
+      "headline": "Meet us before the music",
+      "palette": "Black, cream, cherry",
+      "visual_direction": "Graphic bow-tie and corsage motifs with an angular ticket-inspired composition",
+      "content": [
+        "Meet us before the music",
+        "[Honoree / Host Name]",
+        "[Date] · [Time]",
+        "[Venue]",
+        "RSVP · [Contact]"
+      ]
+    },
+    {
+      "number": 33,
+      "id": "canva-invitation-cotillion-rose",
+      "title": "Cotillion Rose",
+      "category": "Everyday",
+      "occasion": "Debutante ball / Cotillion",
+      "headline": "An evening of grace",
+      "palette": "Rose, ivory, champagne",
+      "visual_direction": "Airy rose stems around a long central oval and delicate ballroom-inspired typography",
+      "content": [
+        "An evening of grace",
+        "[Honoree / Host Name]",
+        "[Date] · [Time]",
+        "[Venue]",
+        "RSVP · [Contact]"
+      ]
+    },
+    {
+      "number": 34,
+      "id": "canva-invitation-supper-at-ours",
+      "title": "Supper at Ours",
+      "category": "Everyday",
+      "occasion": "Other dated event",
+      "headline": "Good food, good company",
+      "palette": "Cream, tomato, midnight",
+      "visual_direction": "Hand-drawn place setting forms a border and the headline follows the curve of a plate",
+      "content": [
+        "Good food, good company",
+        "[Honoree / Host Name]",
+        "[Date] · [Time]",
+        "[Venue]",
+        "RSVP · [Contact]"
+      ]
+    },
+    {
+      "number": 35,
+      "id": "canva-invitation-neighborhood-table",
+      "title": "Neighborhood Table",
+      "category": "Everyday",
+      "occasion": "One-off occasion",
+      "headline": "Let's gather together",
+      "palette": "Ochre, forest, oat",
+      "visual_direction": "Long communal-table illustration spans the bottom with simple warm sans-serif text above",
+      "content": [
+        "Let's gather together",
+        "[Honoree / Host Name]",
+        "[Date] · [Time]",
+        "[Venue]",
+        "RSVP · [Contact]"
+      ]
+    },
+    {
+      "number": 36,
+      "id": "canva-invitation-sunday-slowdown",
+      "title": "Sunday Slowdown",
+      "category": "Everyday",
+      "occasion": "Other dated event",
+      "headline": "Come over for a little while",
+      "palette": "Lilac, espresso, pale pink",
+      "visual_direction": "Loose coffee cup and pastry doodles balance a relaxed asymmetric typographic layout",
+      "content": [
+        "Come over for a little while",
+        "[Honoree / Host Name]",
+        "[Date] · [Time]",
+        "[Venue]",
+        "RSVP · [Contact]"
+      ]
+    },
+    {
+      "number": 37,
+      "id": "canva-invitation-disco-eclipse",
+      "title": "Disco Eclipse",
+      "category": "Celebration",
+      "occasion": "Other dated event",
+      "headline": "A night worth celebrating",
+      "palette": "Charcoal, lavender, chrome",
+      "visual_direction": "Large crescent-shaped mirror ball and tiny prismatic confetti with giant rounded headline",
+      "content": [
+        "A night worth celebrating",
+        "[Honoree / Host Name]",
+        "[Date] · [Time]",
+        "[Venue]",
+        "RSVP · [Contact]"
+      ]
+    },
+    {
+      "number": 38,
+      "id": "canva-invitation-palm-social",
+      "title": "Palm Social",
+      "category": "Celebration",
+      "occasion": "Other dated event",
+      "headline": "Meet us in the sunshine",
+      "palette": "Peach, jade, sand",
+      "visual_direction": "Two broad palm silhouettes frame a sunset circle with breezy stacked text",
+      "content": [
+        "Meet us in the sunshine",
+        "[Honoree / Host Name]",
+        "[Date] · [Time]",
+        "[Venue]",
+        "RSVP · [Contact]"
+      ]
+    },
+    {
+      "number": 39,
+      "id": "canva-invitation-confetti-assembly",
+      "title": "Confetti Assembly",
+      "category": "Celebration",
+      "occasion": "Other dated event",
+      "headline": "Let's make a little noise",
+      "palette": "Cobalt, coral, butter",
+      "visual_direction": "Oversized torn-paper confetti arranged along opposite edges and punchy slab-serif type",
+      "content": [
+        "Let's make a little noise",
+        "[Honoree / Host Name]",
+        "[Date] · [Time]",
+        "[Venue]",
+        "RSVP · [Contact]"
+      ]
+    },
+    {
+      "number": 40,
+      "id": "canva-invitation-gilded-anniversary",
+      "title": "Gilded Anniversary",
+      "category": "Celebration",
+      "occasion": "Anniversary",
+      "headline": "Still choosing each other",
+      "palette": "Burgundy, ivory, gold",
+      "visual_direction": "Two continuous looping gold lines surround an anniversary-year placeholder",
+      "content": [
+        "Still choosing each other",
+        "[Honoree / Host Name]",
+        "[Date] · [Time]",
+        "[Venue]",
+        "RSVP · [Contact]"
+      ]
+    },
+    {
+      "number": 41,
+      "id": "canva-invitation-a-table-for-love",
+      "title": "A Table for Love",
+      "category": "Celebration",
+      "occasion": "Anniversary",
+      "headline": "Celebrate another beautiful year",
+      "palette": "Forest, cream, rose",
+      "visual_direction": "Candlelit bistro-table illustration under a striped awning and intimate centered lettering",
+      "content": [
+        "Celebrate another beautiful year",
+        "[Honoree / Host Name]",
+        "[Date] · [Time]",
+        "[Venue]",
+        "RSVP · [Contact]"
+      ]
+    },
+    {
+      "number": 42,
+      "id": "canva-invitation-milestone-orbit",
+      "title": "Milestone Orbit",
+      "category": "Celebration",
+      "occasion": "Anniversary",
+      "headline": "A love worth celebrating",
+      "palette": "Midnight, violet, pearl",
+      "visual_direction": "Interlocking orbital ellipses with one oversized anniversary numeral placeholder",
+      "content": [
+        "A love worth celebrating",
+        "[Honoree / Host Name]",
+        "[Date] · [Time]",
+        "[Venue]",
+        "RSVP · [Contact]"
+      ]
+    },
+    {
+      "number": 43,
+      "id": "canva-invitation-sunset-toast",
+      "title": "Sunset Toast",
+      "category": "Celebration",
+      "occasion": "Other dated event",
+      "headline": "Here's to the good moments",
+      "palette": "Orange, coral, plum",
+      "visual_direction": "Graphic clinking glasses above striped sunset bands and bold stacked type",
+      "content": [
+        "Here's to the good moments",
+        "[Honoree / Host Name]",
+        "[Date] · [Time]",
+        "[Venue]",
+        "RSVP · [Contact]"
+      ]
+    },
+    {
+      "number": 44,
+      "id": "canva-invitation-lemonade-lawn",
+      "title": "Lemonade Lawn",
+      "category": "Celebration",
+      "occasion": "Other dated event",
+      "headline": "You're invited to a garden party",
+      "palette": "Lemon, sage, white",
+      "visual_direction": "Illustrated lemonade pitcher, daisies and a fine green gingham border",
+      "content": [
+        "You're invited to a garden party",
+        "[Honoree / Host Name]",
+        "[Date] · [Time]",
+        "[Venue]",
+        "RSVP · [Contact]"
+      ]
+    },
+    {
+      "number": 45,
+      "id": "canva-invitation-neon-rendezvous",
+      "title": "Neon Rendezvous",
+      "category": "Celebration",
+      "occasion": "Other dated event",
+      "headline": "Let's celebrate together",
+      "palette": "Navy, fuchsia, acid green",
+      "visual_direction": "Abstract neon-tube loops form a freeform frame around condensed contemporary type",
+      "content": [
+        "Let's celebrate together",
+        "[Honoree / Host Name]",
+        "[Date] · [Time]",
+        "[Venue]",
+        "RSVP · [Contact]"
+      ]
+    },
+    {
+      "number": 46,
+      "id": "canva-invitation-masquerade-moon",
+      "title": "Masquerade Moon",
+      "category": "Celebration",
+      "occasion": "Other dated event",
+      "headline": "An evening of mystery",
+      "palette": "Black, emerald, antique gold",
+      "visual_direction": "Elegant line-drawn mask under a crescent moon with dramatic serif type",
+      "content": [
+        "An evening of mystery",
+        "[Honoree / Host Name]",
+        "[Date] · [Time]",
+        "[Venue]",
+        "RSVP · [Contact]"
+      ]
+    },
+    {
+      "number": 47,
+      "id": "canva-invitation-campfire-company",
+      "title": "Campfire Company",
+      "category": "Celebration",
+      "occasion": "Other dated event",
+      "headline": "Gather around",
+      "palette": "Rust, pine, cream",
+      "visual_direction": "Small stylized campfire and constellation horizon with a curved welcoming headline",
+      "content": [
+        "Gather around",
+        "[Honoree / Host Name]",
+        "[Date] · [Time]",
+        "[Venue]",
+        "RSVP · [Contact]"
+      ]
+    },
+    {
+      "number": 48,
+      "id": "canva-invitation-rainbow-block-party",
+      "title": "Rainbow Block Party",
+      "category": "Celebration",
+      "occasion": "One-off occasion",
+      "headline": "The more the merrier",
+      "palette": "Primary red, cobalt, sunshine",
+      "visual_direction": "Layered geometric house and rainbow shapes border a friendly poster-style composition",
+      "content": [
+        "The more the merrier",
+        "[Honoree / Host Name]",
+        "[Date] · [Time]",
+        "[Venue]",
+        "RSVP · [Contact]"
+      ]
+    },
+    {
+      "number": 49,
+      "id": "canva-invitation-honeycomb-hello",
+      "title": "Honeycomb Hello",
+      "category": "Baby",
+      "occasion": "Baby shower",
+      "headline": "A little honey is on the way",
+      "palette": "Honey, cream, cocoa",
+      "visual_direction": "Fine honeycomb corners, small bees and an open central oval with gentle serif lettering",
+      "content": [
+        "A little honey is on the way",
+        "[Honoree / Host Name]",
+        "[Date] · [Time]",
+        "[Venue]",
+        "RSVP · [Contact]"
+      ]
+    },
+    {
+      "number": 50,
+      "id": "canva-invitation-cloud-cradle",
+      "title": "Cloud Cradle",
+      "category": "Baby",
+      "occasion": "Baby shower",
+      "headline": "A little dream is on the way",
+      "palette": "Sky, pearl, slate",
+      "visual_direction": "Soft layered paper clouds cradle a tiny star above a generous text area",
+      "content": [
+        "A little dream is on the way",
+        "[Honoree / Host Name]",
+        "[Date] · [Time]",
+        "[Venue]",
+        "RSVP · [Contact]"
+      ]
+    },
+    {
+      "number": 51,
+      "id": "canva-invitation-tiny-sailor",
+      "title": "Tiny Sailor",
+      "category": "Baby",
+      "occasion": "Baby shower",
+      "headline": "A new adventure is sailing in",
+      "palette": "Powder blue, navy, cream",
+      "visual_direction": "Small illustrated sailboat crosses gentle scalloped waves beneath spacious type",
+      "content": [
+        "A new adventure is sailing in",
+        "[Honoree / Host Name]",
+        "[Date] · [Time]",
+        "[Venue]",
+        "RSVP · [Contact]"
+      ]
+    },
+    {
+      "number": 52,
+      "id": "canva-invitation-woodland-welcome",
+      "title": "Woodland Welcome",
+      "category": "Baby",
+      "occasion": "Baby shower",
+      "headline": "A little one to love",
+      "palette": "Moss, oat, russet",
+      "visual_direction": "Friendly fox and deer illustrations peek from a woodland foliage border",
+      "content": [
+        "A little one to love",
+        "[Honoree / Host Name]",
+        "[Date] · [Time]",
+        "[Venue]",
+        "RSVP · [Contact]"
+      ]
+    },
+    {
+      "number": 53,
+      "id": "canva-invitation-storybook-arrival",
+      "title": "Storybook Arrival",
+      "category": "Baby",
+      "occasion": "Baby shower",
+      "headline": "A new story begins",
+      "palette": "Cream, dusty blue, ochre",
+      "visual_direction": "Open storybook illustration sends delicate stars upward around the headline",
+      "content": [
+        "A new story begins",
+        "[Honoree / Host Name]",
+        "[Date] · [Time]",
+        "[Venue]",
+        "RSVP · [Contact]"
+      ]
+    },
+    {
+      "number": 54,
+      "id": "canva-invitation-berry-little-one",
+      "title": "Berry Little One",
+      "category": "Baby",
+      "occasion": "Baby shower",
+      "headline": "A berry sweet baby is on the way",
+      "palette": "Strawberry, blush, leaf green",
+      "visual_direction": "Watercolor strawberry vines curl around a scalloped rectangle with playful rounded serif type",
+      "content": [
+        "A berry sweet baby is on the way",
+        "[Honoree / Host Name]",
+        "[Date] · [Time]",
+        "[Venue]",
+        "RSVP · [Contact]"
+      ]
+    },
+    {
+      "number": 55,
+      "id": "canva-invitation-neutral-nest",
+      "title": "Neutral Nest",
+      "category": "Baby",
+      "occasion": "Baby shower",
+      "headline": "Gather for a little one",
+      "palette": "Oat, sage, warm white",
+      "visual_direction": "Quiet woven nest and leaf forms with minimal modern typography and abundant white space",
+      "content": [
+        "Gather for a little one",
+        "[Honoree / Host Name]",
+        "[Date] · [Time]",
+        "[Venue]",
+        "RSVP · [Contact]"
+      ]
+    },
+    {
+      "number": 56,
+      "id": "canva-invitation-here-comes-sunshine",
+      "title": "Here Comes Sunshine",
+      "category": "Baby",
+      "occasion": "Baby shower",
+      "headline": "A little sunshine is on the way",
+      "palette": "Butter yellow, peach, cream",
+      "visual_direction": "Large smiling sun disk peeks from a scalloped border behind warm curved lettering",
+      "content": [
+        "A little sunshine is on the way",
+        "[Honoree / Host Name]",
+        "[Date] · [Time]",
+        "[Venue]",
+        "RSVP · [Contact]"
+      ]
+    },
+    {
+      "number": 57,
+      "id": "canva-invitation-little-balloon-reveal",
+      "title": "Little Balloon Reveal",
+      "category": "Baby",
+      "occasion": "Gender reveal party",
+      "headline": "A sweet surprise awaits",
+      "palette": "Mint, peach, cream",
+      "visual_direction": "Pastel hot-air balloon rises between soft clouds with no gender-coded headline or outcome",
+      "content": [
+        "A sweet surprise awaits",
+        "[Honoree / Host Name]",
+        "[Date] · [Time]",
+        "[Venue]",
+        "RSVP · [Contact]"
+      ]
+    },
+    {
+      "number": 58,
+      "id": "canva-invitation-guess-the-little-star",
+      "title": "Guess the Little Star",
+      "category": "Baby",
+      "occasion": "Gender reveal party",
+      "headline": "Join us for the big reveal",
+      "palette": "Lavender, yellow, midnight",
+      "visual_direction": "Twinkling stars surround a closed gift-box illustration and bold curious headline",
+      "content": [
+        "Join us for the big reveal",
+        "[Honoree / Host Name]",
+        "[Date] · [Time]",
+        "[Venue]",
+        "RSVP · [Contact]"
+      ]
+    },
+    {
+      "number": 59,
+      "id": "canva-invitation-milk-and-morning",
+      "title": "Milk and Morning",
+      "category": "Baby",
+      "occasion": "Sip and see",
+      "headline": "Come meet our little one",
+      "palette": "Warm white, cocoa, dusty rose",
+      "visual_direction": "Simple milk-bottle and tiny booties line drawings beside a calm left-aligned name field",
+      "content": [
+        "Come meet our little one",
+        "[Honoree / Host Name]",
+        "[Date] · [Time]",
+        "[Venue]",
+        "RSVP · [Contact]"
+      ]
+    },
+    {
+      "number": 60,
+      "id": "canva-invitation-peony-welcome",
+      "title": "Peony Welcome",
+      "category": "Baby",
+      "occasion": "Sip and see",
+      "headline": "Little one, lovely company",
+      "palette": "Blush, sage, ivory",
+      "visual_direction": "Loose peonies frame a small oval monogram placeholder and delicate serif invitation text",
+      "content": [
+        "Little one, lovely company",
+        "[Honoree / Host Name]",
+        "[Date] · [Time]",
+        "[Venue]",
+        "RSVP · [Contact]"
+      ]
+    },
+    {
+      "number": 61,
+      "id": "canva-invitation-birthday-sorbet",
+      "title": "Birthday Sorbet",
+      "category": "Birthday",
+      "occasion": "Birthday",
+      "headline": "A little older, a little sweeter",
+      "palette": "Peach, raspberry, cream",
+      "visual_direction": "Three illustrated sorbet scoops support a playful arched headline and bold age placeholder",
+      "content": [
+        "A little older, a little sweeter",
+        "[Honoree / Host Name]",
+        "[Date] · [Time]",
+        "[Venue]",
+        "RSVP · [Contact]"
+      ]
+    },
+    {
+      "number": 62,
+      "id": "canva-invitation-candle-parade",
+      "title": "Candle Parade",
+      "category": "Birthday",
+      "occasion": "Birthday",
+      "headline": "Make room for a wish",
+      "palette": "Butter, cherry, cobalt",
+      "visual_direction": "Uneven hand-drawn candles march along the bottom edge under expressive serif type",
+      "content": [
+        "Make room for a wish",
+        "[Honoree / Host Name]",
+        "[Date] · [Time]",
+        "[Venue]",
+        "RSVP · [Contact]"
+      ]
+    },
+    {
+      "number": 63,
+      "id": "canva-invitation-retro-roller-night",
+      "title": "Retro Roller Night",
+      "category": "Birthday",
+      "occasion": "Birthday",
+      "headline": "Roll into the celebration",
+      "palette": "Pink, orange, teal",
+      "visual_direction": "Vintage roller skate and swooshing track lines with chunky retro display lettering",
+      "content": [
+        "Roll into the celebration",
+        "[Honoree / Host Name]",
+        "[Date] · [Time]",
+        "[Venue]",
+        "RSVP · [Contact]"
+      ]
+    },
+    {
+      "number": 64,
+      "id": "canva-invitation-game-night-level-up",
+      "title": "Game Night Level Up",
+      "category": "Birthday",
+      "occasion": "Birthday",
+      "headline": "Level up with us",
+      "palette": "Navy, lime, white",
+      "visual_direction": "Original pixel-style game shapes and a bold age placeholder inside an arcade-inspired frame",
+      "content": [
+        "Level up with us",
+        "[Honoree / Host Name]",
+        "[Date] · [Time]",
+        "[Venue]",
+        "RSVP · [Contact]"
+      ]
+    },
+    {
+      "number": 65,
+      "id": "canva-invitation-dino-discovery",
+      "title": "Dino Discovery",
+      "category": "Birthday",
+      "occasion": "Birthday",
+      "headline": "A roaring good birthday",
+      "palette": "Sage, rust, cream",
+      "visual_direction": "Friendly original dinosaur silhouettes, fern edges and large rounded age typography",
+      "content": [
+        "A roaring good birthday",
+        "[Honoree / Host Name]",
+        "[Date] · [Time]",
+        "[Venue]",
+        "RSVP · [Contact]"
+      ]
+    },
+    {
+      "number": 66,
+      "id": "canva-invitation-poolside-pop",
+      "title": "Poolside Pop",
+      "category": "Birthday",
+      "occasion": "Birthday",
+      "headline": "Dive into the birthday fun",
+      "palette": "Turquoise, coral, white",
+      "visual_direction": "Illustrated striped float and top-view pool ripples surround a tilted headline",
+      "content": [
+        "Dive into the birthday fun",
+        "[Honoree / Host Name]",
+        "[Date] · [Time]",
+        "[Venue]",
+        "RSVP · [Contact]"
+      ]
+    },
+    {
+      "number": 67,
+      "id": "canva-invitation-midnight-vinyl",
+      "title": "Midnight Vinyl",
+      "category": "Birthday",
+      "occasion": "Birthday",
+      "headline": "Another spin around the sun",
+      "palette": "Black, cream, burnt orange",
+      "visual_direction": "Large partial vinyl-record disk with circular headline and a small label-style date block",
+      "content": [
+        "Another spin around the sun",
+        "[Honoree / Host Name]",
+        "[Date] · [Time]",
+        "[Venue]",
+        "RSVP · [Contact]"
+      ]
+    },
+    {
+      "number": 68,
+      "id": "canva-invitation-paintbox-party",
+      "title": "Paintbox Party",
+      "category": "Birthday",
+      "occasion": "Birthday",
+      "headline": "Color outside the birthday lines",
+      "palette": "Cobalt, red, yellow",
+      "visual_direction": "Expressive brushstroke border and staggered friendly lettering with abundant central space",
+      "content": [
+        "Color outside the birthday lines",
+        "[Honoree / Host Name]",
+        "[Date] · [Time]",
+        "[Venue]",
+        "RSVP · [Contact]"
+      ]
+    },
+    {
+      "number": 69,
+      "id": "canva-invitation-sweet-sixteen-spotlight",
+      "title": "Sweet Sixteen Spotlight",
+      "category": "Birthday",
+      "occasion": "Sweet 16",
+      "headline": "Sixteen and shining",
+      "palette": "Blush, champagne, charcoal",
+      "visual_direction": "Oversized outlined 16 under a theatrical spotlight with a trailing ribbon accent",
+      "content": [
+        "Sixteen and shining",
+        "[Honoree / Host Name]",
+        "[Date] · [Time]",
+        "[Venue]",
+        "RSVP · [Contact]"
+      ]
+    },
+    {
+      "number": 70,
+      "id": "canva-invitation-sixteen-in-bloom",
+      "title": "Sixteen in Bloom",
+      "category": "Birthday",
+      "occasion": "Sweet 16",
+      "headline": "A sweet sixteen celebration",
+      "palette": "Lilac, orchid, ivory",
+      "visual_direction": "Large floral number outline with scattered petals and refined fashion-editorial type",
+      "content": [
+        "A sweet sixteen celebration",
+        "[Honoree / Host Name]",
+        "[Date] · [Time]",
+        "[Venue]",
+        "RSVP · [Contact]"
+      ]
+    },
+    {
+      "number": 71,
+      "id": "canva-invitation-quince-mariposa",
+      "title": "Quince Mariposa",
+      "category": "Birthday",
+      "occasion": "Quinceañera",
+      "headline": "Mis quince años",
+      "palette": "Lavender, pearl, silver",
+      "visual_direction": "Delicate original butterfly swarm rises around a large 15 and elegant name placeholder",
+      "content": [
+        "Mis quince años",
+        "[Honoree / Host Name]",
+        "[Date] · [Time]",
+        "[Venue]",
+        "RSVP · [Contact]"
+      ]
+    },
+    {
+      "number": 72,
+      "id": "canva-invitation-quince-jard-n",
+      "title": "Quince Jardín",
+      "category": "Birthday",
+      "occasion": "Quinceañera",
+      "headline": "Una noche para celebrar",
+      "palette": "Emerald, blush, gold",
+      "visual_direction": "Dramatic rose garden arch, subtle gold linework and centered formal serif type",
+      "content": [
+        "Una noche para celebrar",
+        "[Honoree / Host Name]",
+        "[Date] · [Time]",
+        "[Venue]",
+        "RSVP · [Contact]"
+      ]
+    },
+    {
+      "number": 73,
+      "id": "canva-invitation-golden-milestone",
+      "title": "Golden Milestone",
+      "category": "Birthday",
+      "occasion": "Birthday",
+      "headline": "A milestone worth celebrating",
+      "palette": "Cream, ink, gold",
+      "visual_direction": "Oversized editable age numeral with thin radial lines and an understated editorial footer",
+      "content": [
+        "A milestone worth celebrating",
+        "[Honoree / Host Name]",
+        "[Date] · [Time]",
+        "[Venue]",
+        "RSVP · [Contact]"
+      ]
+    },
+    {
+      "number": 74,
+      "id": "canva-invitation-cherry-disco-birthday",
+      "title": "Cherry Disco Birthday",
+      "category": "Birthday",
+      "occasion": "Birthday",
+      "headline": "Let's dance into another year",
+      "palette": "Cherry, powder pink, silver",
+      "visual_direction": "Illustrated cherry pair with mirror-ball surfaces and bold rounded dancing type",
+      "content": [
+        "Let's dance into another year",
+        "[Honoree / Host Name]",
+        "[Date] · [Time]",
+        "[Venue]",
+        "RSVP · [Contact]"
+      ]
+    },
+    {
+      "number": 75,
+      "id": "canva-invitation-tassel-sunrise",
+      "title": "Tassel Sunrise",
+      "category": "Graduation",
+      "occasion": "Graduation",
+      "headline": "The future starts here",
+      "palette": "Navy, sunrise yellow, white",
+      "visual_direction": "Large rising sun behind a cap silhouette with confident condensed type",
+      "content": [
+        "The future starts here",
+        "[Honoree / Host Name]",
+        "[Date] · [Time]",
+        "[Venue]",
+        "RSVP · [Contact]"
+      ]
+    },
+    {
+      "number": 76,
+      "id": "canva-invitation-diploma-dispatch",
+      "title": "Diploma Dispatch",
+      "category": "Graduation",
+      "occasion": "Graduation",
+      "headline": "Special delivery: a new graduate",
+      "palette": "Cream, forest, orange",
+      "visual_direction": "Original postal-stamp border and diploma illustration arranged as a modern announcement invitation",
+      "content": [
+        "Special delivery: a new graduate",
+        "[Honoree / Host Name]",
+        "[Date] · [Time]",
+        "[Venue]",
+        "RSVP · [Contact]"
+      ]
+    },
+    {
+      "number": 77,
+      "id": "canva-invitation-campus-laurels",
+      "title": "Campus Laurels",
+      "category": "Graduation",
+      "occasion": "Graduation",
+      "headline": "Come celebrate our graduate",
+      "palette": "Sage, ivory, gold",
+      "visual_direction": "Asymmetric laurel branches wrap an oversized class-year placeholder and traditional serif text",
+      "content": [
+        "Come celebrate our graduate",
+        "[Honoree / Host Name]",
+        "[Date] · [Time]",
+        "[Venue]",
+        "RSVP · [Contact]"
+      ]
+    },
+    {
+      "number": 78,
+      "id": "canva-invitation-bold-class-act",
+      "title": "Bold Class Act",
+      "category": "Graduation",
+      "occasion": "Graduation",
+      "headline": "Class dismissed, celebration begins",
+      "palette": "Black, white, cobalt",
+      "visual_direction": "Huge split class-year numerals and a diagonal ribbon create a graphic poster composition",
+      "content": [
+        "Class dismissed, celebration begins",
+        "[Honoree / Host Name]",
+        "[Date] · [Time]",
+        "[Venue]",
+        "RSVP · [Contact]"
+      ]
+    },
+    {
+      "number": 79,
+      "id": "canva-invitation-next-stop-celebration",
+      "title": "Next Stop Celebration",
+      "category": "Graduation",
+      "occasion": "Graduation",
+      "headline": "On to the next adventure",
+      "palette": "Sky, navy, terracotta",
+      "visual_direction": "Rail-ticket inspired invitation with a small suitcase-and-cap drawing and structured date block",
+      "content": [
+        "On to the next adventure",
+        "[Honoree / Host Name]",
+        "[Date] · [Time]",
+        "[Venue]",
+        "RSVP · [Contact]"
+      ]
+    },
+    {
+      "number": 80,
+      "id": "canva-invitation-stargazer-scholar",
+      "title": "Stargazer Scholar",
+      "category": "Graduation",
+      "occasion": "Graduation",
+      "headline": "Dream big, celebrate bigger",
+      "palette": "Midnight, gold, lilac",
+      "visual_direction": "Constellation lines form a subtle graduation-cap outline around spacious centered text",
+      "content": [
+        "Dream big, celebrate bigger",
+        "[Honoree / Host Name]",
+        "[Date] · [Time]",
+        "[Venue]",
+        "RSVP · [Contact]"
+      ]
+    },
+    {
+      "number": 81,
+      "id": "canva-invitation-new-horizons-degree",
+      "title": "New Horizons Degree",
+      "category": "Graduation",
+      "occasion": "Career promotion / Professional graduation",
+      "headline": "A new chapter of achievement",
+      "palette": "Cream, bronze, slate",
+      "visual_direction": "Abstract mountain horizon and slim vertical rules with a formal modern type hierarchy",
+      "content": [
+        "A new chapter of achievement",
+        "[Honoree / Host Name]",
+        "[Date] · [Time]",
+        "[Venue]",
+        "RSVP · [Contact]"
+      ]
+    },
+    {
+      "number": 82,
+      "id": "canva-invitation-promotion-toast",
+      "title": "Promotion Toast",
+      "category": "Graduation",
+      "occasion": "Career promotion / Professional graduation",
+      "headline": "Cheers to the next chapter",
+      "palette": "Burgundy, ivory, blush",
+      "visual_direction": "Minimal coupe-glass line art and a bold honoree-name field with elegant small details",
+      "content": [
+        "Cheers to the next chapter",
+        "[Honoree / Host Name]",
+        "[Date] · [Time]",
+        "[Venue]",
+        "RSVP · [Contact]"
+      ]
+    },
+    {
+      "number": 83,
+      "id": "canva-invitation-decision-day-pennants",
+      "title": "Decision Day Pennants",
+      "category": "Graduation",
+      "occasion": "College Decision Day",
+      "headline": "The next chapter is chosen",
+      "palette": "Cobalt, red, cream",
+      "visual_direction": "Original generic pennants and confetti around an editable future-school name field; no logos",
+      "content": [
+        "The next chapter is chosen",
+        "[Honoree / Host Name]",
+        "[Date] · [Time]",
+        "[Venue]",
+        "RSVP · [Contact]"
+      ]
+    },
+    {
+      "number": 84,
+      "id": "canva-invitation-open-book-future",
+      "title": "Open Book Future",
+      "category": "Graduation",
+      "occasion": "Graduation",
+      "headline": "One chapter ends, another begins",
+      "palette": "Oat, teal, mustard",
+      "visual_direction": "Layered open-book pages become a sunburst beneath thoughtful editorial typography",
+      "content": [
+        "One chapter ends, another begins",
+        "[Honoree / Host Name]",
+        "[Date] · [Time]",
+        "[Venue]",
+        "RSVP · [Contact]"
+      ]
+    },
+    {
+      "number": 85,
+      "id": "canva-invitation-olive-linen",
+      "title": "Olive & Linen",
+      "category": "Remembrance",
+      "occasion": "Wake / Celebration of Life",
+      "headline": "A gathering in remembrance",
+      "palette": "Warm white, olive, charcoal",
+      "visual_direction": "One graceful olive branch and a subtle linen-paper texture beside a calm left-aligned text column",
+      "content": [
+        "A gathering in remembrance",
+        "[Honoree / Host Name]",
+        "[Date] · [Time]",
+        "[Venue]",
+        "RSVP · [Contact]"
+      ]
+    },
+    {
+      "number": 86,
+      "id": "canva-invitation-candlelight",
+      "title": "Candlelight",
+      "category": "Remembrance",
+      "occasion": "Wake / Celebration of Life",
+      "headline": "Celebrating a life",
+      "palette": "Cream, slate, soft gold",
+      "visual_direction": "Single gently glowing illustrated candle and a thin frame with dignified serif lettering",
+      "content": [
+        "Celebrating a life",
+        "[Honoree / Host Name]",
+        "[Date] · [Time]",
+        "[Venue]",
+        "RSVP · [Contact]"
+      ]
+    },
+    {
+      "number": 87,
+      "id": "canva-invitation-quiet-horizon",
+      "title": "Quiet Horizon",
+      "category": "Remembrance",
+      "occasion": "Wake / Celebration of Life",
+      "headline": "Please join us in remembrance",
+      "palette": "Mist blue, warm gray, white",
+      "visual_direction": "Soft watercolor sea horizon across the lower third with quiet centered text above",
+      "content": [
+        "Please join us in remembrance",
+        "[Honoree / Host Name]",
+        "[Date] · [Time]",
+        "[Venue]",
+        "RSVP · [Contact]"
+      ]
+    },
+    {
+      "number": 88,
+      "id": "canva-invitation-garden-of-memories",
+      "title": "Garden of Memories",
+      "category": "Remembrance",
+      "occasion": "Wake / Celebration of Life",
+      "headline": "Together in memory",
+      "palette": "Ivory, sage, dusty rose",
+      "visual_direction": "Gentle wildflower stems form an open oval border with restrained warm typography",
+      "content": [
+        "Together in memory",
+        "[Honoree / Host Name]",
+        "[Date] · [Time]",
+        "[Venue]",
+        "RSVP · [Contact]"
+      ]
+    },
+    {
+      "number": 89,
+      "id": "canva-invitation-a-life-in-photographs",
+      "title": "A Life in Photographs",
+      "category": "Remembrance",
+      "occasion": "Wake / Celebration of Life",
+      "headline": "An invitation to remember",
+      "palette": "Linen, cocoa, muted gold",
+      "visual_direction": "A clean empty portrait-photo placeholder above the honoree name, fine horizontal dividers and generous paper space; no real person imagery",
+      "content": [
+        "An invitation to remember",
+        "[Honoree / Host Name]",
+        "[Date] · [Time]",
+        "[Venue]",
+        "RSVP · [Contact]"
+      ]
+    },
+    {
+      "number": 90,
+      "id": "canva-invitation-woodland-gathering",
+      "title": "Woodland Gathering",
+      "category": "Remembrance",
+      "occasion": "Wake / Celebration of Life",
+      "headline": "A life remembered with love",
+      "palette": "Pale gray, moss, cream",
+      "visual_direction": "Slender birch silhouettes at one edge with softly lit open paper space and traditional lettering",
+      "content": [
+        "A life remembered with love",
+        "[Honoree / Host Name]",
+        "[Date] · [Time]",
+        "[Venue]",
+        "RSVP · [Contact]"
+      ]
+    },
+    {
+      "number": 91,
+      "id": "canva-invitation-evening-stars",
+      "title": "Evening Stars",
+      "category": "Remembrance",
+      "occasion": "Wake / Celebration of Life",
+      "headline": "Join us to honor a life",
+      "palette": "Midnight, ivory, muted gold",
+      "visual_direction": "Delicate stars and a low crescent around a softly illuminated central text field with dignified serif lettering",
+      "content": [
+        "Join us to honor a life",
+        "[Honoree / Host Name]",
+        "[Date] · [Time]",
+        "[Venue]",
+        "RSVP · [Contact]"
+      ]
+    },
+    {
+      "number": 92,
+      "id": "canva-invitation-gentle-petals",
+      "title": "Gentle Petals",
+      "category": "Remembrance",
+      "occasion": "Wake / Celebration of Life",
+      "headline": "Sharing memories, honoring love",
+      "palette": "Warm white, plum, taupe",
+      "visual_direction": "Soft translucent falling petals at the edges surrounding quiet asymmetrical typography",
+      "content": [
+        "Sharing memories, honoring love",
+        "[Honoree / Host Name]",
+        "[Date] · [Time]",
+        "[Venue]",
+        "RSVP · [Contact]"
+      ]
+    },
+    {
+      "number": 93,
+      "id": "canva-invitation-gratitude-table",
+      "title": "Gratitude Table",
+      "category": "Thanks",
+      "occasion": "Other dated event",
+      "headline": "A gathering to say thank you",
+      "palette": "Cream, terracotta, forest",
+      "visual_direction": "Illustrated long dinner table with small flowers and a warm handwritten headline",
+      "content": [
+        "A gathering to say thank you",
+        "[Honoree / Host Name]",
+        "[Date] · [Time]",
+        "[Venue]",
+        "RSVP · [Contact]"
+      ]
+    },
+    {
+      "number": 94,
+      "id": "canva-invitation-bouquet-for-you",
+      "title": "Bouquet for You",
+      "category": "Thanks",
+      "occasion": "Other dated event",
+      "headline": "You're invited with gratitude",
+      "palette": "Blush, burgundy, sage",
+      "visual_direction": "Wrapped original garden bouquet at one side balances an airy serif text block",
+      "content": [
+        "You're invited with gratitude",
+        "[Honoree / Host Name]",
+        "[Date] · [Time]",
+        "[Venue]",
+        "RSVP · [Contact]"
+      ]
+    },
+    {
+      "number": 95,
+      "id": "canva-invitation-good-company-brunch",
+      "title": "Good Company Brunch",
+      "category": "Thanks",
+      "occasion": "Other dated event",
+      "headline": "Thank you, let's brunch",
+      "palette": "Peach, espresso, butter",
+      "visual_direction": "Coffee cup and croissant line drawings sit inside a scalloped cafe-style border",
+      "content": [
+        "Thank you, let's brunch",
+        "[Honoree / Host Name]",
+        "[Date] · [Time]",
+        "[Venue]",
+        "RSVP · [Contact]"
+      ]
+    },
+    {
+      "number": 96,
+      "id": "canva-invitation-appreciation-in-bloom",
+      "title": "Appreciation in Bloom",
+      "category": "Thanks",
+      "occasion": "Other dated event",
+      "headline": "Celebrating the people who care",
+      "palette": "Lavender, ivory, deep green",
+      "visual_direction": "Large abstract flower shapes frame a bold friendly sans-serif honoree-group field",
+      "content": [
+        "Celebrating the people who care",
+        "[Honoree / Host Name]",
+        "[Date] · [Time]",
+        "[Venue]",
+        "RSVP · [Contact]"
+      ]
+    },
+    {
+      "number": 97,
+      "id": "canva-invitation-a-toast-of-thanks",
+      "title": "A Toast of Thanks",
+      "category": "Thanks",
+      "occasion": "Other dated event",
+      "headline": "Here's to you",
+      "palette": "Navy, champagne, white",
+      "visual_direction": "Two fine line-drawn glasses and gentle sparkle accents surround generous centered typography",
+      "content": [
+        "Here's to you",
+        "[Honoree / Host Name]",
+        "[Date] · [Time]",
+        "[Venue]",
+        "RSVP · [Contact]"
+      ]
+    },
+    {
+      "number": 98,
+      "id": "canva-invitation-community-sunshine",
+      "title": "Community Sunshine",
+      "category": "Thanks",
+      "occasion": "One-off occasion",
+      "headline": "A little thanks, a lot of heart",
+      "palette": "Yellow, coral, cream",
+      "visual_direction": "Warm sunburst and small heart cutouts around an inclusive bold headline",
+      "content": [
+        "A little thanks, a lot of heart",
+        "[Honoree / Host Name]",
+        "[Date] · [Time]",
+        "[Venue]",
+        "RSVP · [Contact]"
+      ]
+    },
+    {
+      "number": 99,
+      "id": "canva-invitation-volunteer-garden",
+      "title": "Volunteer Garden",
+      "category": "Thanks",
+      "occasion": "Other dated event",
+      "headline": "Thank you for helping us grow",
+      "palette": "Sage, oat, russet",
+      "visual_direction": "Original watering can and growing seedlings along the bottom with approachable serif text",
+      "content": [
+        "Thank you for helping us grow",
+        "[Honoree / Host Name]",
+        "[Date] · [Time]",
+        "[Venue]",
+        "RSVP · [Contact]"
+      ]
+    },
+    {
+      "number": 100,
+      "id": "canva-invitation-kindness-post",
+      "title": "Kindness Post",
+      "category": "Thanks",
+      "occasion": "Other dated event",
+      "headline": "Good people deserve a celebration",
+      "palette": "Cream, cobalt, cherry",
+      "visual_direction": "Playful envelope and postage-inspired details create a cheerful appreciation-invitation composition",
+      "content": [
+        "Good people deserve a celebration",
+        "[Honoree / Host Name]",
+        "[Date] · [Time]",
+        "[Venue]",
+        "RSVP · [Contact]"
+      ]
+    }
+  ]
+}

@@ -949,3 +949,11 @@ html[data-motion="reduce"] .little-star-cover {
   max-height: none;
   padding: 1px 3px;
 }
+
+/* Imported artwork already includes its paper; keep native words clear. */
+.design-canvas.is-imported .design-text-layer {
+  background: transparent;
+}
+
+/* Full source notices remain beside the selected design and in exports. */
+.studio-template-mini .template-credit { display: none; }
