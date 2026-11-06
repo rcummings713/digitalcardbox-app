@@ -225,7 +225,17 @@ export function MotionSticker({
     />
   );
 }
-export function Card({
+export function Card(props: Parameters<typeof CardContent>[0]) {
+  return props.entry.premium ? (
+    <div className="premium-card-finish">
+      <span className="premium-card-seal">Signature Edition</span>
+      <CardContent {...props} />
+    </div>
+  ) : (
+    <CardContent {...props} />
+  );
+}
+function CardContent({
   entry,
   small = false,
   animate,
@@ -233,7 +243,7 @@ export function Card({
 }: {
   entry: Pick<
     Entry,
-    "style" | "name" | "note" | "photo" | "gif" | "artId" | "design"
+    "style" | "name" | "note" | "photo" | "gif" | "artId" | "design" | "premium"
   >;
   small?: boolean;
   animate?: boolean;

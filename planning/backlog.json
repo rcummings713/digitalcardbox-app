@@ -1053,7 +1053,10 @@
           "priority": "P2",
           "release": "Post-MVP",
           "target_date": null,
-          "estimate_hours": null
+          "estimate_hours": null,
+          "github_issue": 101,
+          "implementation_status": "In Progress",
+          "implementation_note": "6 November: isolated DEV Stripe sandbox; see docs/specs/PRODUCT_CHECKOUT.md. Live rollout remains separate; owner closes issues."
         },
         {
           "id": "DCB-E10-S02",
@@ -1067,7 +1070,10 @@
           "priority": "P2",
           "release": "Post-MVP",
           "target_date": null,
-          "estimate_hours": null
+          "estimate_hours": null,
+          "github_issue": 102,
+          "implementation_status": "In Progress",
+          "implementation_note": "6 November: isolated DEV Stripe sandbox; see docs/specs/PRODUCT_CHECKOUT.md. Live rollout remains separate; owner closes issues."
         },
         {
           "id": "DCB-E10-S03",
@@ -1081,7 +1087,10 @@
           "priority": "P2",
           "release": "Post-MVP",
           "target_date": null,
-          "estimate_hours": null
+          "estimate_hours": null,
+          "github_issue": 103,
+          "implementation_status": "In Progress",
+          "implementation_note": "6 November: isolated DEV Stripe sandbox; see docs/specs/PRODUCT_CHECKOUT.md. Live rollout remains separate; owner closes issues."
         },
         {
           "id": "DCB-E10-S04",
@@ -1095,7 +1104,10 @@
           "priority": "P2",
           "release": "Post-MVP",
           "target_date": null,
-          "estimate_hours": null
+          "estimate_hours": null,
+          "github_issue": 104,
+          "implementation_status": "In Progress",
+          "implementation_note": "6 November: isolated DEV Stripe sandbox; see docs/specs/PRODUCT_CHECKOUT.md. Live rollout remains separate; owner closes issues."
         },
         {
           "id": "DCB-E10-S05",
@@ -1109,7 +1121,10 @@
           "priority": "P2",
           "release": "Post-MVP",
           "target_date": null,
-          "estimate_hours": null
+          "estimate_hours": null,
+          "github_issue": 105,
+          "implementation_status": "In Progress",
+          "implementation_note": "6 November: isolated DEV Stripe sandbox; see docs/specs/PRODUCT_CHECKOUT.md. Live rollout remains separate; owner closes issues."
         },
         {
           "id": "DCB-E10-S06",
@@ -1122,10 +1137,14 @@
           "priority": "P2",
           "release": "Post-MVP",
           "target_date": null,
-          "estimate_hours": null
+          "estimate_hours": null,
+          "github_issue": 106,
+          "implementation_status": "Todo",
+          "implementation_note": "Sandbox gross/refund amounts are not fees, profit or conversion/margin reporting."
         }
       ],
-      "release": "Post-MVP"
+      "release": "Post-MVP",
+      "github_issue": 100
     },
     {
       "id": "DCB-E11",

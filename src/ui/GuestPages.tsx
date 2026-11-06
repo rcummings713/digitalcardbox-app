@@ -1,3 +1,4 @@
+import { PurchasePanel } from "./Billing";
 import {
   DesignCanvas,
   DesignEditor,
@@ -175,6 +176,7 @@ function GuestJourney({
   const { data, setData, actions, notify, mode, busy } = useStore();
   const [draft, setDraft] = useState<Draft>(() => loadDraft(event.token));
   const [error, setError] = useState("");
+  const [premium, setPremium] = useState(false);
   const [gifOpen, setGifOpen] = useState(false);
   const [playing, setPlaying] = useState(false);
   const [invitationPlaying, setInvitationPlaying] = useState(false);
@@ -658,8 +660,17 @@ function GuestJourney({
         )}
         {draft.submitted && (
           <div className="thank-you-card">
-            <Card entry={draft} guestToken={event.token} />
+            <Card entry={{ ...draft, premium }} guestToken={event.token} />
           </div>
+        )}
+        {mode === "server" && draft.submitted && draft.receiptId && (
+          <PurchasePanel
+            product="premium-card"
+            targetId={draft.receiptId}
+            prefix={"/api/invitations/" + event.token + "/billing"}
+            back={base + "/thanks"}
+            onAccess={setPremium}
+          />
         )}
         <Link to={base} className="secondary">
           Back to the occasion

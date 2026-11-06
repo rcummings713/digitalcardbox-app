@@ -1,3 +1,5 @@
+import type { BillingConfiguration } from "../modules/billing/public";
+import { emptyBilling } from "../modules/billing/public";
 import { gifStore } from "../modules/media/catalog";
 import type { GiftHandoff } from "../modules/gifts/routing";
 import type { Feature, Gift, Occasion, Service, Store } from "./model";
@@ -128,6 +130,7 @@ export interface GiftIntentResponse {
 }
 
 export interface PublicConfiguration {
+  billing: BillingConfiguration;
   connected: boolean;
   hosted: boolean;
   publicSiteUrl: string;
@@ -137,6 +140,7 @@ export interface PublicConfiguration {
   feedback: boolean;
 }
 export const initialConfiguration: PublicConfiguration = {
+  billing: emptyBilling,
   connected: false,
   hosted: false,
   publicSiteUrl: "",

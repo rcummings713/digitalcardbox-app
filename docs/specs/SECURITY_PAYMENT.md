@@ -27,7 +27,7 @@ Application-encrypt destinations and recoverable share secrets with external key
 
 Keep AI keys and any vendor secret on the server, never in `VITE_*` or client bundles. Do not collect card numbers, bank details, wallet credentials, payment passwords or screenshots as proof. Encrypt stored destination identifiers, restrict reads, redact logs, use least privilege, rate limits, media caps, malware scanning or safe media handling, backups and a restore drill. Record minimal audit events for destination edits and exports. Test cross-event reads, expired sessions, deadline boundaries, stale route versions, service switching and failure states before live users.
 
-An integrated checkout is a separate phase requiring written provider approval of custody, underwriting, payout, fees, disputes and liability. Only then use provider-hosted data collection, signed webhooks, idempotent ledger transitions and reconciliation. A browser return still does not verify payment.
+Integrated guest-gift checkout is a separate phase requiring written provider approval of custody, underwriting, payout, fees, disputes and liability. Only then use provider-hosted data collection, signed webhooks, idempotent ledger transitions and reconciliation. A browser return still does not verify payment.
 
 ## Deployment credentials
 
@@ -35,3 +35,8 @@ DEV, TEST and PROD use distinct Cloudflare account-owned API tokens restricted t
 
 
 5 November DEV: PayPal accepts a structured PayPal.Me handle and only a fixed HTTPS profile route; it uses all existing ownership/version/window/CSRF and acknowledgment checks. Current and snapshotted routing identifiers are application-encrypted using the existing key, with an idempotent upgrade of legacy plaintext. This is not full-database encryption or a production KMS/identity rollout. See STATIONERY_EDITOR.md and ADR 0011 for scope and rollback compatibility.
+
+
+## DEV product purchases, separate from guest gifts
+
+ADR 0012 permits Stripe sandbox hosted product checkout only. The browser never receives private keys or supplies an authoritative price, buyer, paid status or redirect. Raw-body timestamped HMAC verification, fresh Stripe session/price retrieval, exact order/attempt/amount/currency/item matching and durable event deduplication precede access grants. Buyer authorization is scoped to the host or original same-event guest. Full successful refunds and disputes revoke only the paid upgrade; partial refunds retain it. New-checkout pause does not suppress settlement. Strict return-origin/provider allowlists, CSRF and quotas apply. Stripe metadata and return URLs contain opaque order/attempt IDs, never private text, payment handles or invitation tokens. No verified gift receipt or live payment claim follows from a product purchase. See PRODUCT_CHECKOUT.md for private setup and limitations.

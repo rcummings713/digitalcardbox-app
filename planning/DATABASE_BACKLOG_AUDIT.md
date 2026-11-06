@@ -67,3 +67,8 @@ Created #62–65, added all four to the existing project in Todo, and extended 2
 ## Schedule and status
 
 The baseline grows from 156 hours/51 October stories to **180 hours/54 stories**. The local complete backlog becomes **18 epics/104 stories**. First-week prerequisites produce 72/54/54 weekly hours, so capacity must be replanned before promising October 31. Historical 114–157 / 126–192 Word ranges are superseded by this detailed 180-hour October baseline and a provisional 192–215-hour broader pilot (180 + prior 12–35 follow-on allowance), pending overlap review. The fixed $500 code-work arrangement is unchanged. No issue is closed or implementation claimed by the documentation/backlog update.
+
+
+## 6 November 2026 DEV product-purchase extension
+
+DCB-E10 is now imported as #100, with S01–S05 #101–105 OPEN/In Progress and S06 #106 OPEN/Todo. Migration 006 implements isolated SQLite Billing/Book tables, unique provider/request references, composite scope, frozen membership and preserved content/key. The production PostgreSQL infrastructure/recovery work stays with DCB-E18; this does not duplicate or close those stories. Sandbox gross/refund totals do not satisfy margins/processing-fee reconciliation in S06.

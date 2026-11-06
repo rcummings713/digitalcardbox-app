@@ -111,3 +111,8 @@ selected bytes and credits. No new remote media endpoint is introduced.
 ## 5 November 2026 stationery update
 
 5 November: event payloads accept a separate `saveTheDate` invitation-kind document with `variant: "save-the-date"`; guest responses carry it only within the existing event/link scope. Named style/motion fields remain bounded JSON; card main text still has one authoritative note. Migration 005 adds the document column and PayPal destination service. The adapter now encrypts structured destination/intent identifiers with its existing key and transparently upgrades old plaintext without changing route versions. PayPal uses existing destination and gift-intent endpoints; no transfer endpoint or new provider key. See STATIONERY_EDITOR.md.
+
+
+## Product purchase routes
+
+See PRODUCT_CHECKOUT.md. Host `/api/billing/quotes`, `/api/billing/orders/:id`, `.../checkout`, `.../book`, and `/api/billing/access/:eventId` use the host session. Guest equivalents are `/api/invitations/:token/billing/quotes`, `.../orders/:id`, `.../checkout`, and `.../access/:cardId`, preserving the invitation-scoped cookie path. Mutation bodies accept only fixed product/target/reference choices; CSRF is required. Operator GET/PATCH `/api/admin/billing` controls new checkout and lists test totals. Only POST `/api/billing/stripe/webhook` is exempt from browser Origin/custom-header checks; it requires raw-body Stripe HMAC and test events. Paid access is verified server-side. Existing free routes are unchanged.

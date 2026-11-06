@@ -1,3 +1,5 @@
+import { BillingService } from "./billing-service.mjs";
+import { billingHttp } from "./billing-http.mjs";
 import { StudioService } from "./studio-service.mjs";
 import { MediaService } from "./media-service.mjs";
 import { createServer } from "node:http";
@@ -49,6 +51,8 @@ export function createApiHandler(
 ) {
   const media = services.media ?? new MediaService(repository);
   const studio = new StudioService(repository, media);
+  const billing = services.billing ?? new BillingService(repository);
+  repository.premiumStatus = (id) => billing.premiumCardStatus(id);
   const app = new ReviewApplication(
     repository,
     identity ?? new LocalTestIdentity(repository),
@@ -93,7 +97,7 @@ export function createApiHandler(
       if (!["GET", "POST", "PATCH", "DELETE"].includes(method))
         fail(405, "This method is not supported.");
       throttle(`all:${request.socket.remoteAddress}`, 600);
-      if (!read) {
+      if (!read && path !== "/api/billing/stripe/webhook") {
         const origin = request.headers.origin;
         const selfOrigin = `${secureCookies ? "https" : "http"}://${request.headers.host}`;
         if (
@@ -130,7 +134,20 @@ export function createApiHandler(
           perGuest: 2,
         },
         feedback: true,
+        billing: billing.configuration(),
       });
+      const purchase = await billingHttp({
+        billing,
+        app,
+        session,
+        jar,
+        path,
+        method,
+        request,
+        readBody: body,
+        throttle,
+      });
+      if (purchase) return send(purchase.status || 200, purchase.value);
       const sendImage = (image) => {
         response.statusCode = 200;
         response.setHeader("Content-Type", image.mime);
@@ -318,6 +335,7 @@ export function createApiHandler(
           ok: true,
           mode: hosted ? "hosted-dev" : "local-test",
           moneyMovement: false,
+          productPayments: "stripe-test-only",
         });
       if (path === "/api/session" && read)
         return send(200, {

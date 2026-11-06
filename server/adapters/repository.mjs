@@ -146,6 +146,7 @@ export class ReviewRepository {
         ? { design: cardDesignWithNote(JSON.parse(row.design_json), row.note) }
         : {}),
       ...(row.gif ? { gif: row.gif } : {}),
+      premium: this.premiumStatus?.(row.id) ?? false,
       consent: !!row.consent,
       hidden: !!row.hidden,
       createdAt: row.created_at,
@@ -561,6 +562,9 @@ export class ReviewRepository {
       eventId,
     );
     return this.card(this.one("SELECT * FROM cards WHERE id=?", id));
+  }
+  guestCard(eventId, guestId, id) {
+    return this.one("SELECT * FROM cards WHERE id=? AND event_id=? AND guest_id=? AND removed_at IS NULL", id, eventId, guestId);
   }
   ownedCard(hostId, id) {
     return this.one(

@@ -39,6 +39,7 @@ export interface Entry {
   name: string;
   note: string;
   style: CardStyle;
+  premium?: boolean;
   artId?: string;
   design?: DesignDocument;
   photo?: string;

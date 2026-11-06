@@ -1,3 +1,6 @@
+import { BillingService } from "../server/billing-service.mjs";
+import { billingOptions } from "../server/billing-options.mjs";
+import migration6 from "../server/migrations/006-product-checkout.sql";
 import { DurableObject } from "cloudflare:workers";
 import { randomBytes, createHash, timingSafeEqual } from "node:crypto";
 import { ReviewRepository } from "../server/adapters/repository.mjs";
@@ -73,6 +76,7 @@ export class ReviewStore extends DurableObject {
           migration3,
           migration4,
           migration5,
+          migration6,
         ],
         transactionRunner: (work) => ctx.storage.transactionSync(work),
         passwordHasher: () => "00".repeat(64),
@@ -85,7 +89,10 @@ export class ReviewStore extends DurableObject {
         secureCookies: env.DCB_LOCAL_TEST !== "true",
         hosted: true,
         identity: new HostedReviewIdentity(this.repo, env),
-        services: { media: this.media },
+        services: {
+          media: this.media,
+          billing: new BillingService(this.repo, billingOptions(env)),
+        },
       });
     });
   }

@@ -44,7 +44,7 @@ These additional choices use the existing dated, non-wedding lifecycle: contribu
 
 Production follows [DATA_MODEL.md](DATA_MODEL.md) and [ADR 0005](../adr/0005-database-design.md), with managed PostgreSQL and private photo/export storage. Registered customers represent hosts; anonymous guests are event-scoped and independent of expiring sessions. Cards, consent, destination versions, external gift intent/activity and host receipt marks persist independently. The current UI uses fictional records in device-local storage for account-free owner design review; production authorization and storage remain open. See [UI_DESIGN.md](UI_DESIGN.md) and [ADR 0007](../adr/0007-ui-first-design-review.md).
 
-External gift activity is not proof of a financial transaction. Future premium purchase transactions and approved integrated gift ledgers are separate Post-MVP contracts. Guest intake closure does not delete CardVault records; ongoing private access follows a published retention/deletion policy.
+External gift activity is not proof of a financial transaction. Product purchases now have an isolated DEV sandbox implementation (6 November); approved integrated gift ledgers remain a separate Post-MVP contract. Guest intake closure does not delete CardVault records; ongoing private access follows a published retention/deletion policy.
 
 ## Beyond October
 
@@ -69,3 +69,8 @@ The customer interface now includes occasion-led creation and planned Apple/Goog
 ## 5 November 2026 owner-directed extension
 
 Direct on-design editing, a larger original stationery collection, finite entrance effects, eligible-artwork imports and a separate event-bound save-the-date now extend the design review. PayPal remains an external reviewed profile route, not product checkout or integrated gift processing. Scheduled save-the-dates do not advance contribution deadlines. See STATIONERY_EDITOR.md and ADR 0011. The October schedule is a historical planning baseline; this update adds no November delivery estimate or production acceptance.
+
+
+## 6 November 2026 product checkout
+
+Owner-directed DEV extension implements Stripe sandbox product purchases: $4.99 signature finish and $15/$30/$79 self-contained digital keepsake books. No basic box fee or paid AI allowance is introduced. Free templates, manual delivery, CardVault and basic exports remain. Final book quotes use frozen eligible membership after contribution close; an explicit DEV provisional option supports testing before close. The owner must configure private test keys, webhook secret and four Price IDs. Missing setup fails closed, and live keys/events are refused. See [PRODUCT_CHECKOUT.md](PRODUCT_CHECKOUT.md) and [ADR 0012](../adr/0012-product-checkout-sandbox.md). This supersedes the earlier “future checkout” boundary only for isolated DEV. Physical fulfillment, live sales and fee/margin reconciliation remain open.

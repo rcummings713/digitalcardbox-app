@@ -1,4 +1,5 @@
 import test from "node:test";
+import { createHmac } from "node:crypto";
 import assert from "node:assert/strict";
 import { spawn } from "node:child_process";
 import { createServer } from "node:net";
@@ -31,6 +32,10 @@ test(
       directory,
       "--var",
       "DCB_LOCAL_TEST:true",
+      "--var",
+      "STRIPE_SECRET_KEY:sk_test_worker_fixture_only",
+      "--var",
+      "STRIPE_WEBHOOK_SECRET:whsec_worker_fixture_only",
       "--var",
       "AI_CARDS_ENABLED:false",
       "--var",
@@ -192,11 +197,38 @@ test(
         );
       },
     );
+    const billingEvent = JSON.stringify({
+      id: "evt_worker_billing_probe",
+      type: "test.billing.probe",
+      livemode: false,
+      data: { object: { id: "probe" } },
+    });
+    const stamp = Math.floor(Date.now() / 1000);
+    const signature = createHmac("sha256", "whsec_worker_fixture_only")
+      .update(stamp + "." + billingEvent)
+      .digest("hex");
+    const postBillingEvent = () =>
+      fetch(base + "/api/billing/stripe/webhook", {
+        method: "POST",
+        headers: {
+          "content-type": "application/json",
+          "stripe-signature": "t=" + stamp + ",v1=" + signature,
+        },
+        body: billingEvent,
+      });
+    await t.test(
+      "Worker verifies raw Stripe HMAC and durably deduplicates a sandbox event",
+      async () => {
+        assert.equal((await postBillingEvent()).status, 200);
+        assert.equal((await (await postBillingEvent()).json()).repeated, true);
+      },
+    );
     await t.test(
       "Worker restart preserves the invitation, host session, card and feedback",
       async () => {
         await stop();
         await start();
+        assert.equal((await (await postBillingEvent()).json()).repeated, true);
         assert.equal(
           (await guest.call("/api/invitations/" + event.token)).status,
           200,

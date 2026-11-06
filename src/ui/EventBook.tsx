@@ -1,10 +1,11 @@
+import { PurchasePanel } from "./Billing";
 import { cardArchive } from "../modules/media/archive";
 import { GifCredit } from "./GifCredit";
 import { findGif, gifCreditText } from "../modules/media/catalog";
 import { useState } from "react";
 import { bookEntries, formatDate } from "./model";
 import type { Occasion } from "./model";
-import { Botanical, Card, Empty, Heading, Notice, download } from "./shared";
+import { Botanical, Card, Empty, Heading, download } from "./shared";
 import { useStore } from "./state";
 
 export function EventBook({ event }: { event: Occasion }) {
@@ -266,15 +267,12 @@ export function EventBook({ event }: { event: Occasion }) {
             </button>
           </div>
         </section>
-        <section className="panel">
-          <p className="eyebrow">The polished edition</p>
-          <h3>Room for every memory.</h3>
-          <p className="small">
-            No guest is blocked by a book tier. Payment and high-resolution book
-            delivery are not connected yet.
-          </p>
-          <Notice>Enjoy arranging your book. No purchase has been made.</Notice>
-        </section>
+        <PurchasePanel
+          product="event-book"
+          targetId={event.id}
+          prefix="/api/billing"
+          back={"/workspace/events/" + event.id + "/book"}
+        />
       </div>
     </>
   );

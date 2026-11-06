@@ -1,3 +1,4 @@
+import { CheckoutReturn } from "./ui/Billing";
 import { DesignStudio } from "./ui/DesignStudio";
 import { FeedbackPage } from "./ui/FeedbackPages";
 import { useEffect, useRef, useState } from "react";
@@ -50,6 +51,7 @@ function Shell() {
   let content;
   if (guest)
     content = <GuestPage token={parts[1] || ""} step={parts[2] || "landing"} />;
+  else if (path === "/checkout/return") content = <CheckoutReturn />;
   else if (path === "/") content = <Home />;
   else if (path === "/start") content = <Start />;
   else if (path === "/cards")

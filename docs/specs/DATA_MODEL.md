@@ -181,3 +181,8 @@ Integrated money requires a new approved ADR/provider contract before physical l
 ## 5 November 2026 stationery update
 
 5 November DEV extension: optional `events.save_the_date_json` is separate from the formal invitation; both use bounded versioned invitation documents, the save-the-date carrying its explicit variant. Cards retain a single note and independent style metadata. Local/hosted DEV migration 005 admits PayPal without changing existing route versions or accepted records; application code seals legacy/current destination and intent identifiers with the existing key. This does not install the production PostgreSQL design. See STATIONERY_EDITOR.md and ADR 0011.
+
+
+## Isolated DEV billing adapter — 6 November 2026
+
+Migration 006 adds SQLite `billing_orders`, `billing_order_items`, `billing_payment_attempts`, `billing_provider_events`, `billing_entitlements`, `billing_refunds`, `book_snapshots` and `book_snapshot_entries`. They adapt the separate Billing/Book contracts above without copying note bodies or creating a parallel gift transaction ledger. Composite foreign keys enforce event/card/snapshot scope and entitlement/item/product/target consistency. Request references, active attempts, provider sessions/intents, event receipts and refunds are unique. Snapshot membership/count/price stay frozen; current consent/moderation is rechecked when delivering the album. The current policy retains access on partial successful refund and revokes on full successful refund or dispute. No hard deletion of accepted content or DB/key replacement accompanies the migration. This is sandbox persistence in the existing DEV Durable Object/local SQLite store, not delivery of production PostgreSQL financial operations. See ADR 0012 and PRODUCT_CHECKOUT.md.

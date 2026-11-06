@@ -208,14 +208,15 @@ export function Informational({ page }: { page: string }) {
             <div className="price">Free</div>
             <p>
               Guest cards, a private CardVault and basic export. No contribution
-              cap and no gift required.
+              cap and no gift required. Optional Signature finish: $4.99 after
+              sending.
             </p>
             <Link className="primary" to="/start">
               Create your card box
             </Link>
           </section>
           <section className="panel price-feature">
-            <p className="eyebrow">The polished event book</p>
+            <p className="eyebrow">The digital keepsake book</p>
             <h2>Make it a keepsake.</h2>
             <p>
               Final pricing follows the number of included entries when
@@ -239,8 +240,8 @@ export function Informational({ page }: { page: string }) {
               <summary>About entries &amp; checkout</summary>
               <p className="small">
                 One card with its photo counts as one entry. GIFs and cash gifts
-                do not add entries. Purchasing is not connected in this
-                workspace.
+                do not add entries. Final checkout opens after cards close. This
+                environment uses Stripe test mode; no real money is charged.
               </p>
             </details>
           </section>
@@ -340,7 +341,7 @@ export function Informational({ page }: { page: string }) {
         "Share only words and images that you have permission to use. Keep payment credentials, financial documents and sensitive personal information out of notes.",
         "External gift activity is separate from a card. A guest report or an app handoff does not verify receipt. The host checks their own payment service before marking a gift as received.",
         mode === "server"
-          ? "Local test accounts support card and event-book review. This environment does not process payments, transfer money or accept purchases. Production account providers and database hosting remain separate implementation work."
+          ? "Local test accounts support card and event-book review. Product checkout uses Stripe’s sandbox, with no real charges. Guest gifts remain external handoffs. Production accounts and paid release remain separate work."
           : "This account-free design workspace does not process payments or purchases. Features that require connected accounts will be available after the corresponding services are implemented.",
       ],
     ],

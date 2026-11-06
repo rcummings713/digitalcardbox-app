@@ -5,3 +5,16 @@ DCB_OPERATOR_PASSWORD=
 DCB_HOST_PASSWORD=
 # HTTP local Wrangler testing only. Never configure on hosted environments.
 DCB_LOCAL_TEST=true
+
+
+# Optional Stripe SANDBOX product purchases. Never enter live keys here.
+# See docs/specs/PRODUCT_CHECKOUT.md for products, webhook and preview commands.
+BILLING_ENABLED=false
+BILLING_ALLOW_EARLY_BOOK_PREVIEW=false
+BILLING_RETURN_ORIGIN=http://localhost:5173
+STRIPE_SECRET_KEY=
+STRIPE_WEBHOOK_SECRET=
+STRIPE_PRICE_PREMIUM_CARD=
+STRIPE_PRICE_BOOK_SMALL=
+STRIPE_PRICE_BOOK_MEDIUM=
+STRIPE_PRICE_BOOK_LARGE=

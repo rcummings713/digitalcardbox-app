@@ -956,4 +956,85 @@ html[data-motion="reduce"] .little-star-cover {
 }
 
 /* Full source notices remain beside the selected design and in exports. */
-.studio-template-mini .template-credit { display: none; }
+.studio-template-mini .template-credit {
+  display: none;
+}
+
+/* Product checkout follows the existing paper, copper and editorial type. */
+.purchase-panel {
+  text-align: left;
+  max-width: 780px;
+  margin: 24px auto;
+}
+.purchase-test-label {
+  font: 12px/1.5 var(--font-body);
+  color: #614b31;
+  background: #f0e6d5;
+  border: 1px solid #cbb18a;
+  padding: 9px 12px;
+  border-radius: 4px;
+}
+.purchase-details {
+  margin: 20px 0;
+}
+.purchase-details > div {
+  display: flex;
+  justify-content: space-between;
+  gap: 18px;
+  border-bottom: 1px solid #ac8a6730;
+  padding: 10px 0;
+}
+.purchase-details dt {
+  font-weight: 600;
+}
+.purchase-details dd {
+  margin: 0;
+  text-align: right;
+  overflow-wrap: anywhere;
+}
+.purchase-orders {
+  padding-left: 20px;
+}
+.purchase-orders li {
+  margin: 9px 0;
+}
+.premium-card-finish {
+  position: relative;
+  padding: 20px 12px 12px;
+  border: 2px solid #b39254;
+  background: linear-gradient(
+    145deg,
+    #f6e4b6,
+    #fffaf0 24%,
+    #e9d3a4 70%,
+    #fff9ed
+  );
+  border-radius: 8px;
+  box-shadow: 0 12px 28px #6d4e2020;
+}
+.premium-card-seal {
+  display: block;
+  text-align: center;
+  color: #5b431f;
+  font: 10px/1.8 var(--font-body);
+  text-transform: uppercase;
+  letter-spacing: 0.18em;
+  margin: 0 0 12px;
+}
+@media (max-width: 600px) {
+  .purchase-panel {
+    padding: 18px;
+    margin: 18px 0;
+  }
+  .purchase-panel .primary,
+  .purchase-panel .secondary {
+    width: 100%;
+    margin: 6px 0;
+  }
+  .purchase-details > div {
+    gap: 10px;
+  }
+  .premium-card-finish {
+    padding: 14px 8px 8px;
+  }
+}

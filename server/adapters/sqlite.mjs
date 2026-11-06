@@ -29,6 +29,7 @@ export class SqliteReviewRepository extends ReviewRepository {
       "003-media-feedback.sql",
       "004-design-studio.sql",
       "005-stationery-paypal.sql",
+      "006-product-checkout.sql",
     ].map((name) =>
       readFileSync(new URL("../migrations/" + name, import.meta.url), "utf8"),
     );

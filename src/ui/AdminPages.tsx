@@ -1,3 +1,4 @@
+import { BillingAdmin } from "./Billing";
 import { FeedbackInbox } from "./FeedbackPages";
 import { useEffect, useState } from "react";
 import type { Feature } from "./model";
@@ -293,6 +294,7 @@ function ConnectedAdmin({ tab }: { tab: string }) {
         <section className="panel">
           <h2>Feature availability</h2>
           <AiMediaControl />
+          <BillingAdmin />
           {flags.map((flag) => (
             <div className="flag-row" key={flag.key}>
               <div>

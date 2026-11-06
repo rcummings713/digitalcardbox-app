@@ -1,0 +1,120 @@
+# Product checkout: Stripe sandbox setup
+
+Implemented 6 November 2026 for isolated DEV only. Basic card boxes, manual cards, every current template, CardVault and basic exports remain free. Product purchases are separate from guest-to-host Cash App, Venmo, Zelle and PayPal handoffs. Stripe is the only additional provider account needed for these purchases. No live key is accepted by this implementation.
+
+## What is sold
+
+| Product | USD one-time price | Delivered upgrade |
+| --- | --- | --- |
+| Signature card finish | $4.99 | Gold frame and Signature Edition seal on the delivered card; no extra AI generation |
+| Digital keepsake, 0–99 included cards | $15.00 | Downloadable HTML album, editorial or collage |
+| Digital keepsake, 100–299 included cards | $30.00 | Same format, larger included membership |
+| Digital keepsake, 300+ included cards | $79.00 | Same format, larger included membership |
+
+The book is a self-contained digital edition with full notes, retained artwork and GIFs, suitable for opening offline and browser printing. It is not physical-book fulfillment or a print-production PDF. Existing free exports remain available. Media is bounded to 5 MB per asset / 40 MB of embedded media total (including repeated copies and base64 encoding); a download error leaves the purchase intact. Hand-drawn template layouts are translated into the album's typography; this is not a pixel-exact Canva export. Some current UI-only photo placeholders have no real image upload behind them and are not sold as photo archival.
+
+Normal book checkout requires contribution closure. DEV additionally offers an explicit **provisional test edition** checkbox for an open, published event. Its included membership is frozen at quote time; later submissions are not inserted. Current consent, hidden and removed state are checked again on every download. A completed offline download cannot be recalled. The price/count of its original snapshot stays in history if subsequent moderation reduces visible entries.
+
+## 1. Create a Stripe sandbox
+
+1. Sign in to [Stripe Dashboard](https://dashboard.stripe.com/), creating the business owner's account if needed. Open the account picker and choose **Sandboxes → Create sandbox** (or the existing test environment). Stay in that sandbox throughout these instructions.
+2. Open **Developers → API keys** (the Dashboard search can find “API keys”). Reveal/copy the **secret** test key beginning `sk_test_`. Do not use `pk_test_`, `sk_live_` or `rk_live_`. A restricted `rk_test_` key also works if granted Prices read, Checkout Sessions read/write, Payment Intents read, Refunds read and Disputes read.
+3. Keep keys out of chat, Git, screenshots, browser code and `VITE_` variables. A full-page hosted Checkout redirect requires **no publishable frontend key**, Stripe.js or client SDK.
+
+Official reference: [sandbox and secret keys](https://docs.stripe.com/keys).
+
+## 2. Create four one-time prices
+
+In the same sandbox open **Product catalogue → Add product**. Create these four products, each with a **one-time, flat USD price**, quantity one. Leave taxes, subscriptions, trials, shipping and coupons off for this test configuration. Do not enable automatic tax for these Checkout sessions; the current server verifies an exact total.
+
+| Suggested product name | Price | Setting to receive its `price_…` ID |
+| --- | --- | --- |
+| TheDigitalCardBox Signature Card | 4.99 USD | `STRIPE_PRICE_PREMIUM_CARD` |
+| TheDigitalCardBox Digital Book — Small | 15.00 USD | `STRIPE_PRICE_BOOK_SMALL` |
+| TheDigitalCardBox Digital Book — Medium | 30.00 USD | `STRIPE_PRICE_BOOK_MEDIUM` |
+| TheDigitalCardBox Digital Book — Large | 79.00 USD | `STRIPE_PRICE_BOOK_LARGE` |
+
+Open each product's price and copy the **Price ID**, beginning `price_`. Product IDs (`prod_`) and Payment Link URLs are not accepted. The server retrieves and checks each price's sandbox mode, active state, amount, currency and one-time type before checkout. Incorrect setup fails closed without changing the original card or book.
+
+## 3. Create the DEV webhook destination
+
+1. In the sandbox open **Workbench → Webhooks → Create event destination**.
+2. Choose events from **Your account** and **Snapshot** payloads. Set the API version to **2026-10-28.endive**, matching `server/stripe-provider.mjs`.
+3. Select exactly these event types:
+
+```text
+checkout.session.completed
+checkout.session.async_payment_succeeded
+checkout.session.async_payment_failed
+checkout.session.expired
+refund.created
+refund.updated
+refund.failed
+charge.dispute.created
+```
+
+4. Choose **Webhook endpoint** and enter this exact endpoint URL (no invitation tokens):
+
+```text
+https://feature-compact-mobile-lay-b2925a1b-digitalcardbox-app-dev.rcummings71300.workers.dev/api/billing/stripe/webhook
+```
+
+5. Create the destination. Open it and reveal its **Signing secret**, beginning `whsec_`. This is different from the API secret key.
+
+References: [create a destination](https://docs.stripe.com/webhooks), [Checkout fulfillment](https://docs.stripe.com/checkout/fulfillment.md?ui=full-page).
+
+## 4. Connect private values to the existing DEV preview
+
+The repository's DEV configuration already sets `BILLING_ENABLED=true`, `BILLING_ALLOW_EARLY_BOOK_PREVIEW=true` and the return origin to the stable DEV URL above. These flags alone cannot enable checkout: all six values below are required. TEST and PROD configurations are not changed.
+
+Run these commands in Terminal from the repository. Sign in to Cloudflare if prompted. Each command prompts privately for its one value; paste it there. **Use preview secrets for the named preview**, not only base Worker secrets; changing a base Worker secret does not update an already existing preview.
+
+```sh
+cd /Users/robertcummings/Projects/digitalcardbox-app
+npx wrangler login
+npx wrangler preview secret put STRIPE_SECRET_KEY --config wrangler.dev.jsonc --worker-name digitalcardbox-app-dev --name feature-compact-mobile-lay-b2925a1b
+npx wrangler preview secret put STRIPE_WEBHOOK_SECRET --config wrangler.dev.jsonc --worker-name digitalcardbox-app-dev --name feature-compact-mobile-lay-b2925a1b
+npx wrangler preview secret put STRIPE_PRICE_PREMIUM_CARD --config wrangler.dev.jsonc --worker-name digitalcardbox-app-dev --name feature-compact-mobile-lay-b2925a1b
+npx wrangler preview secret put STRIPE_PRICE_BOOK_SMALL --config wrangler.dev.jsonc --worker-name digitalcardbox-app-dev --name feature-compact-mobile-lay-b2925a1b
+npx wrangler preview secret put STRIPE_PRICE_BOOK_MEDIUM --config wrangler.dev.jsonc --worker-name digitalcardbox-app-dev --name feature-compact-mobile-lay-b2925a1b
+npx wrangler preview secret put STRIPE_PRICE_BOOK_LARGE --config wrangler.dev.jsonc --worker-name digitalcardbox-app-dev --name feature-compact-mobile-lay-b2925a1b
+```
+
+Each command must complete successfully. Price IDs use secret settings here to avoid committing account-specific configuration; they are not API credentials. Do not replace any existing encryption key, Durable Object namespace, preview name or review identity to connect Stripe. No extra database service or migration command is required: additive migration 006 runs on the existing isolated DEV SQLite store.
+
+Reload DEV. Visit `/api/config` on the DEV site: `billing.configured`, `billing.enabled`, `billing.premiumCards` and `billing.eventBooks` should all be `true`. Configuration readiness checks presence/format only; the first checkout also validates the real Stripe price and API access. If `configured` is false, check the secret and signing secret prefixes and return origin. If product flags are false, check the four Price IDs and the operator's **Feature controls → Product test checkout** setting. The API never returns the secret values.
+
+## 5. Test the customer flows
+
+1. As a host, create/publish an event, then open its invitation link in the same browser profile or a second private profile. Send a free guest card. On its receipt choose **Review $4.99 signature finish**, review the server price, and continue to Stripe test checkout.
+2. Enter test card **4242 4242 4242 4242**, any future expiry and any three-digit CVC in **Stripe's hosted page**. Use any sandbox contact details it requests. No real card or funds are needed. See [Stripe testing](https://docs.stripe.com/testing).
+3. Return to the site. It shows pending until a signed event or a server retrieval confirms the exact paid Checkout session. The original guest browser's temporary purchase context and invitation session are needed to view its private receipt. Returning on another device does not grant access. The host's card view now has the signature finish.
+4. For a book, sign into the host workspace, open **Event book**, choose the provisional checkbox while the event is open, review the included count/price, and pay using the same sandbox card. Download both album styles from the purchase receipt. A final closed-event book omits the provisional checkbox requirement.
+5. Cancel a checkout, then revisit its receipt: it stays unpaid and can resume. A declined card can be retried inside the same Stripe session. The app never grants paid access from a return URL, screenshot or external gift status.
+6. In Stripe's sandbox **Payments**, open that successful product payment and choose **Refund**. A partial successful refund retains access; a full successful refund revokes the upgrade. Original notes and free CardVault access stay intact. Refunds are initiated in Stripe Dashboard, not through a new app refund-issuance endpoint. Signed refund events update the stored history. A dispute revokes access pending manual review; automatic restoration after a won dispute is not implemented.
+7. In operator **Feature controls → Product test checkout**, inspect test order/status and gross/refunded amounts or pause new checkouts. These totals are sandbox bookkeeping, not actual revenue, net profit or processing-fee reconciliation. DCB-E10-S06 remains follow-up work.
+
+## Optional local development
+
+Copy `.env.server.example` to ignored `.env.server` and set the same six values privately, plus:
+
+```dotenv
+BILLING_ENABLED=true
+BILLING_ALLOW_EARLY_BOOK_PREVIEW=true
+BILLING_RETURN_ORIGIN=http://localhost:5173
+```
+
+Run `npm run dev`. In another terminal, install/sign into the [Stripe CLI](https://docs.stripe.com/stripe-cli), choose the same sandbox, and run:
+
+```sh
+stripe login
+stripe listen --events checkout.session.completed,checkout.session.async_payment_succeeded,checkout.session.async_payment_failed,checkout.session.expired,refund.created,refund.updated,refund.failed,charge.dispute.created --forward-to localhost:8787/api/billing/stripe/webhook
+```
+
+Use the listener's `whsec_…` value as local `STRIPE_WEBHOOK_SECRET` and restart the app. The CLI signing secret differs from the hosted destination's secret. If using a different UI/API port, adjust both commands/origin. Generic `stripe trigger` events do not belong to app orders and intentionally cannot unlock them; use a real app-created sandbox checkout for the end-to-end test.
+
+## Security, persistence and scope
+
+New tables persist orders, fixed items, attempts, verified-event receipts, access grants and refunds. Unique references and transaction boundaries make event replay safe; ambiguous creation retries use the same Stripe idempotency key and stop before its retention window expires. Raw event bodies, PAN/CVV, bank details and provider secrets are not stored in these tables. Event receipts retain only event ID/type/digest/time; checkout URLs are encrypted. Server-scoped buyers, same-event constraints, CSRF, quotas, fixed price IDs and fixed provider URLs apply. Private notes and invitation tokens never enter Stripe metadata or return URLs.
+
+This uses the existing DEV SQLite/Durable Object store, not the planned production PostgreSQL billing deployment. This code deliberately refuses live credentials/events. Enabling real sales requires a separately reviewed live-mode rollout with production identity/storage, recovery/retention operations, fee reconciliation and owner approval; a key substitution does not silently enable it. See [ADR 0012](../adr/0012-product-checkout-sandbox.md).

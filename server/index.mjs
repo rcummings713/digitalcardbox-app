@@ -1,3 +1,5 @@
+import { BillingService } from "./billing-service.mjs";
+import { billingOptions } from "./billing-options.mjs";
 import { resolve } from "node:path";
 import { existsSync } from "node:fs";
 import { loadEnvFile } from "node:process";
@@ -16,6 +18,10 @@ const repo = new SqliteReviewRepository(
 const server = createApiServer(repo, {
   publicSiteUrl: process.env.DCB_PUBLIC_SITE_URL || "",
   services: {
+    billing: new BillingService(
+      repo,
+      billingOptions(process.env, "http://localhost:5173"),
+    ),
     media: new MediaService(repo, {
       apiKey: process.env.OPENAI_API_KEY || "",
       aiEnabled: process.env.AI_CARDS_ENABLED === "true",
@@ -24,7 +30,7 @@ const server = createApiServer(repo, {
 });
 server.listen(port, "127.0.0.1", () =>
   console.log(
-    `TheDigitalCardBox test API: http://127.0.0.1:${port} (persistent local records; no payments)`,
+    `TheDigitalCardBox test API: http://127.0.0.1:${port} (persistent local records; product payments are Stripe test-only)`,
   ),
 );
 for (const signal of ["SIGINT", "SIGTERM"])

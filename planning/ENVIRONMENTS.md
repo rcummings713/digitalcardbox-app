@@ -70,3 +70,8 @@ The original Worker-specific CI token may need narrowly scoped capability to
 create/use this DEV Worker's Durable Object binding. Diagnose the actual API
 error before changing permissions; do not broaden TEST/PROD tokens or grant
 account-wide access for unrelated resources. No production deployment is authorized.
+
+
+## Stripe product tests (6 November)
+
+Only `wrangler.dev.jsonc` enables sandbox purchase flags and the stable named-preview return origin. Six owner-provided Stripe values are installed as named-preview secrets using PRODUCT_CHECKOUT.md. Do not substitute a new Worker, Durable Object identity, encryption key or database. TEST/PROD remain unchanged. Missing configuration is unavailable, and live keys/events are rejected.

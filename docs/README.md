@@ -19,3 +19,6 @@ When an implementation detail changes, update the relevant spec, ADR, affected r
 
 
 - [Card media and AI key setup](specs/CARD_MEDIA.md): curated store, moderated generation, quotas and private feedback. [ADR 0009](adr/0009-hosted-dev-media.md) extends the shared backend to isolated DEV for live QR invitations.
+
+
+- [Stripe sandbox product checkout and exact key setup](specs/PRODUCT_CHECKOUT.md); [ADR 0012](adr/0012-product-checkout-sandbox.md) records isolated DEV scope and refund/access policy.
