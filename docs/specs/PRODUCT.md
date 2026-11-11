@@ -74,3 +74,8 @@ Direct on-design editing, a larger original stationery collection, finite entran
 ## 6 November 2026 product checkout
 
 Owner-directed DEV extension implements Stripe sandbox product purchases: $4.99 signature finish and $15/$30/$79 self-contained digital keepsake books. No basic box fee or paid AI allowance is introduced. Free templates, manual delivery, CardVault and basic exports remain. Final book quotes use frozen eligible membership after contribution close; an explicit DEV provisional option supports testing before close. The owner must configure private test keys, webhook secret and four Price IDs. Missing setup fails closed, and live keys/events are refused. See [PRODUCT_CHECKOUT.md](PRODUCT_CHECKOUT.md) and [ADR 0012](../adr/0012-product-checkout-sandbox.md). This supersedes the earlier “future checkout” boundary only for isolated DEV. Physical fulfillment, live sales and fee/margin reconciliation remain open.
+
+
+## 11 November 2026 stable DEV deployment
+
+The owner requests the existing connected backend at the main DEV Worker address. `dev` now deploys the tested connected UI/API there; feature previews stay isolated. Stripe sandbox registration uses the stable DEV webhook and return origin in PRODUCT_CHECKOUT.md. The stable store starts separately from retained preview records and uses the same additive migrations and persistent key design. TEST/customer PROD and live-payment boundaries remain unchanged.

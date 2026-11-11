@@ -149,3 +149,8 @@ Sources checked for this implementation: [OpenAI image generation](https://devel
 ## 5 November 2026 stationery update
 
 5 November: original stationery expands to 106 card and 95 invitation/save-the-date compositions. Text and page/art animations remain native bounded document data, not AI image text. AI backgrounds reuse the existing key, quotas and moderation; no paid request was made for this update. Owner-reviewed PNG/JPG background imports require worldwide retention/template/export rights, record sources/hashes and appear with credits; portable archives embed their selected bytes. No Canva assets ship without a real authorized eligible export. See STATIONERY_EDITOR.md.
+
+
+## Stable DEV main Worker — 11 November 2026
+
+For artwork testing on the stable `https://digitalcardbox-app-dev.rcummings71300.workers.dev` site, install its own private key with `npx wrangler secret put OPENAI_API_KEY --config wrangler.dev.jsonc --name digitalcardbox-app-dev`. Main Worker and named-preview secrets are independent. All request, moderation and budget limits above apply unchanged. The operator's private login is configured separately on the main Worker. No AI key is copied from a preview or read back from Cloudflare.

@@ -18,7 +18,7 @@
     "AI_CARDS_ENABLED": "true",
     "BILLING_ENABLED": "true",
     "BILLING_ALLOW_EARLY_BOOK_PREVIEW": "true",
-    "BILLING_RETURN_ORIGIN": "https://feature-compact-mobile-lay-b2925a1b-digitalcardbox-app-dev.rcummings71300.workers.dev",
+    "BILLING_RETURN_ORIGIN": "https://digitalcardbox-app-dev.rcummings71300.workers.dev",
   },
   "durable_objects": {
     "bindings": [{ "name": "REVIEW", "class_name": "ReviewStore" }],

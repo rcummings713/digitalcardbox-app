@@ -9,6 +9,7 @@ Keep one GitHub repository and use GitHub Actions to build and route static UI d
 
 | Source | GitHub environment | Cloudflare target |
 | --- | --- | --- |
+| `dev` | DEV | The stable connected `digitalcardbox-app-dev` Worker main deployment |
 | `feature/` prefix, including nested branch names | DEV | A named preview under `digitalcardbox-app-dev` |
 | `develop` | TEST | The stable `digitalcardbox-app-test` Worker |
 | `release/` prefix, including nested branch names | TEST | A named preview under `digitalcardbox-app-test` |
@@ -35,3 +36,10 @@ Workers, preview URLs and deployment targets are separate. This static setup add
 Use disposable HTTPS `workers.dev` URLs now and attach the final domain to PROD later. Features and release candidates have independent preview URLs. Record each deployment's environment, commit SHA and URL; restore a previous approved master commit for application rollback, then approve its new PROD deployment. Database rollback remains a separate future runbook.
 
 This decides the static UI deployment pipeline only. The production server/runtime spike in ADR 0001 remains open, and the private MVP release gates are unchanged. See [the environment runbook](../../planning/ENVIRONMENTS.md).
+
+
+## 11 November 2026: stable DEV integration target
+
+The owner requests the connected backend at the main DEV Worker address for a permanent Stripe sandbox endpoint. Add `dev` as a DEV-only integration branch: `deploy --config wrangler.dev.jsonc --name digitalcardbox-app-dev`. The existing DEV-scoped CI token deploys it; GitHub builds with connected/server data mode and runs the same checks as feature deployments. Cloudflare labels this Worker's main deployment “Production”; this is still the DEV Worker and never the customer PROD target. Feature previews remain isolated. `develop`/release and `master` routing/owner approval are unchanged.
+
+Stable DEV uses its own Durable Object namespace and the existing `shared-review-v1` object name, repository migrations and stored encryption key. The previous static baseline had no backend records. This deployment initializes a new DEV test store; it does not copy, delete, expire or rebind the existing preview's records, links, sessions, keys or secrets. Existing preview invitations continue at their original origin. New DEV invitations and checkout returns use the stable DEV origin. Operator access is privately configured on the main Worker before backend release. Future updates to `dev` preserve its namespace and key. Stripe sandbox credentials remain owner-provided; live keys/events stay rejected.

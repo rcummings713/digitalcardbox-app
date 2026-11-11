@@ -116,3 +116,6 @@ selected bytes and credits. No new remote media endpoint is introduced.
 ## Product purchase routes
 
 See PRODUCT_CHECKOUT.md. Host `/api/billing/quotes`, `/api/billing/orders/:id`, `.../checkout`, `.../book`, and `/api/billing/access/:eventId` use the host session. Guest equivalents are `/api/invitations/:token/billing/quotes`, `.../orders/:id`, `.../checkout`, and `.../access/:cardId`, preserving the invitation-scoped cookie path. Mutation bodies accept only fixed product/target/reference choices; CSRF is required. Operator GET/PATCH `/api/admin/billing` controls new checkout and lists test totals. Only POST `/api/billing/stripe/webhook` is exempt from browser Origin/custom-header checks; it requires raw-body Stripe HMAC and test events. Paid access is verified server-side. Existing free routes are unchanged.
+
+
+Stable hosted DEV (11 November): `https://digitalcardbox-app-dev.rcummings71300.workers.dev` serves this same private API. The `dev` branch deploys its connected UI/backend. Use `/api/billing/stripe/webhook` there for Stripe sandbox events and install main Worker runtime secrets. Its store/session cookies differ from the retained feature preview; no previous preview records are copied or deleted by the deployment.

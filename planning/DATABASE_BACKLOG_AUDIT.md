@@ -72,3 +72,8 @@ The baseline grows from 156 hours/51 October stories to **180 hours/54 stories**
 ## 6 November 2026 DEV product-purchase extension
 
 DCB-E10 is now imported as #100, with S01–S05 #101–105 OPEN/In Progress and S06 #106 OPEN/Todo. Migration 006 implements isolated SQLite Billing/Book tables, unique provider/request references, composite scope, frozen membership and preserved content/key. The production PostgreSQL infrastructure/recovery work stays with DCB-E18; this does not duplicate or close those stories. Sandbox gross/refund totals do not satisfy margins/processing-fee reconciliation in S06.
+
+
+## 11 November stable DEV target
+
+Extend existing hosted DEV story #91 (DCB-E18-S05) and checkout story #103 rather than adding another database epic. The existing DEV Worker's main deployment initializes its own isolated review namespace, preserving the previous preview. `dev` provides repeatable releases and a stable Stripe sandbox endpoint. Migrations/key storage remain unchanged; this is neither a preview-record migration nor delivery of production PostgreSQL/recovery gates. Stories stay open/In Progress for owner review.

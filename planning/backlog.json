@@ -1,6 +1,6 @@
 {
   "project": "TheDigitalCardBox",
-  "version": "2026-11-05",
+  "version": "2026-11-11",
   "source": "Canonical product/security/database specs, ADRs, Word references and live GitHub backlog review",
   "note": "AI-drafted planning backlog. October working estimate is 180 hours after adding 24 explicit database-foundation hours. Replan capacity before committing to October 31; acceptance gates remain mandatory. Post-MVP candidates are not release commitments.",
   "epics": [
@@ -1764,7 +1764,8 @@
           "priority": "P0",
           "release": "UI design review",
           "target_date": null,
-          "estimate_hours": null
+          "estimate_hours": null,
+          "implementation_note": "11 November: stable dev branch/main DEV Worker for connected review and Stripe sandbox. Previous preview state stays separate and intact. See ADR 0006 and PRODUCT_CHECKOUT.md."
         }
       ]
     },

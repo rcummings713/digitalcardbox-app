@@ -56,31 +56,31 @@ charge.dispute.created
 4. Choose **Webhook endpoint** and enter this exact endpoint URL (no invitation tokens):
 
 ```text
-https://feature-compact-mobile-lay-b2925a1b-digitalcardbox-app-dev.rcummings71300.workers.dev/api/billing/stripe/webhook
+https://digitalcardbox-app-dev.rcummings71300.workers.dev/api/billing/stripe/webhook
 ```
 
 5. Create the destination. Open it and reveal its **Signing secret**, beginning `whsec_`. This is different from the API secret key.
 
 References: [create a destination](https://docs.stripe.com/webhooks), [Checkout fulfillment](https://docs.stripe.com/checkout/fulfillment.md?ui=full-page).
 
-## 4. Connect private values to the existing DEV preview
+## 4. Connect private values to the stable DEV Worker
 
 The repository's DEV configuration already sets `BILLING_ENABLED=true`, `BILLING_ALLOW_EARLY_BOOK_PREVIEW=true` and the return origin to the stable DEV URL above. These flags alone cannot enable checkout: all six values below are required. TEST and PROD configurations are not changed.
 
-Run these commands in Terminal from the repository. Sign in to Cloudflare if prompted. Each command prompts privately for its one value; paste it there. **Use preview secrets for the named preview**, not only base Worker secrets; changing a base Worker secret does not update an already existing preview.
+Run these commands in Terminal from the repository. Sign in to Cloudflare if prompted. Each command prompts privately for its one value; paste it there. Use **main Worker secrets** for this stable DEV destination. In Cloudflare Dashboard choose `digitalcardbox-app-dev` → **Production** (the main deployment of the DEV Worker), not a feature preview. This does not select the customer PROD Worker. Existing previews keep separate secrets and data.
 
 ```sh
 cd /Users/robertcummings/Projects/digitalcardbox-app
 npx wrangler login
-npx wrangler preview secret put STRIPE_SECRET_KEY --config wrangler.dev.jsonc --worker-name digitalcardbox-app-dev --name feature-compact-mobile-lay-b2925a1b
-npx wrangler preview secret put STRIPE_WEBHOOK_SECRET --config wrangler.dev.jsonc --worker-name digitalcardbox-app-dev --name feature-compact-mobile-lay-b2925a1b
-npx wrangler preview secret put STRIPE_PRICE_PREMIUM_CARD --config wrangler.dev.jsonc --worker-name digitalcardbox-app-dev --name feature-compact-mobile-lay-b2925a1b
-npx wrangler preview secret put STRIPE_PRICE_BOOK_SMALL --config wrangler.dev.jsonc --worker-name digitalcardbox-app-dev --name feature-compact-mobile-lay-b2925a1b
-npx wrangler preview secret put STRIPE_PRICE_BOOK_MEDIUM --config wrangler.dev.jsonc --worker-name digitalcardbox-app-dev --name feature-compact-mobile-lay-b2925a1b
-npx wrangler preview secret put STRIPE_PRICE_BOOK_LARGE --config wrangler.dev.jsonc --worker-name digitalcardbox-app-dev --name feature-compact-mobile-lay-b2925a1b
+npx wrangler secret put STRIPE_SECRET_KEY --config wrangler.dev.jsonc --name digitalcardbox-app-dev
+npx wrangler secret put STRIPE_WEBHOOK_SECRET --config wrangler.dev.jsonc --name digitalcardbox-app-dev
+npx wrangler secret put STRIPE_PRICE_PREMIUM_CARD --config wrangler.dev.jsonc --name digitalcardbox-app-dev
+npx wrangler secret put STRIPE_PRICE_BOOK_SMALL --config wrangler.dev.jsonc --name digitalcardbox-app-dev
+npx wrangler secret put STRIPE_PRICE_BOOK_MEDIUM --config wrangler.dev.jsonc --name digitalcardbox-app-dev
+npx wrangler secret put STRIPE_PRICE_BOOK_LARGE --config wrangler.dev.jsonc --name digitalcardbox-app-dev
 ```
 
-Each command must complete successfully. Price IDs use secret settings here to avoid committing account-specific configuration; they are not API credentials. Do not replace any existing encryption key, Durable Object namespace, preview name or review identity to connect Stripe. No extra database service or migration command is required: additive migration 006 runs on the existing isolated DEV SQLite store.
+Each command must complete successfully. Price IDs use secret settings here to avoid committing account-specific configuration; they are not API credentials. Do not replace any existing encryption key, Durable Object namespace, object name or review identity to connect Stripe. No extra database service or migration command is required: additive migration 006 runs on the existing isolated DEV SQLite store.
 
 Reload DEV. Visit `/api/config` on the DEV site: `billing.configured`, `billing.enabled`, `billing.premiumCards` and `billing.eventBooks` should all be `true`. Configuration readiness checks presence/format only; the first checkout also validates the real Stripe price and API access. If `configured` is false, check the secret and signing secret prefixes and return origin. If product flags are false, check the four Price IDs and the operator's **Feature controls → Product test checkout** setting. The API never returns the secret values.
 
@@ -118,3 +118,8 @@ Use the listener's `whsec_…` value as local `STRIPE_WEBHOOK_SECRET` and restar
 New tables persist orders, fixed items, attempts, verified-event receipts, access grants and refunds. Unique references and transaction boundaries make event replay safe; ambiguous creation retries use the same Stripe idempotency key and stop before its retention window expires. Raw event bodies, PAN/CVV, bank details and provider secrets are not stored in these tables. Event receipts retain only event ID/type/digest/time; checkout URLs are encrypted. Server-scoped buyers, same-event constraints, CSRF, quotas, fixed price IDs and fixed provider URLs apply. Private notes and invitation tokens never enter Stripe metadata or return URLs.
 
 This uses the existing DEV SQLite/Durable Object store, not the planned production PostgreSQL billing deployment. This code deliberately refuses live credentials/events. Enabling real sales requires a separately reviewed live-mode rollout with production identity/storage, recovery/retention operations, fee reconciliation and owner approval; a key substitution does not silently enable it. See [ADR 0012](../adr/0012-product-checkout-sandbox.md).
+
+
+## Stable DEV cutover — 11 November 2026
+
+The main DEV Worker now receives connected releases from `dev`; feature previews remain available separately. The webhook and return origin above replace the former branch-preview setup target. If you already registered the preview destination in Stripe, edit that destination's URL to the stable endpoint above, retain the same eight events/snapshot/API version, and install that destination's signing secret on the main DEV Worker. Do not leave both destinations delivering the same sandbox events unnecessarily. Create and pay for new test orders from the stable DEV site. The main store cannot look up old preview orders; old preview invitations and accepted content remain at the old preview URL. No preview store/key is deleted or rebound during this release. Missing Stripe setup keeps checkout disabled; the endpoint may return 503 until its private values are installed.

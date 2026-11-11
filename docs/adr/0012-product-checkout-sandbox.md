@@ -15,3 +15,6 @@ Signed events are deduplicated durably. Successful partial refunds retain access
 Provider calls occur outside database transactions; attempt IDs become provider idempotency keys. Ambiguous create failures keep the attempt for retry and stop before 24-hour key expiry. Event receipts contain identifiers/type/digest/time rather than full webhook bodies. Private invitation tokens remain local to the browser's return context and never travel to Stripe.
 
 No live transactions, TEST/PROD deployment, verified gift receipt, physical fulfillment or fully reconciled profit reporting is authorized by this extension. Operator totals are explicitly sandbox gross/refund values. Account-specific secrets and Price IDs must be configured by the owner using [PRODUCT_CHECKOUT.md](../specs/PRODUCT_CHECKOUT.md); missing setup fails closed.
+
+
+11 November: the owner authorizes stable DEV deployment. Use the main `digitalcardbox-app-dev` Worker URL for sandbox webhooks/returns and install secrets on that main Worker. `dev` drives verified releases to it. Original preview records and secrets stay isolated and intact; no order migration is claimed. ADR 0006 records this deployment extension. Sandbox-only verification/refund/access rules remain unchanged.

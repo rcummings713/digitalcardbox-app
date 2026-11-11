@@ -4,7 +4,7 @@ import { deploymentPlan } from './deployment-plan.mjs';
 
 test('only master can select production', () => {
   assert.equal(deploymentPlan('master').environment, 'PROD');
-  for (const branch of ['feature/master', 'release/master', 'develop', 'main', 'master-old', 'hotfix/example']) assert.notEqual(deploymentPlan(branch).environment, 'PROD');
+  for (const branch of ['feature/master', 'release/master', 'dev', 'develop', 'main', 'master-old', 'hotfix/example']) assert.notEqual(deploymentPlan(branch).environment, 'PROD');
 });
 test('develop deploys the stable test Worker', () => {
   assert.equal(deploymentPlan('develop').command, 'deploy --env test --name digitalcardbox-app-test');
@@ -29,4 +29,17 @@ test('similar and long names do not collide or become shell commands', () => {
   const plans = names.map(branch => deploymentPlan(branch));
   assert.equal(new Set(plans.map(plan => plan.previewName)).size, names.length);
   assert.ok(plans.every(plan => /^[a-z0-9-]+$/.test(plan.previewName)));
+});
+
+
+test('dev deploys the connected DEV Worker main address and never selects customer production', () => {
+  const plan = deploymentPlan('dev');
+  assert.equal(plan.environment, 'DEV');
+  assert.equal(plan.worker, 'digitalcardbox-app-dev');
+  assert.equal(plan.previewName, '');
+  assert.equal(plan.command, 'deploy --config wrangler.dev.jsonc --name digitalcardbox-app-dev');
+  assert.deepEqual(deploymentPlan('dev', {event:'workflow_dispatch'}), plan);
+  for (const branch of ['dev-old','developer','feature/dev','dev/feature']) assert.notEqual(deploymentPlan(branch).command, plan.command);
+  assert.equal(deploymentPlan('dev', {event:'pull_request'}).command, '');
+  assert.equal(deploymentPlan('dev', {refType:'tag'}).command, '');
 });

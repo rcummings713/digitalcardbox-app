@@ -7,6 +7,7 @@ export function deploymentPlan(branch, { event = 'push', refType = 'branch' } = 
   const none = { environment: '', wranglerEnvironment: '', worker: '', previewName: '', command: '' };
   if (!['push', 'workflow_dispatch'].includes(event) || refType !== 'branch' || typeof branch !== 'string' || /[\r\n\0]/.test(branch)) return none;
   if (branch === 'master') return { environment: 'PROD', wranglerEnvironment: 'prod', worker: 'digitalcardbox-app', previewName: '', command: 'deploy --env prod --name digitalcardbox-app' };
+  if (branch === 'dev') return { environment: 'DEV', wranglerEnvironment: 'dev', worker: 'digitalcardbox-app-dev', previewName: '', command: 'deploy --config wrangler.dev.jsonc --name digitalcardbox-app-dev' };
   if (branch === 'develop') return { environment: 'TEST', wranglerEnvironment: 'test', worker: 'digitalcardbox-app-test', previewName: '', command: 'deploy --env test --name digitalcardbox-app-test' };
   const prefix = branch.startsWith('feature/') ? 'feature' : branch.startsWith('release/') ? 'release' : '';
   if (!prefix || !branch.slice(prefix.length + 1)) return none;

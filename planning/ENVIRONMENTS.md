@@ -1,10 +1,11 @@
 # Deployment environments and solo release workflow
 
-The setup follows [ADR 0006](../docs/adr/0006-deployment-environments.md). The feature DEV route now builds the connected UI and deploys `wrangler.dev.jsonc` with a private SQLite-backed Durable Object under ADR 0009. TEST/PROD retain their previous static review route; their production backend/identity decisions are not part of this DEV change. `npm run dev` retains the Node SQLite adapter for local review.
+The setup follows [ADR 0006](../docs/adr/0006-deployment-environments.md). Both the stable `dev` branch and feature DEV routes build the connected UI and deploys `wrangler.dev.jsonc` with a private SQLite-backed Durable Object under ADR 0009. TEST/PROD retain their previous static review route; their production backend/identity decisions are not part of this DEV change. `npm run dev` retains the Node SQLite adapter for local review.
 
 | Environment | Source | URL |
 | --- | --- | --- |
-| DEV | Each `feature/` branch | Its own preview under the DEV Worker; `digitalcardbox-app-dev.rcummings71300.workers.dev` is the initial DEV baseline. |
+| DEV integration | `dev` | `https://digitalcardbox-app-dev.rcummings71300.workers.dev` — connected UI/API and stable Stripe sandbox destination. |
+| DEV feature | Each `feature/` branch | Its own isolated preview under the DEV Worker. |
 | TEST | `develop` | `https://digitalcardbox-app-test.rcummings71300.workers.dev` |
 | TEST candidate | Each `release/` branch | Its own preview under the TEST Worker. |
 | PROD | Approved `master` build | `https://digitalcardbox-app.rcummings71300.workers.dev` |
@@ -74,4 +75,9 @@ account-wide access for unrelated resources. No production deployment is authori
 
 ## Stripe product tests (6 November)
 
-Only `wrangler.dev.jsonc` enables sandbox purchase flags and the stable named-preview return origin. Six owner-provided Stripe values are installed as named-preview secrets using PRODUCT_CHECKOUT.md. Do not substitute a new Worker, Durable Object identity, encryption key or database. TEST/PROD remain unchanged. Missing configuration is unavailable, and live keys/events are rejected.
+`wrangler.dev.jsonc` enables sandbox purchase flags. Its top-level return origin is the stable DEV address; existing preview overrides retain their preview origin. Install the six owner-provided Stripe values on the main DEV Worker using PRODUCT_CHECKOUT.md. Main Worker secrets and preview secrets are separate. Keep both namespace identities/keys intact; feature data is not automatically migrated to stable DEV. TEST/PROD remain unchanged. Missing configuration is unavailable, and live keys/events are rejected.
+
+
+## Stable DEV releases
+
+Merge reviewed feature work into `dev` and push; GitHub Actions verifies and deploys the main DEV Worker. This is the integration site for owner/Stripe testing. Use its main URL, never a unique deployment URL, for Stripe's sandbox webhook. Configure runtime secrets with `wrangler secret put ... --config wrangler.dev.jsonc --name digitalcardbox-app-dev`, without the `preview` subcommand. The existing DEV operator credentials are privately installed on this Worker; they are not tracked in Git. Old preview host cookies/links and records remain at the preview origin; start or publish a stable DEV event to test the new origin. This initial release leaves the old preview intact and does not claim a record migration. Once the owner configures Stripe, launch checkout from stable DEV so the order and webhook share its database.
