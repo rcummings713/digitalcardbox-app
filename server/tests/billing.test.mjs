@@ -1,5 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
+import { StripeProvider } from "../stripe-provider.mjs";
 import { BillingService } from "../billing-service.mjs";
 import { setup, invitation, card, Agent } from "./helpers.mjs";
 import { stripeFixture } from "./billing-fixture.mjs";
@@ -769,4 +770,29 @@ test("operator inspection reports safe Stripe access categories without provider
       !JSON.stringify(result.data).includes("customer@example.invalid"),
     );
   }
+});
+
+test("default Stripe transport preserves the runtime global fetch receiver", async (t) => {
+  const original = globalThis.fetch;
+  t.after(() => {
+    globalThis.fetch = original;
+  });
+  let called = false;
+  globalThis.fetch = function (url, options) {
+    assert.equal(this, globalThis, "Runtime fetch received the wrong receiver");
+    called = true;
+    assert.equal(url, "https://api.stripe.com/v1/prices/price_fixture");
+    assert.equal(options.method, "GET");
+    return Promise.resolve(Response.json({ id: "price_fixture" }));
+  };
+  const provider = new StripeProvider({
+    secretKey: "sk_test_receiver_fixture",
+    webhookSecret: "whsec_receiver_fixture",
+    returnOrigin: "https://example.com",
+  });
+  assert.equal(
+    (await provider.api("prices/price_fixture")).id,
+    "price_fixture",
+  );
+  assert.equal(called, true);
 });

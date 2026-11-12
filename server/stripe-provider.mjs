@@ -22,7 +22,7 @@ export class StripeProvider {
     secretKey = "",
     webhookSecret = "",
     returnOrigin = "",
-    fetcher = fetch,
+    fetcher = (...args) => globalThis.fetch(...args),
   } = {}) {
     this.key = secretKey;
     this.webhookSecret = webhookSecret;
