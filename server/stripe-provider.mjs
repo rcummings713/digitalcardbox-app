@@ -58,7 +58,7 @@ export class StripeProvider {
     try {
       response = await this.fetcher("https://api.stripe.com/v1/" + path, {
         method: params ? "POST" : "GET",
-        redirect: "error",
+        redirect: "manual",
         headers: {
           Authorization: "Bearer " + this.key,
           "Stripe-Version": STRIPE_VERSION,
@@ -77,6 +77,14 @@ export class StripeProvider {
         503,
         "Stripe could not confirm this action. Your order is saved; check its status before retrying.",
         "stripe_unavailable",
+      );
+    }
+    if (response.status >= 300 && response.status < 400) {
+      await response.body?.cancel();
+      fail(
+        502,
+        "Stripe returned an unexpected redirect.",
+        "stripe_redirect_rejected",
       );
     }
     const reader = response.body.getReader();
