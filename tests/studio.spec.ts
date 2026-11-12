@@ -359,6 +359,7 @@ test("premium editions are chosen before sending and unpaid drafts never appear 
   await expect(
     page.getByRole("button", { name: /^Send my card/ }),
   ).toBeDisabled();
+  expect((await new AxeBuilder({ page }).analyze()).violations).toEqual([]);
   const current = await (await page.request.get("/api/host/workspace")).json();
   expect(
     current.entries.some((e: { id: string }) => e.id === saved.entry.id),

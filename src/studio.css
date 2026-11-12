@@ -1209,3 +1209,7 @@ html[data-motion="reduce"] .little-star-cover {
     grid-template-columns: repeat(3, minmax(0, 1fr));
   }
 }
+
+.premium-card-finish[class*="premium-edition-"] .premium-card-seal {
+  color: var(--premium-ink, #5b431f);
+}
