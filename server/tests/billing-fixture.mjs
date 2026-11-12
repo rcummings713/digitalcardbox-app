@@ -57,6 +57,18 @@ export function stripeFixture() {
     else if (path === "checkout/sessions" && init.method === "POST") {
       const params = new URLSearchParams(init.body),
         key = init.headers["Idempotency-Key"];
+      // Owner's sandbox defaults to Managed Payments; this fixed-total test
+      // integration explicitly uses standard Checkout instead.
+      if (params.get("managed_payments[enabled]") !== "false")
+        return Response.json(
+          {
+            error: {
+              message:
+                "Managed Payments must be explicitly disabled for this sandbox integration",
+            },
+          },
+          { status: 400 },
+        );
       // Endive rejects the old request field (it is response-only now).
       if (params.has("payment_method_types[0]"))
         return Response.json(

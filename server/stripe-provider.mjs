@@ -169,6 +169,7 @@ export class StripeProvider {
       "checkout/sessions",
       {
         mode: "payment",
+        "managed_payments[enabled]": "false",
         "allowed_payment_method_types[0]": "card",
         "line_items[0][price]": order.price_id,
         "line_items[0][quantity]": "1",
