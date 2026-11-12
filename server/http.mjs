@@ -119,7 +119,10 @@ export function createApiHandler(
           );
       }
       const jar = cookies(request);
-      const session = await auth.resolve(app, jar[HOST_COOKIE]);
+      const session =
+        path === "/api/session" && method === "DELETE"
+          ? app.session(jar[HOST_COOKIE])
+          : await auth.resolve(app, jar[HOST_COOKIE]);
       const requireCsrf = () => {
         app.requireHost(session);
         if (
@@ -385,7 +388,7 @@ export function createApiHandler(
       }
       if (path === "/api/session" && method === "DELETE") {
         requireCsrf();
-        repository.dropHostSession(hash(jar[HOST_COOKIE]));
+        await auth.logout(jar[HOST_COOKIE]);
         response.setHeader(
           "Set-Cookie",
           cookie(HOST_COOKIE, "", "/api", secureCookies, 0),

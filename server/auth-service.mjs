@@ -419,7 +419,13 @@ export class AuthService {
     if (row)
       try {
         const tokens = JSON.parse(this.repo.decrypt(row.tokens_ciphertext));
-        await this.provider.call("logout?scope=local", {}, tokens.access_token);
+        await this.provider.call(
+          "logout?scope=local",
+          {},
+          tokens.access_token,
+          "POST",
+          3000,
+        );
       } catch {}
   }
 }

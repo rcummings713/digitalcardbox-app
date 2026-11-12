@@ -32,7 +32,13 @@ export class AuthProvider {
       return false;
     }
   }
-  async call(path, data, token, method = data ? "POST" : "GET") {
+  async call(
+    path,
+    data,
+    token,
+    method = data ? "POST" : "GET",
+    timeoutMs = 15000,
+  ) {
     if (!this.configured)
       fail(
         503,
@@ -44,7 +50,7 @@ export class AuthProvider {
       response = await this.fetcher(this.origin + "/auth/v1/" + path, {
         method,
         redirect: "manual",
-        signal: AbortSignal.timeout(15000),
+        signal: AbortSignal.timeout(timeoutMs),
         headers: {
           apikey: this.key,
           "Content-Type": "application/json",

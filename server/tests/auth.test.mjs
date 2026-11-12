@@ -277,3 +277,44 @@ test("legacy shared review credentials cannot authenticate any managed customer"
     "operator",
   );
 });
+
+test("sign-out revokes the local bridge and contacts the managed provider, including during provider outage", async (t) => {
+  const p = authFixture();
+  let unavailable = false;
+  const f = await setup(t, {
+    authOptions: {
+      ...p.options,
+      fetcher: async (...args) => {
+        if (unavailable) throw new Error("provider unavailable");
+        return p.options.fetcher(...args);
+      },
+    },
+  });
+  const credentials = { email: p.initial.email, password: p.initial.password };
+  await f.other.call("/api/auth/login", "POST", credentials);
+  assert.equal(
+    (
+      await f.other.call(
+        "/api/session",
+        "DELETE",
+        {},
+        { "x-csrf-token": "wrong" },
+      )
+    ).status,
+    403,
+  );
+  assert.equal(f.repo.one("SELECT count(*) AS n FROM auth_sessions").n, 1);
+  assert.equal((await f.other.call("/api/session", "DELETE", {})).status, 200);
+  assert.ok(p.calls.some((c) => c.path === "logout"));
+  assert.equal(f.repo.one("SELECT count(*) AS n FROM auth_sessions").n, 0);
+  assert.equal((await f.other.call("/api/host/workspace")).status, 401);
+  await f.other.call("/api/auth/login", "POST", credentials);
+  f.repo.run(
+    "UPDATE auth_sessions SET checked_at='2000-01-01T00:00:00Z',access_expires_at='2000-01-01T00:00:00Z'",
+  );
+  unavailable = true;
+  assert.equal((await f.other.call("/api/session", "DELETE", {})).status, 200);
+  assert.equal(f.repo.one("SELECT count(*) AS n FROM auth_sessions").n, 0);
+  assert.equal(f.repo.one("SELECT count(*) AS n FROM auth_subjects").n, 1);
+  assert.equal((await f.other.call("/api/host/workspace")).status, 401);
+});
