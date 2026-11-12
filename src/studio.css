@@ -1111,6 +1111,7 @@ html[data-motion="reduce"] .little-star-cover {
 }
 .premium-choice-art {
   position: relative;
+  isolation: isolate;
   aspect-ratio: 5/6;
   overflow: hidden;
   border: 3px double #b7965d;
