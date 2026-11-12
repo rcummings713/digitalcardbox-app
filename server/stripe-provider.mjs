@@ -79,12 +79,6 @@ export class StripeProvider {
         "stripe_unavailable",
       );
     }
-    if (!response.ok)
-      fail(
-        503,
-        "Stripe could not complete this action. Your order is saved; please check its status.",
-        "stripe_unavailable",
-      );
     const reader = response.body.getReader();
     let total = 0;
     const chunks = [];
@@ -99,7 +93,28 @@ export class StripeProvider {
         }
         chunks.push(Buffer.from(value));
       }
-      return JSON.parse(Buffer.concat(chunks).toString("utf8"));
+      const value = JSON.parse(Buffer.concat(chunks).toString("utf8"));
+      if (!response.ok) {
+        const versionRejected =
+          typeof value.error?.message === "string" &&
+          /invalid stripe api version/i.test(value.error.message);
+        const code =
+          response.status === 401
+            ? "stripe_authentication_failed"
+            : response.status === 403
+              ? "stripe_permission_denied"
+              : response.status === 404
+                ? "stripe_resource_missing"
+                : versionRejected
+                  ? "stripe_api_version_unsupported"
+                  : "stripe_unavailable";
+        fail(
+          503,
+          "Stripe could not complete this action. Your order is saved; please check its status.",
+          code,
+        );
+      }
+      return value;
     } catch (error) {
       if (error.status) throw error;
       fail(502, "Stripe returned an unexpected response.");

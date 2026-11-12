@@ -1,5 +1,16 @@
 import { STRIPE_VERSION } from "./stripe-provider.mjs";
 
+function safeReason(error) {
+  return [
+    "stripe_authentication_failed",
+    "stripe_permission_denied",
+    "stripe_resource_missing",
+    "stripe_api_version_unsupported",
+  ].includes(error.code)
+    ? error.code
+    : "stripe_unavailable";
+}
+
 // Operator-only, read-only inspection. Provider keys and webhook secrets never
 // leave the server. Presence flags are deliberately separate from verification.
 export async function inspectStripeSetup(billing, expectedEvents) {
@@ -40,8 +51,12 @@ export async function inspectStripeSetup(billing, expectedEvents) {
             result.currency === "usd" &&
             result.actualMinor === expectedMinor;
           return result;
-        } catch {
-          return { ...result, error: "stripe_price_unavailable" };
+        } catch (error) {
+          return {
+            ...result,
+            error: "stripe_price_unavailable",
+            reason: safeReason(error),
+          };
         }
       },
     ),
@@ -83,8 +98,9 @@ export async function inspectStripeSetup(billing, expectedEvents) {
           webhook.missingEvents.length === 0;
         webhook.status = webhook.settingsVerified ? "matched" : "mismatch";
       }
-    } catch {
+    } catch (error) {
       webhook.status = "unverified";
+      webhook.reason = safeReason(error);
     }
   }
   const placeholders = expectedEvents.map(() => "?").join(",");

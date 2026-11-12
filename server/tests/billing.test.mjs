@@ -736,3 +736,37 @@ test("setup inspection keeps delivery proof separate and reports unavailable pro
   assert.equal(value.latestVerifiedWebhook.type, "checkout.session.expired");
   assert.equal(value.completedTestPaymentCount, 0);
 });
+
+test("operator inspection reports safe Stripe access categories without provider error messages", async (t) => {
+  const f = await ready(t);
+  await f.operator.login("operator@digitalcardbox.test");
+  for (const [status, message, reason] of [
+    [
+      401,
+      "Invalid API Key provided: sk_test_PRIVATE",
+      "stripe_authentication_failed",
+    ],
+    [403, "Not permitted sk_test_PRIVATE", "stripe_permission_denied"],
+    [
+      404,
+      "Missing price for customer@example.invalid",
+      "stripe_resource_missing",
+    ],
+    [
+      400,
+      "Invalid Stripe API version: invalid-version",
+      "stripe_api_version_unsupported",
+    ],
+  ]) {
+    f.billing.provider.fetcher = async () =>
+      Response.json({ error: { message } }, { status });
+    const result = await f.operator.call("/api/admin/billing/check");
+    assert.equal(result.status, 200);
+    assert.ok(result.data.prices.every((p) => p.reason === reason));
+    assert.equal(result.data.webhook.reason, reason);
+    assert.ok(!JSON.stringify(result.data).includes("sk_test_PRIVATE"));
+    assert.ok(
+      !JSON.stringify(result.data).includes("customer@example.invalid"),
+    );
+  }
+});
