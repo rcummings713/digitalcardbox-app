@@ -738,7 +738,7 @@ test("setup inspection keeps delivery proof separate and reports unavailable pro
   assert.equal(value.completedTestPaymentCount, 0);
 });
 
-test("operator inspection reports safe Stripe access categories without provider error messages", async (t) => {
+test("operator inspection reports safe Stripe access categories with redacted operator hints", async (t) => {
   const f = await ready(t);
   await f.operator.login("operator@digitalcardbox.test");
   for (const [status, message, reason] of [
@@ -765,6 +765,7 @@ test("operator inspection reports safe Stripe access categories without provider
     assert.equal(result.status, 200);
     assert.ok(result.data.prices.every((p) => p.reason === reason));
     assert.equal(result.data.webhook.reason, reason);
+    assert.equal(result.data.lastProviderFailure.httpStatus, status);
     assert.ok(!JSON.stringify(result.data).includes("sk_test_PRIVATE"));
     assert.ok(
       !JSON.stringify(result.data).includes("customer@example.invalid"),
@@ -795,4 +796,35 @@ test("default Stripe transport preserves the runtime global fetch receiver", asy
     "price_fixture",
   );
   assert.equal(called, true);
+});
+
+test("checkout rejection hints remain operator-only and redact credentials and emails", async (t) => {
+  const f = await ready(t);
+  const original = f.billing.provider.fetcher;
+  const privateHint =
+    "Unsupported method for sk_test_PRIVATE and whsec_PRIVATE at buyer@example.invalid";
+  f.billing.provider.fetcher = async (url, init) =>
+    url.endsWith("/checkout/sessions")
+      ? Response.json({ error: { message: privateHint } }, { status: 400 })
+      : original(url, init);
+  const order = await quote(f);
+  const rejected = await f.guest.call(
+    f.billingPath + "/orders/" + order.id + "/checkout",
+    "POST",
+    {},
+  );
+  assert.equal(rejected.status, 503);
+  assert.ok(!JSON.stringify(rejected.data).includes("Unsupported method"));
+  assert.equal((await f.guest.call("/api/admin/billing/check")).status, 401);
+  await f.operator.login("operator@digitalcardbox.test");
+  const result = await f.operator.call("/api/admin/billing/check");
+  assert.equal(result.data.lastProviderFailure.operation, "checkout/sessions");
+  assert.match(result.data.lastProviderFailure.hint, /Unsupported method/);
+  for (const secret of [
+    "sk_test_PRIVATE",
+    "whsec_PRIVATE",
+    "buyer@example.invalid",
+  ])
+    assert.ok(!JSON.stringify(result.data).includes(secret));
+  assert.equal(result.data.completedTestPaymentCount, 0);
 });

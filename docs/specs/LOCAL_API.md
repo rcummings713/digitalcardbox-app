@@ -122,3 +122,5 @@ Stable hosted DEV (11 November): `https://digitalcardbox-app-dev.rcummings71300.
 
 
 Operator GET `/api/admin/billing/check` performs read-only sandbox price/webhook configuration inspection, at most three checks per minute. It returns separate actual-price validation, endpoint settings, verified-delivery count/latest type/time, and completed test payment count. The endpoint requires operator identity and returns no provider credentials, private note bodies or raw events. No charge, refund or payment session is created by inspection.
+
+The operator billing check also returns `lastProviderFailure` (latest in-memory timestamp, HTTP status, operation and bounded key/email-redacted hint), or null. It is not a persistent audit log and is never included in public purchase errors.

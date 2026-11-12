@@ -103,6 +103,28 @@ export class StripeProvider {
       }
       const value = JSON.parse(Buffer.concat(chunks).toString("utf8"));
       if (!response.ok) {
+        // Only the operator inspection exposes this short redacted hint. Public
+        // errors remain fixed text; credentials and email addresses are removed.
+        const hint = String(
+          value.error?.message || "Stripe rejected the request.",
+        )
+          .replaceAll(this.key, "[redacted]")
+          .replaceAll(this.webhookSecret, "[redacted]")
+          .replace(
+            /\b(?:sk|rk)_(?:test|live)_[^\s"'<>]+|whsec_[^\s"'<>]+/g,
+            "[redacted]",
+          )
+          .replace(
+            /[A-Za-z0-9.+_-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}/g,
+            "[redacted email]",
+          )
+          .slice(0, 240);
+        this.lastFailure = {
+          at: new Date().toISOString(),
+          httpStatus: response.status,
+          operation: path.split("?")[0].split("/").slice(0, 2).join("/"),
+          hint,
+        };
         const versionRejected =
           typeof value.error?.message === "string" &&
           /invalid stripe api version/i.test(value.error.message);
@@ -147,7 +169,7 @@ export class StripeProvider {
       "checkout/sessions",
       {
         mode: "payment",
-        "payment_method_types[0]": "card",
+        "allowed_payment_method_types[0]": "card",
         "line_items[0][price]": order.price_id,
         "line_items[0][quantity]": "1",
         client_reference_id: order.id,

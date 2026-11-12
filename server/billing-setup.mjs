@@ -125,5 +125,6 @@ export async function inspectStripeSetup(billing, expectedEvents) {
     verifiedWebhookCount: verified,
     latestVerifiedWebhook: latest || null,
     completedTestPaymentCount: paid,
+    lastProviderFailure: billing.provider.lastFailure || null,
   };
 }

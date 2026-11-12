@@ -21,3 +21,5 @@ No live transactions, TEST/PROD deployment, verified gift receipt, physical fulf
 
 
 Owner configuration verification: operator-only read-only Stripe price and webhook-endpoint inspection now distinguishes configuration, received signed events and completed purchases. Presence flags alone never claim a successful Stripe transaction. DEV stores owner-managed Price IDs as secret bindings to preserve them during releases without widening the CI token’s dashboard-metadata permissions; API/signing keys remain server-side. No financial state transition or schema change is introduced by inspection.
+
+Runtime compatibility verification (11 November): use `redirect: manual` and reject all 3xx responses so credentials cannot leave Stripe; Worker Request does not implement `error`. Endive uses `allowed_payment_method_types` for the existing card-only filter. A native workerd regression constructs real Requests, and the Stripe fixture rejects the removed request field. Only the protected operator inspection exposes short redacted provider hints; public errors remain generic. No payment is submitted by setup inspection.

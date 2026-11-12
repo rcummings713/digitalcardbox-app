@@ -57,6 +57,24 @@ export function stripeFixture() {
     else if (path === "checkout/sessions" && init.method === "POST") {
       const params = new URLSearchParams(init.body),
         key = init.headers["Idempotency-Key"];
+      // Endive rejects the old request field (it is response-only now).
+      if (params.has("payment_method_types[0]"))
+        return Response.json(
+          {
+            error: { message: "payment_method_types is unsupported on Endive" },
+          },
+          { status: 400 },
+        );
+      if (params.get("allowed_payment_method_types[0]") !== "card")
+        return Response.json(
+          {
+            error: {
+              message:
+                "The test checkout must retain its supported card method",
+            },
+          },
+          { status: 400 },
+        );
       result = [...sessions.values()].find((row) => row.retryKey === key);
       if (!result) {
         const id = "cs_test_review" + (++serial).toString().padStart(5, "0"),
