@@ -38,7 +38,8 @@ export async function billingHttp({
   if (
     !guest &&
     !path.startsWith("/api/billing/") &&
-    path !== "/api/admin/billing"
+    path !== "/api/admin/billing" &&
+    path !== "/api/admin/billing/check"
   )
     return null;
   const actor = billing.actor(
@@ -50,6 +51,12 @@ export async function billingHttp({
     method !== "GET",
   );
   throttle("billing:" + (actor.hostId || actor.guestId), 60);
+  if (path === "/api/admin/billing/check") {
+    app.requireOperator(session);
+    if (method !== "GET") fail(405, "Use GET to inspect setup.");
+    throttle("billing-check:" + actor.hostId, 3);
+    return { value: await billing.inspectSetup(app, session) };
+  }
   if (path === "/api/admin/billing") {
     if (!["GET", "PATCH"].includes(method)) fail(405, "Use GET or PATCH.");
     return {

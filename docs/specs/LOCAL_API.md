@@ -119,3 +119,6 @@ See PRODUCT_CHECKOUT.md. Host `/api/billing/quotes`, `/api/billing/orders/:id`, 
 
 
 Stable hosted DEV (11 November): `https://digitalcardbox-app-dev.rcummings71300.workers.dev` serves this same private API. The `dev` branch deploys its connected UI/backend. Use `/api/billing/stripe/webhook` there for Stripe sandbox events and install main Worker runtime secrets. Its store/session cookies differ from the retained feature preview; no previous preview records are copied or deleted by the deployment.
+
+
+Operator GET `/api/admin/billing/check` performs read-only sandbox price/webhook configuration inspection, at most three checks per minute. It returns separate actual-price validation, endpoint settings, verified-delivery count/latest type/time, and completed test payment count. The endpoint requires operator identity and returns no provider credentials, private note bodies or raw events. No charge, refund or payment session is created by inspection.

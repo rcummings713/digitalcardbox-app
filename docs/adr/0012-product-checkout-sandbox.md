@@ -18,3 +18,6 @@ No live transactions, TEST/PROD deployment, verified gift receipt, physical fulf
 
 
 11 November: the owner authorizes stable DEV deployment. Use the main `digitalcardbox-app-dev` Worker URL for sandbox webhooks/returns and install secrets on that main Worker. `dev` drives verified releases to it. Original preview records and secrets stay isolated and intact; no order migration is claimed. ADR 0006 records this deployment extension. Sandbox-only verification/refund/access rules remain unchanged.
+
+
+Owner configuration verification: operator-only read-only Stripe price and webhook-endpoint inspection now distinguishes configuration, received signed events and completed purchases. Presence flags alone never claim a successful Stripe transaction. DEV preserves dashboard-managed plain Price IDs during releases (`keep_vars: true`); secret keys remain server-side. No financial state transition or schema change is introduced by inspection.

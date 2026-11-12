@@ -655,3 +655,84 @@ test("expired contribution windows block new premium purchases and stale creatin
   );
   assert.equal(other.stripe.sessions.size, 0);
 });
+
+test("operator setup inspection verifies all four Stripe prices and endpoint settings without creating payments or revealing keys", async (t) => {
+  const f = await ready(t);
+  assert.equal((await f.other.call("/api/admin/billing/check")).status, 401);
+  await f.host.login();
+  assert.equal((await f.host.call("/api/admin/billing/check")).status, 403);
+  assert.equal(f.stripe.calls.length, 0);
+  await f.operator.login("operator@digitalcardbox.test");
+  const result = await f.operator.call("/api/admin/billing/check");
+  assert.equal(result.status, 200);
+  assert.equal(result.data.pricingVerified, true);
+  assert.equal(result.data.webhook.settingsVerified, true);
+  assert.equal(result.data.webhookDeliveryVerified, false);
+  assert.equal(result.data.completedTestPaymentCount, 0);
+  assert.deepEqual(
+    result.data.prices.map((p) => p.actualMinor),
+    [499, 1500, 3000, 7900],
+  );
+  assert.ok(f.stripe.calls.every((c) => c.method === "GET"));
+  assert.equal(f.stripe.sessions.size, 0);
+  assert.ok(!JSON.stringify(result.data).includes("sk_test_"));
+  assert.ok(!JSON.stringify(result.data).includes("whsec_"));
+});
+test("setup inspection flags incorrect amount/currency/recurrence/mode and wrong endpoint selection", async (t) => {
+  const f = await ready(t);
+  await f.operator.login("operator@digitalcardbox.test");
+  const actual = f.billing.provider.fetcher;
+  for (const delta of [
+    { unit_amount: 1 },
+    { currency: "eur" },
+    { recurring: { interval: "month" }, type: "recurring" },
+    { livemode: true },
+    { active: false },
+  ]) {
+    f.billing.provider.fetcher = async (url, init) => {
+      const response = await actual(url, init);
+      return url.includes("/prices/")
+        ? Response.json({ ...(await response.json()), ...delta })
+        : response;
+    };
+    const value = (await f.operator.call("/api/admin/billing/check")).data;
+    assert.equal(value.pricingVerified, false);
+    assert.ok(value.prices.every((p) => !p.verified));
+  }
+  f.billing.provider.fetcher = actual;
+  f.stripe.webhooks[0].enabled_events = ["checkout.session.completed"];
+  let value = (await f.operator.call("/api/admin/billing/check")).data;
+  assert.equal(value.webhook.settingsVerified, false);
+  assert.equal(value.webhook.missingEvents.length, 7);
+  f.stripe.webhooks[0].url =
+    "https://different.invalid/api/billing/stripe/webhook";
+  value = (await f.operator.call("/api/admin/billing/check")).data;
+  assert.equal(value.webhook.status, "missing");
+  assert.equal(f.stripe.sessions.size, 0);
+});
+test("setup inspection keeps delivery proof separate and reports unavailable provider permissions honestly", async (t) => {
+  const f = await ready(t);
+  await f.operator.login("operator@digitalcardbox.test");
+  const actual = f.billing.provider.fetcher;
+  f.billing.provider.fetcher = async (url, init) =>
+    url.includes("/webhook_endpoints")
+      ? Response.json({}, { status: 403 })
+      : actual(url, init);
+  let value = (await f.operator.call("/api/admin/billing/check")).data;
+  assert.equal(value.pricingVerified, true);
+  assert.equal(value.webhook.status, "unverified");
+  assert.equal(value.webhookDeliveryVerified, false);
+  f.billing.provider.fetcher = actual;
+  const order = await quote(f);
+  await checkout(f, order);
+  const event = [...f.stripe.sessions.values()][0];
+  event.status = "expired";
+  assert.equal(
+    (await f.stripe.webhook(f.base, "checkout.session.expired", event)).status,
+    200,
+  );
+  value = (await f.operator.call("/api/admin/billing/check")).data;
+  assert.equal(value.webhookDeliveryVerified, true);
+  assert.equal(value.latestVerifiedWebhook.type, "checkout.session.expired");
+  assert.equal(value.completedTestPaymentCount, 0);
+});

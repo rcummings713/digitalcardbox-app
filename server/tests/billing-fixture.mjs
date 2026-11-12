@@ -17,6 +17,25 @@ export function stripeFixture() {
     price_medium_test: 3000,
     price_large_test: 7900,
   };
+  const webhooks = [
+    {
+      id: "we_fixture",
+      livemode: false,
+      status: "enabled",
+      api_version: "2026-10-28.endive",
+      url: "http://localhost:4175/api/billing/stripe/webhook",
+      enabled_events: [
+        "checkout.session.completed",
+        "checkout.session.async_payment_succeeded",
+        "checkout.session.async_payment_failed",
+        "checkout.session.expired",
+        "refund.created",
+        "refund.updated",
+        "refund.failed",
+        "charge.dispute.created",
+      ],
+    },
+  ];
   let serial = 0;
   const fetcher = async (url, init = {}) => {
     calls.push({ url, method: init.method || "GET", body: init.body });
@@ -31,8 +50,11 @@ export function stripeFixture() {
         currency: "usd",
         unit_amount: amounts[id],
         recurring: null,
+        type: "one_time",
       };
-    } else if (path === "checkout/sessions" && init.method === "POST") {
+    } else if (path === "webhook_endpoints")
+      result = { data: webhooks, has_more: false };
+    else if (path === "checkout/sessions" && init.method === "POST") {
       const params = new URLSearchParams(init.body),
         key = init.headers["Idempotency-Key"];
       result = [...sessions.values()].find((row) => row.retryKey === key);
@@ -116,6 +138,7 @@ export function stripeFixture() {
   }
   return {
     fetcher,
+    webhooks,
     sessions,
     refunds,
     disputes,

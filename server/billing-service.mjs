@@ -1,3 +1,4 @@
+import { inspectStripeSetup } from "./billing-setup.mjs";
 import { randomUUID } from "node:crypto";
 import { BillingRepository } from "./billing-repository.mjs";
 import { StripeProvider } from "./stripe-provider.mjs";
@@ -598,6 +599,10 @@ export class BillingService {
       snapshot: this.view(order).snapshot,
       testMode: true,
     };
+  }
+  async inspectSetup(app, session) {
+    app.requireOperator(session);
+    return inspectStripeSetup(this, [...supportedEvents]);
   }
   operator(app, session, input) {
     app.requireOperator(session);
