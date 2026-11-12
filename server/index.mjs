@@ -1,3 +1,4 @@
+import { AuthService, authOptions } from "./auth-service.mjs";
 import { BillingService } from "./billing-service.mjs";
 import { billingOptions } from "./billing-options.mjs";
 import { resolve } from "node:path";
@@ -18,6 +19,10 @@ const repo = new SqliteReviewRepository(
 const server = createApiServer(repo, {
   publicSiteUrl: process.env.DCB_PUBLIC_SITE_URL || "",
   services: {
+    auth: new AuthService(repo, {
+      ...authOptions(process.env),
+      siteOrigin: process.env.DCB_AUTH_ORIGIN || "http://localhost:5173",
+    }),
     billing: new BillingService(
       repo,
       billingOptions(process.env, "http://localhost:5173"),

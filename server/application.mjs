@@ -236,7 +236,7 @@ export class ReviewApplication {
       );
     return { event, session };
   }
-  submitCard(token, cookieToken, csrf, input, studioToken) {
+  submitCard(token, cookieToken, csrf, input, studioToken, draftEdition) {
     return this.repo.transaction(() => {
       const { event, session } = this.guestSession(token, cookieToken);
       if (!csrf || csrf !== session.csrf_token)
@@ -249,7 +249,9 @@ export class ReviewApplication {
       const previous =
         typeof input?.requestKey === "string" &&
         this.repo.cardByRequest(session.guest_id, input.requestKey);
-      if (previous) {
+      if (previous && !draftEdition) {
+        if (previous.delivery_state === "draft")
+          fail(409, "Use the premium card send action after checkout.");
         const candidate = validateCard(input, { ...flags, gifs: true });
         if (
           !["name", "note", "style", "gif"].every(
@@ -272,6 +274,12 @@ export class ReviewApplication {
       if (windowFor(event, this.repo.clock()) !== "open")
         fail(409, "This invitation is not accepting cards.");
       const value = validateCard(input, flags);
+      if (value.design?.premiumEdition && !draftEdition)
+        fail(
+          402,
+          "Review the premium card checkout before sending, or choose the free collection.",
+          "premium_payment_required",
+        );
       if (
         value.artId &&
         !this.repo.one(
@@ -287,7 +295,35 @@ export class ReviewApplication {
         { eventId: event.id, guestId: session.guest_id },
         studioToken,
       );
-      const entry = this.repo.insertCard(event.id, session.guest_id, value);
+      let entry;
+      if (previous && draftEdition) {
+        if (previous.delivery_state !== "draft")
+          fail(
+            409,
+            "This card was already delivered. Start a new card to make changes.",
+          );
+        this.repo.run(
+          "UPDATE cards SET name=?,note=?,style=?,gif=?,consent=?,art_id=?,design_json=?,premium_edition=? WHERE id=? AND delivery_state='draft'",
+          value.name,
+          value.note,
+          value.style,
+          value.gif,
+          Number(value.consent),
+          value.artId ?? null,
+          value.design ? JSON.stringify(storedCardDesign(value.design)) : null,
+          draftEdition,
+          previous.id,
+        );
+        entry = this.repo.card(
+          this.repo.guestCard(event.id, session.guest_id, previous.id),
+        );
+      } else
+        entry = this.repo.insertCard(
+          event.id,
+          session.guest_id,
+          value,
+          draftEdition,
+        );
       // A guest receives only a receipt for their own submission, never the host inbox.
       return {
         entry: { id: entry.id, createdAt: entry.createdAt },
@@ -418,7 +454,7 @@ export class ReviewApplication {
       if (
         value.entryId &&
         !this.repo.one(
-          "SELECT id FROM cards WHERE id=? AND event_id=? AND guest_id=? AND removed_at IS NULL",
+          "SELECT id FROM cards WHERE id=? AND event_id=? AND guest_id=? AND delivery_state='delivered' AND removed_at IS NULL",
           value.entryId,
           event.id,
           session.guest_id,

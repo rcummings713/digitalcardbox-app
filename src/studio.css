@@ -107,11 +107,11 @@
 }
 .studio-template-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 230px), 1fr));
   gap: 14px;
   margin-top: 16px;
-  max-height: 480px;
-  overflow-y: auto;
+  max-height: none;
+  overflow: visible;
   padding: 4px;
 }
 .studio-template-grid > button {
@@ -133,7 +133,7 @@
 }
 .studio-template-mini {
   pointer-events: none;
-  max-width: 150px;
+  max-width: 340px;
   margin: auto;
 }
 .design-presentation {
@@ -620,9 +620,9 @@
     font-size: 16px;
   }
   .studio-template-grid {
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-    gap: 7px;
-    max-height: 365px;
+    grid-template-columns: 1fr;
+    gap: 22px;
+    max-height: none;
   }
   .studio-template-grid > button {
     padding: 5px;
@@ -1036,5 +1036,176 @@ html[data-motion="reduce"] .little-star-cover {
   }
   .premium-card-finish {
     padding: 14px 8px 8px;
+  }
+}
+
+/* Browse whole stationery designs using the page, never tiny nested viewports. */
+.studio-template-grid .design-text-layer {
+  overflow: hidden;
+}
+.studio-template-grid .design-presentation {
+  overflow: visible;
+}
+.studio-template-grid > button {
+  align-self: start;
+  padding: 12px;
+}
+.studio-template-grid strong {
+  font-size: 14px;
+}
+.design-motion-controls {
+  display: flex;
+  gap: 14px;
+  align-items: center;
+  flex-wrap: wrap;
+  margin-top: 12px;
+}
+.design-motion-controls label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+}
+.design-motion-controls select {
+  width: auto;
+  min-width: 110px;
+}
+
+.premium-selection {
+  border: 0;
+  padding: 0;
+  margin: 0 0 22px;
+}
+.premium-selection legend {
+  font-family: var(--font-heading);
+  font-size: 23px;
+  margin-bottom: 12px;
+}
+.premium-paths {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+.premium-paths [aria-pressed="true"] {
+  background: #efe1d6;
+  border-color: #967044;
+}
+.premium-choice-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+  margin-top: 18px;
+}
+.premium-choice {
+  background: #fffaf3;
+  padding: 10px;
+  border: 1px solid #d7c2a4;
+  border-radius: 8px;
+  color: var(--ink);
+  text-align: left;
+  min-width: 0;
+}
+.premium-choice[aria-pressed="true"] {
+  outline: 2px solid #967044;
+  outline-offset: 2px;
+}
+.premium-choice-art {
+  position: relative;
+  aspect-ratio: 5/6;
+  overflow: hidden;
+  border: 3px double #b7965d;
+  background: #fff9ed;
+  margin-bottom: 12px;
+}
+.premium-choice-art .card-art {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  opacity: 0.8;
+}
+.premium-preview-caption {
+  position: absolute;
+  inset: 36% 10% auto;
+  font: 17px/1.4 var(--font-heading);
+  text-align: center;
+}
+.premium-preview-caption em {
+  font-size: 13px;
+}
+.premium-choice strong,
+.premium-choice > span,
+.premium-choice small {
+  display: block;
+}
+.premium-choice > span {
+  font-size: 12px;
+  margin: 8px 0;
+  line-height: 1.5;
+}
+.premium-choice small {
+  color: #785c33;
+}
+.premium-edition-garden {
+  --premium-paper: #edf0e7;
+  --premium-ink: #354b3d;
+  border-radius: 16px 16px 4px 4px;
+}
+.premium-edition-celestial {
+  --premium-paper: #263b50;
+  --premium-ink: #fff5de;
+  border-color: #ceb47b;
+}
+.premium-edition-pearl {
+  --premium-paper: #f7f0ed;
+  --premium-ink: #6d5555;
+  border-radius: 36px 36px 8px 8px;
+}
+.premium-edition-celebration {
+  --premium-paper: #f7e7e9;
+  --premium-ink: #69414d;
+  border-color: #b38a54;
+}
+.premium-edition-classic {
+  --premium-paper: #faf6ed;
+  --premium-ink: #554838;
+  border-style: double;
+}
+.premium-choice-art {
+  background: var(--premium-paper, #fff9ed);
+  color: var(--premium-ink, #51422f);
+}
+.premium-card-finish[class*="premium-edition-"] {
+  background: var(--premium-paper, #fff9ed);
+  box-shadow:
+    0 0 0 1px #b79a64,
+    0 10px 32px #755a3420;
+}
+.premium-card-finish.premium-edition-garden {
+  border-left: 8px solid #8c9c7c;
+}
+.premium-card-finish.premium-edition-pearl {
+  border: 5px dotted #c0aba0;
+}
+.premium-card-finish.premium-edition-celebration {
+  border: 5px dashed #bb985b;
+}
+.premium-card-finish.premium-edition-classic {
+  border: 7px double #b99c67;
+}
+@media (min-width: 900px) {
+  .premium-choice-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+@media print {
+  .design-motion-controls {
+    display: none !important;
+  }
+}
+
+@media (min-width: 800px) {
+  .studio-start-options:has(> button:nth-child(3)) {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
   }
 }

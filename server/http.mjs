@@ -1,3 +1,6 @@
+import { CardDraftService } from "./card-drafts.mjs";
+import { AuthService } from "./auth-service.mjs";
+import { authHttp } from "./auth-http.mjs";
 import { BillingService } from "./billing-service.mjs";
 import { billingHttp } from "./billing-http.mjs";
 import { StudioService } from "./studio-service.mjs";
@@ -51,6 +54,7 @@ export function createApiHandler(
 ) {
   const media = services.media ?? new MediaService(repository);
   const studio = new StudioService(repository, media);
+  const auth = services.auth ?? new AuthService(repository);
   const billing = services.billing ?? new BillingService(repository);
   repository.premiumStatus = (id) => billing.premiumCardStatus(id);
   const app = new ReviewApplication(
@@ -60,6 +64,9 @@ export function createApiHandler(
       claimArtwork: (design, context, token) =>
         studio.authorize(design, context, token),
     },
+  );
+  const cardDrafts = new CardDraftService(repository, app, (id) =>
+    billing.premiumCardStatus(id),
   );
   const buckets = new Map();
   function throttle(key, max, period = 60000) {
@@ -112,7 +119,7 @@ export function createApiHandler(
           );
       }
       const jar = cookies(request);
-      const session = app.session(jar[HOST_COOKIE]);
+      const session = await auth.resolve(app, jar[HOST_COOKIE]);
       const requireCsrf = () => {
         app.requireHost(session);
         if (
@@ -122,7 +129,8 @@ export function createApiHandler(
           fail(403, "Refresh this page before saving.", "csrf_failed");
       };
       const origin = `${secureCookies ? "https" : "http"}://${request.headers.host}`;
-      const configuration = () => ({
+      const configuration = async () => ({
+        auth: await auth.provider.settings(),
         connected: true,
         hosted,
         publicSiteUrl: publicSiteUrl || origin,
@@ -136,6 +144,23 @@ export function createApiHandler(
         feedback: true,
         billing: billing.configuration(),
       });
+      if (
+        await authHttp({
+          auth,
+          app,
+          session,
+          jar,
+          path,
+          method,
+          request,
+          response,
+          readBody: body,
+          throttle,
+          cookie,
+          secureCookies,
+        })
+      )
+        return;
       const purchase = await billingHttp({
         billing,
         app,
@@ -205,7 +230,8 @@ export function createApiHandler(
             guestStudioImage[2],
           ),
         );
-      if (path === "/api/config" && read) return send(200, configuration());
+      if (path === "/api/config" && read)
+        return send(200, await configuration());
       if (path === "/api/gifs" && read) {
         const query = new URL(request.url, "http://local.invalid").searchParams;
         if ([...query.keys()].some((k) => k !== "q"))
@@ -229,7 +255,7 @@ export function createApiHandler(
         return send(200, {
           account: result.account,
           csrfToken: result.csrfToken,
-          configuration: configuration(),
+          configuration: await configuration(),
         });
       }
       if (path === "/api/feedback/session" && read) {
@@ -342,13 +368,12 @@ export function createApiHandler(
           account: session ? publicHost(session.host) : null,
           csrfToken: session?.csrf_token ?? null,
           flags: repository.flags(),
-          configuration: configuration(),
+          configuration: await configuration(),
         });
       if (path === "/api/session" && method === "POST") {
         throttle(`login:${request.socket.remoteAddress}`, 12, 15 * 60000);
         const result = app.login(await body(request));
-        if (jar[HOST_COOKIE])
-          repository.dropHostSession(hash(jar[HOST_COOKIE]));
+        if (jar[HOST_COOKIE]) await auth.logout(jar[HOST_COOKIE]);
         response.setHeader(
           "Set-Cookie",
           cookie(HOST_COOKIE, result.token, "/api", secureCookies),
@@ -447,6 +472,35 @@ export function createApiHandler(
             method === "DELETE" ? "remove" : input.action,
           ),
         );
+      }
+      const draftMatch = path.match(
+        /^\/api\/invitations\/([A-Za-z0-9_-]{20,100})\/card-drafts(?:\/([a-f0-9-]{36})\/send)?$/,
+      );
+      if (draftMatch && method === "POST") {
+        throttle(
+          "card-draft:" +
+            hash(draftMatch[1]) +
+            ":" +
+            request.socket.remoteAddress,
+          30,
+        );
+        const input = await body(request);
+        const result = draftMatch[2]
+          ? cardDrafts.send(
+              draftMatch[1],
+              jar.dcb_guest,
+              request.headers["x-csrf-token"],
+              draftMatch[2],
+              input,
+            )
+          : cardDrafts.save(
+              draftMatch[1],
+              jar.dcb_guest,
+              request.headers["x-csrf-token"],
+              input,
+              jar.dcb_studio,
+            );
+        return send(result.repeated ? 200 : 201, result);
       }
       match = path.match(
         /^\/api\/invitations\/([A-Za-z0-9_-]{20,100})(?:\/(cards|gift-intents))?$/,

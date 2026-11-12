@@ -1,3 +1,4 @@
+import { ManagedAccounts } from "./ManagedAccounts";
 import { designContinuation } from "../modules/design/contracts";
 import { useState } from "react";
 import { Link, go } from "./shared";
@@ -11,7 +12,8 @@ export function SignIn({
 }) {
   const { actions, busy, notify, account, configuration } = useStore();
   const [email, setEmail] = useState(
-    new URLSearchParams(location.search).get("access") === "operator"
+    new URLSearchParams(location.search).get("access") === "operator" ||
+      returnTo.startsWith("/admin")
       ? "operator@digitalcardbox.test"
       : "host@digitalcardbox.test",
   );
@@ -22,6 +24,13 @@ export function SignIn({
   async function signIn(address: string, value: string) {
     if (await actions.login(address, value)) go(next);
   }
+  if (
+    configuration.hosted &&
+    !next.startsWith("/admin") &&
+    new URLSearchParams(location.search).get("access") !== "operator" &&
+    (!account || (!account.registered && account.role !== "operator"))
+  )
+    return <ManagedAccounts returnTo={next} create={showChoices} />;
   if (account)
     return (
       <section className="panel sign-in-panel">

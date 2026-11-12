@@ -90,8 +90,8 @@ export function AiCardComposer({
       </p>
       {!configuration.ai.available && (
         <p className="notice">
-          AI artwork is not enabled for this review yet. All 26 collection
-          designs are ready to use.
+          AI artwork is temporarily unavailable. You can personalize any
+          collection design while it is being connected.
         </p>
       )}
       {error && (

@@ -6,6 +6,7 @@ import {
   fontChoices,
   palettes,
   motionChoices,
+  motionSpeeds,
   draftKey,
   withDesignGif,
   validateDesign,
@@ -16,6 +17,7 @@ import type {
   DesignKind,
   DesignMotion,
   DesignVariant,
+  MotionSpeed,
 } from "../modules/design/contracts";
 import { findGif, templates } from "../modules/media/catalog";
 import { TemplateArt } from "./TemplateArt";
@@ -71,6 +73,9 @@ export function DesignCanvas({
   const [badArt, setBadArt] = useState<string>(),
     [motionPlaying, setMotionPlaying] = useState(false),
     [replay, setReplay] = useState(0);
+  const [speed, setSpeed] = useState<MotionSpeed>(value.motionSpeed || "slow");
+  const timing = motionSpeeds[speed];
+  useEffect(() => setSpeed(value.motionSpeed || "slow"), [value.motionSpeed]);
   const template = templates.find((item) => item.id === value.template)!;
   const imported = "artwork" in template;
   const palette =
@@ -95,9 +100,12 @@ export function DesignCanvas({
       return;
     }
     setMotionPlaying(true);
-    const timer = setTimeout(() => setMotionPlaying(false), 4400);
+    const timer = setTimeout(
+      () => setMotionPlaying(false),
+      timing.duration + value.blocks.length * timing.stagger + 150,
+    );
     return () => clearTimeout(timer);
-  }, [hasMotion, isEditable, reduced, replay]);
+  }, [hasMotion, isEditable, reduced, replay, speed]);
   function motionStyle(
     preset: DesignMotion | undefined,
     index = 0,
@@ -106,10 +114,10 @@ export function DesignCanvas({
     return motionPlaying && choice !== "none"
       ? {
           animationName: `dcb-motion-${choice === "stagger" ? "rise" : choice}`,
-          animationDuration: "1100ms",
+          animationDuration: `${timing.duration}ms`,
           animationTimingFunction: "cubic-bezier(.2,.7,.2,1)",
           animationFillMode: "both",
-          animationDelay: `${value.motion === "stagger" || choice === "stagger" ? index * 160 : 0}ms`,
+          animationDelay: `${value.motion === "stagger" || choice === "stagger" ? index * timing.stagger : 0}ms`,
         }
       : {};
   }
@@ -408,20 +416,37 @@ export function DesignCanvas({
         </div>
       )}
       {hasMotion && !isEditable && (
-        <button
-          type="button"
-          className="text-link"
-          disabled={reduced}
-          onClick={() =>
-            motionPlaying ? setMotionPlaying(false) : setReplay((r) => r + 1)
-          }
-        >
-          {reduced
-            ? "Animations off · reduced motion"
-            : motionPlaying
-              ? "Show still design"
-              : "Replay animation"}
-        </button>
+        <div className="design-motion-controls">
+          <label>
+            Preview speed
+            <select
+              aria-label="Preview animation speed"
+              value={speed}
+              disabled={reduced}
+              onChange={(e) => setSpeed(e.target.value as MotionSpeed)}
+            >
+              {Object.entries(motionSpeeds).map(([id, item]) => (
+                <option key={id} value={id}>
+                  {item.label}
+                </option>
+              ))}
+            </select>
+          </label>
+          <button
+            type="button"
+            className="text-link"
+            disabled={reduced}
+            onClick={() =>
+              motionPlaying ? setMotionPlaying(false) : setReplay((r) => r + 1)
+            }
+          >
+            {reduced
+              ? "Animations off · reduced motion"
+              : motionPlaying
+                ? "Show still design"
+                : "Replay animation"}
+          </button>
+        </div>
       )}
       <TemplateCredit id={value.template} />
       <GifCredit id={value.gif} />
@@ -710,6 +735,20 @@ export function DesignEditor({
               </select>
             </div>
           </div>
+          <label htmlFor={`motion-speed-${value.kind}`}>Animation speed</label>
+          <select
+            id={`motion-speed-${value.kind}`}
+            value={value.motionSpeed || "slow"}
+            onChange={(e) =>
+              commit({ ...value, motionSpeed: e.target.value as MotionSpeed })
+            }
+          >
+            {Object.entries(motionSpeeds).map(([id, item]) => (
+              <option key={id} value={id}>
+                {item.label}
+              </option>
+            ))}
+          </select>
           <label htmlFor={`layer-${value.kind}`}>Text layer</label>
           <select
             id={`layer-${value.kind}`}

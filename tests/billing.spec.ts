@@ -117,3 +117,57 @@ test("an invalid or inaccessible purchase cannot reveal private content", async 
     }),
   ).toHaveCount(0);
 });
+
+test("a paid premium draft returns through the invitation-scoped receipt to review and explicit Send", async ({
+  page,
+}) => {
+  const id = "ad99829c-5795-4d66-b142-a67e1e4e9284",
+    token = "public-premium-return-token",
+    prefix = "/api/invitations/" + token + "/billing",
+    back = "/g/" + token + "/review";
+  await page.addInitScript(
+    ({ id, prefix, back }) =>
+      sessionStorage.setItem(
+        "dcb-purchase-" + id,
+        JSON.stringify({ prefix, back }),
+      ),
+    { id, prefix, back },
+  );
+  let paid = false;
+  await page.route("**" + prefix + "/orders/" + id, (route) =>
+    route.fulfill({
+      json: {
+        order: {
+          id,
+          product: "premium-card",
+          targetId: "private-draft",
+          eventId: "private-event",
+          amountMinor: 499,
+          currency: "usd",
+          status: paid ? "paid" : "pending",
+          entitled: paid,
+          refundedMinor: 0,
+          testMode: true,
+        },
+      },
+    }),
+  );
+  await page.goto("/checkout/return?order=" + id + "&paid=true");
+  await expect(
+    page.locator(".purchase-panel").getByRole("status"),
+  ).toContainText("Paid access is not confirmed");
+  await expect(
+    page.getByRole("link", { name: "Review and send my card ↗", exact: true }),
+  ).toHaveCount(0);
+  paid = true;
+  await page.getByRole("button", { name: "Refresh payment status" }).click();
+  await expect(
+    page.getByRole("link", { name: "Review and send my card ↗", exact: true }),
+  ).toHaveAttribute("href", back);
+  await expect(
+    page.locator(".purchase-panel").getByRole("status"),
+  ).toContainText("purchase is confirmed");
+  await expect(
+    page.getByText("Your card is already delivered.", { exact: false }),
+  ).toHaveCount(0);
+});

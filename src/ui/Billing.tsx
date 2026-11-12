@@ -28,7 +28,7 @@ function context(order: string): CheckoutContext {
       /^(?:\/api\/billing|\/api\/invitations\/[A-Za-z0-9_-]{20,100}\/billing)$/.test(
         value.prefix,
       ) &&
-      /^\/(?:g\/[A-Za-z0-9_-]{20,100}\/thanks|workspace\/events\/[a-zA-Z0-9-]+\/book)$/.test(
+      /^\/(?:g\/[A-Za-z0-9_-]{20,100}\/(?:thanks|review)|workspace\/events\/[a-zA-Z0-9-]+\/book)$/.test(
         value.back,
       )
     )
@@ -114,12 +114,14 @@ export function PurchasePanel({
   prefix,
   back,
   onAccess,
+  beforeSend = false,
 }: {
   product: PurchaseOrder["product"];
   targetId: string;
   prefix: string;
   back: string;
   onAccess?: (value: boolean) => void;
+  beforeSend?: boolean;
 }) {
   const { mode, configuration } = useStore();
   const billing = configuration.billing || emptyBilling;
@@ -186,12 +188,14 @@ export function PurchasePanel({
       </p>
       <h2>
         {card
-          ? "Give your words a signature finish."
+          ? "Your Signature card, made for them."
           : "Keep a beautifully composed edition."}
       </h2>
       <p>
         {card
-          ? "Your card is already delivered. An optional $4.99 upgrade adds a gold frame and Signature Edition seal to the host’s copy. Every template and your words remain available free."
+          ? beforeSend
+            ? "Your selected edition is $4.99. Complete checkout, then return here and choose Send. Your card stays private until you send it. Free cards are always available."
+            : "Your Signature purchase is $4.99. Your original words remain available with your card."
           : "Download a self-contained digital album with complete notes, retained artwork and animations, in editorial or collage style. Your basic CardVault and exports stay free. Physical printing and shipping are separate."}
       </p>
       <p className="purchase-test-label">
@@ -201,7 +205,9 @@ export function PurchasePanel({
         <>
           <p role="status">
             {card
-              ? "Your signature finish is active."
+              ? beforeSend
+                ? "Your premium card is paid and ready for you to send."
+                : "Your Signature edition is active."
               : "Your digital edition is available."}
           </p>
           {!card && access.orderId && (
@@ -274,7 +280,7 @@ export function PurchasePanel({
               {busy
                 ? "Preparing your quote…"
                 : card
-                  ? "Review $4.99 signature finish"
+                  ? "Review $4.99 premium card"
                   : "Review book purchase"}
             </button>
           )}
@@ -373,7 +379,7 @@ export function CheckoutReturn() {
             <p role="status">
               {order.entitled
                 ? order.product === "premium-card"
-                  ? "The host’s card now has its signature finish."
+                  ? "Your Signature purchase is confirmed. Return to your card review to send it if you haven’t already."
                   : "Your digital keepsake is unlocked."
                 : order.status === "refunded"
                   ? "This purchase was fully refunded. Paid access has been removed; original notes remain safe."
@@ -381,6 +387,13 @@ export function CheckoutReturn() {
                     ? "Paid access is paused while this payment is reviewed."
                     : "Paid access is not confirmed. Your original free content remains available."}
             </p>
+            {order.entitled &&
+              order.product === "premium-card" &&
+              value.back.endsWith("/review") && (
+                <Link className="primary" to={value.back}>
+                  Review and send my card ↗
+                </Link>
+              )}
             {order.entitled && order.product === "event-book" && (
               <div className="buttons">
                 <label>

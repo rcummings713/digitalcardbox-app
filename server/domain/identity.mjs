@@ -6,5 +6,6 @@ export const publicHost = (host) => ({
   name: host.name,
   email: host.email,
   role: host.role,
+  registered: !!host.registered,
   reducedMotion: !!host.reduced_motion,
 });

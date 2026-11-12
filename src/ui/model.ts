@@ -1,3 +1,4 @@
+import type { PremiumEdition } from "../modules/cards/premium";
 import type { DesignDocument } from "../modules/design/contracts";
 import { cardTemplates as templates, gifStore } from "../modules/media/catalog";
 import type { TemplateId } from "../modules/media/catalog";
@@ -40,6 +41,7 @@ export interface Entry {
   note: string;
   style: CardStyle;
   premium?: boolean;
+  premiumEdition?: PremiumEdition;
   artId?: string;
   design?: DesignDocument;
   photo?: string;

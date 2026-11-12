@@ -484,7 +484,7 @@ test("migrations 004–005 upgrade an existing version-3 database and reruns wit
         current
           .all("SELECT version FROM review_schema_versions ORDER BY version")
           .map((row) => row.version),
-        [1, 2, 3, 4, 5, 6],
+        [1, 2, 3, 4, 5, 6, 7],
       );
       assert.equal(
         current.card(current.one("SELECT * FROM cards WHERE id='legacy-card'"))

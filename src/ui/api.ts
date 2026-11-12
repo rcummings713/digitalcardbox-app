@@ -11,6 +11,7 @@ export interface HostAccount {
   email: string;
   role: "host" | "operator";
   reducedMotion: boolean;
+  registered?: boolean;
 }
 export interface InvitationResponse {
   event: Occasion;
@@ -129,7 +130,15 @@ export interface GiftIntentResponse {
   repeated: boolean;
 }
 
+export interface AuthConfiguration {
+  configured: boolean;
+  email: boolean;
+  google: boolean;
+  apple: boolean;
+  unavailable?: boolean;
+}
 export interface PublicConfiguration {
+  auth?: AuthConfiguration;
   billing: BillingConfiguration;
   connected: boolean;
   hosted: boolean;

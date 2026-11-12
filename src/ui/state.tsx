@@ -26,6 +26,7 @@ import type {
   SessionResponse,
 } from "./api";
 interface Actions {
+  syncSession: () => Promise<void>;
   startReview: () => Promise<boolean>;
   guestCsrf: (token: string) => string | undefined;
   reviewFeedback: (
@@ -255,6 +256,14 @@ export function StoreProvider({ children }: { children: ReactNode }) {
           return true;
         }),
       );
+    },
+    async syncSession() {
+      const value = await request<SessionResponse>("/api/session");
+      sessionGeneration.current++;
+      csrf.current = value.csrfToken;
+      setAccount(value.account);
+      if (value.configuration) setConfiguration(value.configuration);
+      if (value.account) await refresh();
     },
     async login(email, password) {
       const result = await perform(async () => {

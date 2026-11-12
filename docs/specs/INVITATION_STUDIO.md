@@ -166,3 +166,6 @@ Official implementation references checked 30 October 2026:
 ## 5 November 2026 stationery update
 
 5 November extension supersedes the collection/editor counts above: 106 original cards and 95 invitation/save-the-date designs, direct on-design typing, per-layer formatting, corner resizing/duplication, editable-file import/export and finite page/art/text motion. Save-the-dates are separate owned-event designs with private links/QR and scheduled read-only presentation. Approved background imports preserve their own provenance and export bytes. Actual Canva imports require an authorized eligible export. See STATIONERY_EDITOR.md and ADR 0011.
+
+
+11 November owner update: the gallery shows whole portrait templates with no nested template/grid scrolling, one column on phones, twelve initial results and load-more/search across the complete collection. Selecting a template focuses the editor. Standard (1.8s), Slow (3.2s default) and Very slow (5.2s) entrance speeds include proportionate stagger, persist in the design and can be overridden in previews. Effects remain finite/stoppable; reduced motion and print remain still.

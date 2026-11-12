@@ -79,3 +79,6 @@ Owner-directed DEV extension implements Stripe sandbox product purchases: $4.99 
 ## 11 November 2026 stable DEV deployment
 
 The owner requests the existing connected backend at the main DEV Worker address. `dev` now deploys the tested connected UI/API there; feature previews stay isolated. Stripe sandbox registration uses the stable DEV webhook and return origin in PRODUCT_CHECKOUT.md. The stable store starts separately from retained preview records and uses the same additive migrations and persistent key design. TEST/customer PROD and live-payment boundaries remain unchanged.
+
+
+11 November end-to-end DEV extension: ADR 0013 brings Supabase-managed verified email/password and Google/Apple host accounts forward for DEV. Passwords stay with Supabase; issuer/subject ownership and encrypted backend sessions keep existing data. Provider configuration is owner-managed. Premium card edition selection and sandbox payment move before explicit card delivery; free cards remain directly sendable. Six Signature treatments share the $4.99 price. Whole-template galleries and persisted selectable slow entrance effects extend the shared editor. Production gates remain separate.

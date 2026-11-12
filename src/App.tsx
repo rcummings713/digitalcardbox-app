@@ -1,3 +1,4 @@
+import { ManagedAccounts, AccountCallback } from "./ui/ManagedAccounts";
 import { CheckoutReturn } from "./ui/Billing";
 import { DesignStudio } from "./ui/DesignStudio";
 import { FeedbackPage } from "./ui/FeedbackPages";
@@ -51,6 +52,20 @@ function Shell() {
   let content;
   if (guest)
     content = <GuestPage token={parts[1] || ""} step={parts[2] || "landing"} />;
+  else if (path === "/auth/sign-in")
+    content = (
+      <SignIn
+        returnTo={
+          new URLSearchParams(location.search).get("next") || "/workspace"
+        }
+      />
+    );
+  else if (path === "/auth/register") content = <ManagedAccounts create />;
+  else if (
+    parts[0] === "auth" &&
+    ["callback", "confirmed", "verify", "recover"].includes(parts[1])
+  )
+    content = <AccountCallback key={route} kind={parts[1]} />;
   else if (path === "/checkout/return") content = <CheckoutReturn />;
   else if (path === "/") content = <Home />;
   else if (path === "/start") content = <Start />;
@@ -152,7 +167,7 @@ function Shell() {
           <span>
             {mode === "server"
               ? account
-                ? account.id.startsWith("visitor-")
+                ? account.id.startsWith("visitor-") && !account.registered
                   ? "Private test workspace · Saved to this browser"
                   : `Test workspace · ${account.email}`
                 : "Private host workspace"

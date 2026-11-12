@@ -6,6 +6,11 @@ export class LocalTestIdentity {
   }
   authenticate(email, password) {
     const host = this.repository.findHost(email);
+    if (
+      host &&
+      !["review-host", "review-other", "review-operator"].includes(host.id)
+    )
+      return null;
     const actual = scryptSync(
       password,
       host?.password_salt ?? "00000000000000000000000000000000",

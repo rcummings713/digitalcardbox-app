@@ -95,7 +95,7 @@ Release: October 2026 private MVP and follow-on. Hosts control private event dat
   - Use a managed identity provider and verified email.
   - Server stores provider subject and role, not a custom password database.
   - Persist one identity.customers record per (auth_issuer, auth_subject); synchronize verified email without using email as ownership identity or storing passwords.
-  - Review Apple, Google, Amazon and manual email account entry with an account-free UI bypass during design review; provider eligibility/configuration and verified server sessions remain required before launch. Never collect a password in the local UI.
+  - DEV customer entry supports managed email/password, Google and Apple when configured, while retaining an account-free bypass. Passwords are forwarded only to Supabase and never persisted by this app. Amazon provider eligibility remains future work; production identity/database acceptance remains separate.
   - **Blocked by:** DCB-E18-S02
 - **DCB-E02-S02 Enforce event ownership** — October 2026 private MVP. As a host, I want only authorized hosts to see my private event data so that gifts and notes remain private.
   - Every host read and write checks ownership or explicit membership on the server.
@@ -382,6 +382,8 @@ Release: Post-MVP. Sell optional design upgrades and polished books without char
 - **DCB-E10-S01 Offer premium card design** — Post-MVP. As a guest, I want to see a $4.99 premium card option so that I can choose a richer design.
   - Free manual path remains.
   - Premium status and price are clear before checkout.
+  - Show six selectable premium editions before delivery, including the public card studio; save selection intent without treating it as payment proof.
+  - Keep premium drafts private until signed/retrieved payment confirmation and an explicit guest-authorized Send; free participation remains available.
 - **DCB-E10-S02 Quote book price from included entries** — Post-MVP. As a host, I want a final server quote so that I pay for the correct $15/$30/$79 tier.
   - Tier uses 0–99, 100–299 or 300+ consented entries after day 90.
   - Price cannot be altered by the browser.
@@ -390,10 +392,12 @@ Release: Post-MVP. Sell optional design upgrades and polished books without char
   - Create server-side order and provider session.
   - Do not store PAN/CVV or treat return URL as payment proof.
   - Persist billing.orders/order_items/payment_attempts; customer or same-event guest buyer, unique provider/request references and server prices remain separate from gift funds.
+  - Premium card checkout targets a private saved draft, then returns to review; a success URL alone cannot deliver or grant premium treatment.
 - **DCB-E10-S04 Grant paid entitlement on signed event** — Post-MVP. As a buyer, I want access to the upgrade after payment so that I receive what I bought.
   - Verified provider event is replay-safe.
   - Entitlement applies once to the correct card or event.
   - Durably deduplicate verified billing.provider_events by provider/event ID and grant billing.entitlements once per paid target; no browser-controlled paid state.
+  - Explicit premium draft Send rechecks current entitlement, invitation/guest scope, contribution window and feature switches atomically; unsigned/unpaid/cancelled returns cannot send.
 - **DCB-E10-S05 Handle failed checkout and refund** — Post-MVP. As a buyer, I want an honest order status so that I know whether I was charged.
   - Pending and failed payments do not unlock.
   - Refund updates entitlement and purchase history.
@@ -618,6 +622,7 @@ Release: UI design review. Prospective hosts can design invitations before creat
   - Reusable mobile editor offers text selection, editing, font/size/alignment, palettes, movement/nudging, layer order, add/remove text, undo/redo, reset and saved local drafts, plus optional searchable licensed GIFs.
   - Original text stays readable and separate from ornament/art; keyboard, touch, reduced-motion and narrow-screen flows are verified.
   - Creating a preview never makes an event public or creates a guest link.
+  - Show whole invitation templates at readable widths using page scrolling; no individual template or text-layer scrollbars. Load more preserves access to the full searchable catalogue.
 - **DCB-E20-S02 Bind invitation designs to owned events before sharing** — UI design review. As a host, I want to keep my invitation design through setup and share it only after I have created and published my card box.
   - Carry an invitation draft through account choices and event setup; let an existing host select an owned event or edit its invitation from the workspace.
   - Persist a bounded versioned invitation document with event ownership, CSRF and revision checks. No arbitrary HTML, remote asset URL or cross-event artwork is accepted.
@@ -637,3 +642,4 @@ Release: UI design review. Prospective hosts can design invitations before creat
   - Allowlisted finite fade/rise/zoom/stagger/float effects can be selected at page, text and artwork levels, previewed and persisted with cards/invitations/save-the-dates.
   - Native editable text stays readable and independent of decorative art. Pause shows the complete still design; reduced motion and print show static content. No flashing or infinite automatic motion.
   - Verify direct text editing, movement/resize, mixed typography, formatting, layers and undo/redo remain usable on touch and keyboard.
+  - Persist Standard/Slow/Very slow preview speed, default Slow (3.2-second effects); use finite timing proportional to the selected speed and preserve Stop/reduced-motion/print behavior.

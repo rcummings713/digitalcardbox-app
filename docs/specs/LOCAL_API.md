@@ -124,3 +124,6 @@ Stable hosted DEV (11 November): `https://digitalcardbox-app-dev.rcummings71300.
 Operator GET `/api/admin/billing/check` performs read-only sandbox price/webhook configuration inspection, at most three checks per minute. It returns separate actual-price validation, endpoint settings, verified-delivery count/latest type/time, and completed test payment count. The endpoint requires operator identity and returns no provider credentials, private note bodies or raw events. No charge, refund or payment session is created by inspection.
 
 The operator billing check also returns `lastProviderFailure` (latest in-memory timestamp, HTTP status, operation and bounded key/email-redacted hint), or null. It is not a persistent audit log and is never included in public purchase errors.
+
+
+11 November owner-directed DEV extension: see ADR 0013 and ACCOUNT_AND_AI_SETUP.md. Supabase owns passwords and verified provider identities; additive migration 007 stores only issuer/subject links, encrypted session tokens and expiring S256 PKCE flows. Cards-owned premium drafts stay outside host/book views until an authorized Send after verified sandbox payment. Existing accepted records/keys remain intact; production PostgreSQL/identity/recovery gates remain open.

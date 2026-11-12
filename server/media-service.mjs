@@ -51,7 +51,7 @@ function day(repo) {
   return dayInZone(repo.clock(), "America/New_York");
 }
 export class MediaService {
-  constructor(repo, { apiKey = "", aiEnabled = false, fetcher = fetch } = {}) {
+  constructor(repo, { apiKey = "", aiEnabled = false, fetcher = (...args) => globalThis.fetch(...args) } = {}) {
     this.repo = repo;
     this.apiKey = apiKey;
     this.enabled = aiEnabled;
@@ -98,7 +98,7 @@ export class MediaService {
         },
         body: JSON.stringify(payload),
         signal: AbortSignal.timeout(90000),
-        redirect: "error",
+        redirect: "manual",
       });
     } catch {
       fail(
@@ -106,6 +106,10 @@ export class MediaService {
         "Card artwork is unavailable right now. You can still choose a collection design.",
         "ai_unavailable",
       );
+    }
+    if (response.status >= 300 && response.status < 400) {
+      await response.body?.cancel();
+      fail(503, "Artwork provider returned an unexpected redirect.", "ai_unavailable");
     }
     if (!response.ok)
       fail(

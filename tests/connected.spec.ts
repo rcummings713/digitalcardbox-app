@@ -608,7 +608,7 @@ test("guest can browse the expanded templates and use the curated GIF store whil
     page.getByRole("button", { name: "Create one card with AI" }),
   ).toBeDisabled();
   await expect(page.locator(".ai-card-composer")).toContainText(
-    "AI artwork is not enabled",
+    "AI artwork is temporarily unavailable",
   );
   await page.getByRole("button", { name: /^(Add|Change) a GIF/ }).click();
   await page.getByLabel("Find a little feeling").fill("wedding rings");

@@ -13,6 +13,7 @@ export default defineConfig({
     "studio.spec.ts",
     "stationery.spec.ts",
     "billing.spec.ts",
+    "accounts.spec.ts",
   ],
   outputDir: "test-results/connected",
   fullyParallel: false,

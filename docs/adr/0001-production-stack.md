@@ -33,3 +33,6 @@ SQLite and seeded identity adapters for the owner’s host/guest testing request
 This is an implemented local runtime, not the deployed PostgreSQL/managed-auth
 spike or a production stack decision. React pages call explicit API operations;
 provider/runtime adapters and production authorization gates remain open here.
+
+
+11 November owner-directed DEV extension: ADR 0013 implements Supabase-managed customer authentication over the current isolated DEV adapter, including an encrypted backend session bridge required by that adapter. This does not close the production runtime/PostgreSQL spike or migrate existing content.

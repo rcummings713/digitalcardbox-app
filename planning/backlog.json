@@ -92,7 +92,7 @@
             "Use a managed identity provider and verified email.",
             "Server stores provider subject and role, not a custom password database.",
             "Persist one identity.customers record per (auth_issuer, auth_subject); synchronize verified email without using email as ownership identity or storing passwords.",
-            "Review Apple, Google, Amazon and manual email account entry with an account-free UI bypass during design review; provider eligibility/configuration and verified server sessions remain required before launch. Never collect a password in the local UI."
+            "DEV customer entry supports managed email/password, Google and Apple when configured, while retaining an account-free bypass. Passwords are forwarded only to Supabase and never persisted by this app. Amazon provider eligibility remains future work; production identity/database acceptance remains separate."
           ],
           "priority": "P0",
           "release": "October 2026 private MVP",
@@ -100,7 +100,10 @@
           "estimate_hours": 7,
           "depends_on": [
             "DCB-E18-S02"
-          ]
+          ],
+          "github_issue": 8,
+          "implementation_status": "In Progress",
+          "implementation_note": "11 November owner extension: ADR 0013 implements an isolated Supabase identity bridge for existing Cloudflare DEV data. Await owner project/provider configuration and real account acceptance; production PostgreSQL blocker #64 and human review remain open."
         },
         {
           "id": "DCB-E02-S02",
@@ -534,7 +537,9 @@
           "priority": "P0",
           "release": "UI design review",
           "target_date": null,
-          "estimate_hours": null
+          "estimate_hours": null,
+          "implementation_status": "In Progress",
+          "implementation_note": "11 November: use Worker-compatible manual redirect rejection for provider requests, preserve fixed moderated image model and shared quotas. Real generation awaits owner OPENAI_API_KEY setup and acceptance; fixtures do not represent live generation."
         }
       ],
       "release": "October 2026 private MVP and follow-on"
@@ -1048,7 +1053,9 @@
           "story": "As a guest, I want to see a $4.99 premium card option so that I can choose a richer design.",
           "acceptance": [
             "Free manual path remains.",
-            "Premium status and price are clear before checkout."
+            "Premium status and price are clear before checkout.",
+            "Show six selectable premium editions before delivery, including the public card studio; save selection intent without treating it as payment proof.",
+            "Keep premium drafts private until signed/retrieved payment confirmation and an explicit guest-authorized Send; free participation remains available."
           ],
           "priority": "P2",
           "release": "Post-MVP",
@@ -1056,7 +1063,7 @@
           "estimate_hours": null,
           "github_issue": 101,
           "implementation_status": "In Progress",
-          "implementation_note": "6 November: isolated DEV Stripe sandbox; see docs/specs/PRODUCT_CHECKOUT.md. Live rollout remains separate; owner closes issues."
+          "implementation_note": "11 November: pre-send premium selection replaces the earlier post-delivery UI. Additive migration 007 preserves accepted cards and paid orders. Keep OPEN/In Progress for owner review."
         },
         {
           "id": "DCB-E10-S02",
@@ -1082,7 +1089,8 @@
           "acceptance": [
             "Create server-side order and provider session.",
             "Do not store PAN/CVV or treat return URL as payment proof.",
-            "Persist billing.orders/order_items/payment_attempts; customer or same-event guest buyer, unique provider/request references and server prices remain separate from gift funds."
+            "Persist billing.orders/order_items/payment_attempts; customer or same-event guest buyer, unique provider/request references and server prices remain separate from gift funds.",
+            "Premium card checkout targets a private saved draft, then returns to review; a success URL alone cannot deliver or grant premium treatment."
           ],
           "priority": "P2",
           "release": "Post-MVP",
@@ -1099,7 +1107,8 @@
           "acceptance": [
             "Verified provider event is replay-safe.",
             "Entitlement applies once to the correct card or event.",
-            "Durably deduplicate verified billing.provider_events by provider/event ID and grant billing.entitlements once per paid target; no browser-controlled paid state."
+            "Durably deduplicate verified billing.provider_events by provider/event ID and grant billing.entitlements once per paid target; no browser-controlled paid state.",
+            "Explicit premium draft Send rechecks current entitlement, invitation/guest scope, contribution window and feature switches atomically; unsigned/unpaid/cancelled returns cannot send."
           ],
           "priority": "P2",
           "release": "Post-MVP",
@@ -1849,7 +1858,8 @@
             "Public Invitations page with occasion-filtered premium templates and live editable previews before any account/event creation.",
             "Reusable mobile editor offers text selection, editing, font/size/alignment, palettes, movement/nudging, layer order, add/remove text, undo/redo, reset and saved local drafts, plus optional searchable licensed GIFs.",
             "Original text stays readable and separate from ornament/art; keyboard, touch, reduced-motion and narrow-screen flows are verified.",
-            "Creating a preview never makes an event public or creates a guest link."
+            "Creating a preview never makes an event public or creates a guest link.",
+            "Show whole invitation templates at readable widths using page scrolling; no individual template or text-layer scrollbars. Load more preserves access to the full searchable catalogue."
           ],
           "priority": "P1",
           "release": "UI design review",
@@ -1885,7 +1895,9 @@
           "priority": "P1",
           "release": "UI design review",
           "target_date": null,
-          "estimate_hours": null
+          "estimate_hours": null,
+          "implementation_status": "In Progress",
+          "implementation_note": "11 November: use Worker-compatible manual redirect rejection for provider requests, preserve fixed moderated image model and shared quotas. Real generation awaits owner OPENAI_API_KEY setup and acceptance; fixtures do not represent live generation."
         },
         {
           "id": "DCB-E20-S04",
@@ -1908,7 +1920,8 @@
           "acceptance": [
             "Allowlisted finite fade/rise/zoom/stagger/float effects can be selected at page, text and artwork levels, previewed and persisted with cards/invitations/save-the-dates.",
             "Native editable text stays readable and independent of decorative art. Pause shows the complete still design; reduced motion and print show static content. No flashing or infinite automatic motion.",
-            "Verify direct text editing, movement/resize, mixed typography, formatting, layers and undo/redo remain usable on touch and keyboard."
+            "Verify direct text editing, movement/resize, mixed typography, formatting, layers and undo/redo remain usable on touch and keyboard.",
+            "Persist Standard/Slow/Very slow preview speed, default Slow (3.2-second effects); use finite timing proportional to the selected speed and preserve Stop/reduced-motion/print behavior."
           ],
           "priority": "P1",
           "release": "UI design review",

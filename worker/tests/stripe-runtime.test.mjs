@@ -68,7 +68,13 @@ test(
     }
     assert.deepEqual(
       result,
-      { nativeRequestAccepted: true, redirectRejected: true, calls: 2 },
+      {
+        nativeRequestAccepted: true,
+        redirectRejected: true,
+        artworkRequestAccepted: true,
+        authRequestAccepted: true,
+        calls: 2,
+      },
       logs,
     );
   },

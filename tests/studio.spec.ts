@@ -1,5 +1,8 @@
 import { test, expect } from "@playwright/test";
 import AxeBuilder from "@axe-core/playwright";
+let preservedHostCookies:
+  | Awaited<ReturnType<import("@playwright/test").BrowserContext["cookies"]>>
+  | undefined;
 
 test("visitors design a card without an account; text tools, undo, GIF and saved draft survive refresh", async ({
   page,
@@ -15,9 +18,12 @@ test("visitors design a card without an account; text tools, undo, GIF and saved
   await expect(options.nth(1)).toContainText("Generic cards");
   await options.nth(1).click();
   await page.getByLabel("Filter designs").selectOption("All designs");
-  expect(
-    await page.locator(".studio-template-grid>button").count(),
-  ).toBeGreaterThanOrEqual(20);
+  expect(await page.locator(".studio-template-grid>button").count()).toBe(12);
+  await page.getByRole("button", { name: /Show more templates/ }).click();
+  await expect(page.locator(".studio-template-grid>button")).toHaveCount(24);
+  await page
+    .getByLabel("Search templates", { exact: true })
+    .fill("Pressed Peony");
   await page
     .getByRole("button", { name: "Pressed Peony", exact: true })
     .click();
@@ -165,6 +171,7 @@ test("a saved editable card reaches the host with its typography, animation and 
   await expect(page.getByRole("heading", { level: 1 })).toContainText(
     "A little hello",
   );
+  preservedHostCookies = await page.context().cookies();
   await page.goto("/workspace/events/test-baby-shower/share");
   const invitation = await page
     .getByLabel("Guest invitation link")
@@ -254,4 +261,114 @@ test("AI completion preserves words edited while waiting and applies artwork onl
   await expect(page.getByLabel("Your message", { exact: true })).toHaveValue(
     "These words were written while my artwork was being made.",
   );
+});
+
+test("phone invitation gallery shows whole templates and uses page scrolling", async ({
+  page,
+}) => {
+  await page.setViewportSize({ width: 375, height: 812 });
+  await page.goto("/invitations");
+  await page.getByRole("button", { name: /Invitation templates/ }).click();
+  await expect(
+    page.locator(".studio-template-grid>button").first(),
+  ).toBeVisible();
+  const geometry = await page
+    .locator(".studio-template-grid")
+    .evaluate((grid) => {
+      const tile = grid.querySelector("button")!,
+        canvas = tile.querySelector(".design-canvas")!;
+      return {
+        overflow: getComputedStyle(grid).overflowY,
+        tileWidth: tile.getBoundingClientRect().width,
+        canvasHeight: canvas.getBoundingClientRect().height,
+        scrollingLayers: [
+          ...grid.querySelectorAll(".design-text-layer"),
+        ].filter((el) =>
+          ["auto", "scroll"].includes(getComputedStyle(el).overflowY),
+        ).length,
+      };
+    });
+  expect(geometry.overflow).toBe("visible");
+  expect(geometry.tileWidth).toBeGreaterThan(250);
+  expect(geometry.canvasHeight).toBeGreaterThan(300);
+  expect(geometry.scrollingLayers).toBe(0);
+  expect(
+    await page.evaluate(
+      () => document.documentElement.scrollWidth <= innerWidth,
+    ),
+  ).toBe(true);
+});
+
+test("premium editions are chosen before sending and unpaid drafts never appear in the host inbox", async ({
+  page,
+}) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  const origin = new URL(
+    page.url() === "about:blank" ? "http://127.0.0.1:4175" : page.url(),
+  ).origin;
+  if (preservedHostCookies)
+    await page.context().addCookies(preservedHostCookies);
+  else {
+    const login = await page.request.post("/api/session", {
+      headers: { Origin: origin, "X-DCB-Request": "1" },
+      data: {
+        email: "host@digitalcardbox.test",
+        password: "CardBoxReview!2026",
+      },
+    });
+    expect(login.ok()).toBe(true);
+  }
+  const before = await (await page.request.get("/api/host/workspace")).json();
+  const event = before.events.find(
+    (e: { status: string }) => e.status === "published",
+  );
+  await page.goto("/cards");
+  await page.getByRole("button", { name: /Premium cards/ }).click();
+  await expect(page.locator(".premium-choice")).toHaveCount(6);
+  await page.getByRole("button", { name: /Written in the Stars/ }).click();
+  await page
+    .getByRole("button", { name: "Save card draft", exact: true })
+    .click();
+  expect((await new AxeBuilder({ page }).analyze()).violations).toEqual([]);
+  await page.goto("/g/" + event.token + "/card");
+  await page.getByRole("button", { name: /Use my saved card design/ }).click();
+  await expect(
+    page.getByRole("button", { name: /Written in the Stars/ }),
+  ).toHaveAttribute("aria-pressed", "true");
+  await page
+    .getByLabel("Your name", { exact: true })
+    .fill("Private premium review");
+  await page
+    .getByLabel("Your note", { exact: true })
+    .fill("These words stay private until the card is paid and sent.");
+  const save = page.waitForResponse(
+    (r) => r.url().endsWith("/card-drafts") && r.request().method() === "POST",
+  );
+  await page.getByRole("button", { name: /^Review my card/ }).click();
+  const saved = await (await save).json();
+  expect(saved.entry.id).toBeTruthy();
+  await expect(
+    page.getByRole("heading", {
+      name: "Your Signature card, made for them.",
+      exact: true,
+    }),
+  ).toBeVisible();
+  await expect(
+    page.getByText("Your card is already delivered.", { exact: false }),
+  ).toHaveCount(0);
+  await expect(
+    page.getByRole("button", { name: /^Send my card/ }),
+  ).toBeDisabled();
+  const current = await (await page.request.get("/api/host/workspace")).json();
+  expect(
+    current.entries.some((e: { id: string }) => e.id === saved.entry.id),
+  ).toBe(false);
+  await page.getByRole("link", { name: "Keep editing", exact: true }).click();
+  await page
+    .getByRole("button", { name: "Free collection · $0", exact: true })
+    .click();
+  await page.getByRole("button", { name: /^Review my card/ }).click();
+  await expect(
+    page.getByRole("button", { name: /^Send my card/ }),
+  ).toBeEnabled();
 });

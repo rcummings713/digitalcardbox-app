@@ -386,7 +386,7 @@ test("migration 005 preserves all v4 destination ciphertext, versions, notes, in
       );
       assert.equal(
         reopened.one("SELECT max(version) AS n FROM review_schema_versions").n,
-        6,
+        7,
       );
       assert.deepEqual(reopened.all("PRAGMA foreign_key_check"), []);
       assert.equal(reopened.one("PRAGMA quick_check").quick_check, "ok");

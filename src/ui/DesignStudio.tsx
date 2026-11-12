@@ -1,5 +1,10 @@
-import { useEffect, useState } from "react";
-import { cardTemplates as templates, aiOptions } from "../modules/media/catalog";
+import { PremiumCardChoices } from "./PremiumCardChoices";
+import { premiumEditions } from "../modules/cards/premium";
+import { useEffect, useRef, useState } from "react";
+import {
+  cardTemplates as templates,
+  aiOptions,
+} from "../modules/media/catalog";
 import type { AiCardChoices } from "../modules/media/catalog";
 import { occasionChoices, eventTypes } from "../modules/events/occasions";
 import {
@@ -77,12 +82,15 @@ export function DesignStudio({
       variant,
     );
   });
-  const [source, setSource] = useState<"ai" | "templates">(
+  const [source, setSource] = useState<"ai" | "templates" | "premium">(
     event ? "templates" : "ai",
   );
   const [libraryOpen, setLibraryOpen] = useState(false);
   const [category, setCategory] = useState("Recommended");
   const [query, setQuery] = useState("");
+  const [visibleTemplates, setVisibleTemplates] = useState(12);
+  const editorRef = useRef<HTMLDivElement>(null);
+  useEffect(() => setVisibleTemplates(12), [query, category, value.occasion]);
   const [gifOpen, setGifOpen] = useState(false);
   const [storageError, setStorageError] = useState("");
   const [artError, setArtError] = useState("");
@@ -145,9 +153,10 @@ export function DesignStudio({
   }
   const items = [
     ...(kind === "invitation" ? invitationTemplates : templates),
-  ].sort((a, b) =>
-    Number("artwork" in b) - Number("artwork" in a) ||
-    Number("layout" in b) - Number("layout" in a),
+  ].sort(
+    (a, b) =>
+      Number("artwork" in b) - Number("artwork" in a) ||
+      Number("layout" in b) - Number("layout" in a),
   );
   const desiredCategory = /baby|gender/i.test(value.occasion)
     ? "Baby"
@@ -256,6 +265,7 @@ export function DesignStudio({
           aria-pressed={source === "templates"}
           onClick={() => {
             setSource("templates");
+            edit({ ...value, premiumEdition: undefined });
             setLibraryOpen(true);
           }}
         >
@@ -269,6 +279,22 @@ export function DesignStudio({
           </strong>
           <small>Thoughtfully designed. Ready to personalize.</small>
         </button>
+        {kind === "card" && (
+          <button
+            type="button"
+            aria-pressed={source === "premium"}
+            onClick={() => {
+              setSource("premium");
+              setLibraryOpen(true);
+              if (!value.premiumEdition)
+                edit({ ...value, premiumEdition: "gilded" });
+            }}
+          >
+            <span aria-hidden="true">✧</span>
+            <strong>Premium cards</strong>
+            <small>Six Signature editions · $4.99 before sending.</small>
+          </button>
+        )}
       </div>
       <div className="studio-library panel">
         <div className="studio-library-heading">
@@ -304,9 +330,25 @@ export function DesignStudio({
           onToggle={(e) => setLibraryOpen(e.currentTarget.open)}
         >
           <summary>
-            {source === "ai" ? "AI artwork options" : "Browse design templates"}
+            {source === "premium"
+              ? "Explore Signature editions"
+              : source === "ai"
+                ? "AI artwork options"
+                : "Browse design templates"}
           </summary>
-          {source === "ai" ? (
+          {source === "premium" ? (
+            <PremiumCardChoices
+              value={value.premiumEdition}
+              onChange={(edition) => {
+                const option = premiumEditions.find((e) => e.id === edition);
+                if (!edition) setSource("templates");
+                edit({
+                  ...(option ? applyTemplate(value, option.template) : value),
+                  premiumEdition: edition,
+                });
+              }}
+            />
+          ) : source === "ai" ? (
             <div className="studio-ai-controls">
               <div className="studio-ai-choices">
                 {(["palette", "artwork", "motif"] as const).map((field) => (
@@ -431,12 +473,25 @@ export function DesignStudio({
                 {filtered.length} designs · personalize every text layer
               </p>
               <div className="studio-template-grid">
-                {filtered.map((t) => (
+                {filtered.slice(0, visibleTemplates).map((t) => (
                   <button
                     key={t.id}
                     type="button"
                     aria-pressed={value.template === t.id && !value.artId}
-                    onClick={() => edit(applyTemplate(value, t.id))}
+                    onClick={() => {
+                      edit(applyTemplate(value, t.id));
+                      requestAnimationFrame(() => {
+                        editorRef.current?.scrollIntoView({
+                          block: "start",
+                          behavior: matchMedia(
+                            "(prefers-reduced-motion: reduce)",
+                          ).matches
+                            ? "instant"
+                            : "smooth",
+                        });
+                        editorRef.current?.focus({ preventScroll: true });
+                      });
+                    }}
                   >
                     <div
                       className="studio-template-mini"
@@ -454,23 +509,40 @@ export function DesignStudio({
                   </button>
                 ))}
               </div>
+              {filtered.length > visibleTemplates && (
+                <button
+                  type="button"
+                  className="secondary"
+                  onClick={() => setVisibleTemplates((n) => n + 12)}
+                >
+                  Show more templates ({filtered.length - visibleTemplates}{" "}
+                  more)
+                </button>
+              )}
             </>
           )}
         </details>
       </div>
-      <DesignEditor
-        value={value}
-        onChange={edit}
-        artUrl={designArtworkUrl(
-          value,
-          undefined,
-          Boolean(
-            event &&
-            (variant ? event.saveTheDate : event.invitation)?.artId ===
-              value.artId,
-          ),
-        )}
-      />
+      <div
+        ref={editorRef}
+        tabIndex={-1}
+        role="region"
+        aria-label="Personalize selected template"
+      >
+        <DesignEditor
+          value={value}
+          onChange={edit}
+          artUrl={designArtworkUrl(
+            value,
+            undefined,
+            Boolean(
+              event &&
+              (variant ? event.saveTheDate : event.invitation)?.artId ===
+                value.artId,
+            ),
+          )}
+        />
+      </div>
       <div className="studio-extras panel">
         <div>
           <h2>A little movement. A little personality.</h2>

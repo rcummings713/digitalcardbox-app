@@ -1,8 +1,11 @@
+import { HostedReviewIdentity } from "../server/adapters/hosted-review-identity.mjs";
+import { AuthService, authOptions } from "../server/auth-service.mjs";
+import migration7 from "../server/migrations/007-managed-accounts-card-drafts.sql";
 import { BillingService } from "../server/billing-service.mjs";
 import { billingOptions } from "../server/billing-options.mjs";
 import migration6 from "../server/migrations/006-product-checkout.sql";
 import { DurableObject } from "cloudflare:workers";
-import { randomBytes, createHash, timingSafeEqual } from "node:crypto";
+import { randomBytes } from "node:crypto";
 import { ReviewRepository } from "../server/adapters/repository.mjs";
 import { createApiHandler } from "../server/http.mjs";
 import { MediaService } from "../server/media-service.mjs";
@@ -31,34 +34,6 @@ class DurableSqlite {
   }
   close() {}
 }
-class HostedReviewIdentity {
-  constructor(repo, env) {
-    this.repo = repo;
-    this.env = env;
-  }
-  authenticate(email, password) {
-    const host = this.repo.findHost(email);
-    const expected =
-      host?.role === "operator"
-        ? this.env.DCB_OPERATOR_PASSWORD
-        : this.env.DCB_HOST_PASSWORD;
-    // Published local credentials never authenticate a hosted operator/host.
-    if (
-      !host ||
-      host.id.startsWith("visitor-") ||
-      !expected ||
-      expected.length < 20 ||
-      expected === "CardBoxReview!2026"
-    )
-      return null;
-    return timingSafeEqual(
-      createHash("sha256").update(password).digest(),
-      createHash("sha256").update(expected).digest(),
-    )
-      ? host
-      : null;
-  }
-}
 export class ReviewStore extends DurableObject {
   constructor(ctx, env) {
     super(ctx, env);
@@ -77,6 +52,7 @@ export class ReviewStore extends DurableObject {
           migration4,
           migration5,
           migration6,
+          migration7,
         ],
         transactionRunner: (work) => ctx.storage.transactionSync(work),
         passwordHasher: () => "00".repeat(64),
@@ -91,6 +67,7 @@ export class ReviewStore extends DurableObject {
         identity: new HostedReviewIdentity(this.repo, env),
         services: {
           media: this.media,
+          auth: new AuthService(this.repo, authOptions(env)),
           billing: new BillingService(this.repo, billingOptions(env)),
         },
       });
@@ -128,7 +105,10 @@ export class ReviewStore extends DurableObject {
     const outgoing = {
       statusCode: 200,
       setHeader(name, value) {
-        outgoingHeaders.set(name, value);
+        if (Array.isArray(value)) {
+          outgoingHeaders.delete(name);
+          for (const item of value) outgoingHeaders.append(name, item);
+        } else outgoingHeaders.set(name, value);
       },
       end(body) {
         result = new Response(body, {

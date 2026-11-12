@@ -227,7 +227,12 @@ export function MotionSticker({
 }
 export function Card(props: Parameters<typeof CardContent>[0]) {
   return props.entry.premium ? (
-    <div className="premium-card-finish">
+    <div
+      className={
+        "premium-card-finish premium-edition-" +
+        (props.entry.premiumEdition || "gilded")
+      }
+    >
       <span className="premium-card-seal">Signature Edition</span>
       <CardContent {...props} />
     </div>
@@ -243,7 +248,15 @@ function CardContent({
 }: {
   entry: Pick<
     Entry,
-    "style" | "name" | "note" | "photo" | "gif" | "artId" | "design" | "premium"
+    | "style"
+    | "name"
+    | "note"
+    | "photo"
+    | "gif"
+    | "artId"
+    | "design"
+    | "premium"
+    | "premiumEdition"
   >;
   small?: boolean;
   animate?: boolean;

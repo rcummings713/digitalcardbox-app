@@ -1,3 +1,5 @@
+import { MediaService } from "../../server/media-service.mjs";
+import { AuthProvider } from "../../server/auth-provider.mjs";
 export { ReviewStore } from "../index.mjs";
 import { StripeProvider } from "../../server/stripe-provider.mjs";
 const setup = {
@@ -37,7 +39,34 @@ export default {
     } catch (error) {
       rejected = error.code === "stripe_redirect_rejected";
     }
+    let artworkRequestAccepted = false,
+      authRequestAccepted = false;
+    const nativeFetch = async (input, init) => {
+      const request = new Request(input, init);
+      if (request.redirect !== "manual")
+        throw new Error("Credentials must not follow redirects");
+      return Response.json({ ok: true });
+    };
+    const media = new MediaService(null, {
+      apiKey: "sk-runtime-fixture",
+      fetcher: nativeFetch,
+    });
+    artworkRequestAccepted =
+      (
+        await media.call("moderations", {
+          input: "Safe stationery",
+          model: "omni-moderation-latest",
+        })
+      ).ok === true;
+    const auth = new AuthProvider({
+      url: "https://auth.fixture.invalid",
+      publishableKey: "sb_publishable_native_fixture",
+      fetcher: nativeFetch,
+    });
+    authRequestAccepted = (await auth.call("settings")).ok === true;
     return Response.json({
+      artworkRequestAccepted,
+      authRequestAccepted,
       nativeRequestAccepted: price.id === "price_fixture",
       redirectRejected: rejected,
       calls,

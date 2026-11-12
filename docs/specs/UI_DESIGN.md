@@ -244,3 +244,6 @@ alternative text and keyboard focus/close behavior remain available.
 ## 5 November 2026 stationery update
 
 5 November: expanded original stationery, direct on-design plain-text typing (double-tap/Enter or explicit control), per-layer type/bold/italic/underline, resize/duplicate and complete local history. Finite page/art/text effects are previewable and honor still/reduced-motion/print. Public save-the-dates precede setup; host designs/shares them from an owned published card box, with a scheduled read-only guest route. PayPal.Me is the fourth host-configurable external service. Approved background imports carry source/license evidence and remain distinct from editable text. Actual Canva exports await an authorized connection; no proprietary editor or licensing permission is implied. See STATIONERY_EDITOR.md.
+
+
+11 November DEV extension: hosted account entry now uses real managed email registration/login, confirmation/recovery and Google/Apple PKCE flows once the owner enables the providers. Account-free continuation remains. Invitation galleries use full portrait previews and page scrolling; motion speeds persist. Premium edition choice precedes private draft checkout and an explicit Send. See ADR 0013 and ACCOUNT_AND_AI_SETUP.md.

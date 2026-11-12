@@ -147,6 +147,7 @@ export class ReviewRepository {
         : {}),
       ...(row.gif ? { gif: row.gif } : {}),
       premium: this.premiumStatus?.(row.id) ?? false,
+      ...(row.premium_edition ? { premiumEdition: row.premium_edition } : {}),
       consent: !!row.consent,
       hidden: !!row.hidden,
       createdAt: row.created_at,
@@ -302,7 +303,7 @@ export class ReviewRepository {
       host.id,
     );
     const cards = this.all(
-      "SELECT c.* FROM cards c JOIN events e ON e.id=c.event_id WHERE e.owner_id=? AND c.removed_at IS NULL ORDER BY c.created_at DESC LIMIT 1000",
+      "SELECT c.* FROM cards c JOIN events e ON e.id=c.event_id WHERE e.owner_id=? AND c.delivery_state='delivered' AND c.removed_at IS NULL ORDER BY c.created_at DESC LIMIT 1000",
       host.id,
     );
     return {
@@ -443,7 +444,10 @@ export class ReviewRepository {
     return this.one("SELECT * FROM hosts WHERE email=?", email);
   }
   host(id) {
-    return this.one("SELECT * FROM hosts WHERE id=?", id);
+    return this.one(
+      "SELECT h.*, EXISTS(SELECT 1 FROM auth_subjects a WHERE a.host_id=h.id) AS registered FROM hosts h WHERE h.id=?",
+      id,
+    );
   }
   hostSession(tokenHash) {
     return this.one(
@@ -539,10 +543,10 @@ export class ReviewRepository {
       key,
     );
   }
-  insertCard(eventId, guestId, value) {
+  insertCard(eventId, guestId, value, draftEdition) {
     const id = randomUUID();
     this.run(
-      "INSERT INTO cards (id,event_id,guest_id,request_key,name,note,style,gif,consent,created_at,art_id,design_json) VALUES(?,?,?,?,?,?,?,?,?,?,?,?)",
+      "INSERT INTO cards (id,event_id,guest_id,request_key,name,note,style,gif,consent,created_at,art_id,design_json,delivery_state,premium_edition) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
       id,
       eventId,
       guestId,
@@ -555,20 +559,28 @@ export class ReviewRepository {
       this.now(),
       value.artId ?? null,
       value.design ? JSON.stringify(storedCardDesign(value.design)) : null,
+      draftEdition ? "draft" : "delivered",
+      draftEdition || null,
     );
-    this.run(
-      "UPDATE events SET locked_at=coalesce(locked_at,?),revision=revision+1 WHERE id=?",
-      this.now(),
-      eventId,
-    );
+    if (!draftEdition)
+      this.run(
+        "UPDATE events SET locked_at=coalesce(locked_at,?),revision=revision+1 WHERE id=?",
+        this.now(),
+        eventId,
+      );
     return this.card(this.one("SELECT * FROM cards WHERE id=?", id));
   }
   guestCard(eventId, guestId, id) {
-    return this.one("SELECT * FROM cards WHERE id=? AND event_id=? AND guest_id=? AND removed_at IS NULL", id, eventId, guestId);
+    return this.one(
+      "SELECT * FROM cards WHERE id=? AND event_id=? AND guest_id=? AND removed_at IS NULL",
+      id,
+      eventId,
+      guestId,
+    );
   }
   ownedCard(hostId, id) {
     return this.one(
-      "SELECT c.* FROM cards c JOIN events e ON e.id=c.event_id WHERE c.id=? AND e.owner_id=? AND c.removed_at IS NULL",
+      "SELECT c.* FROM cards c JOIN events e ON e.id=c.event_id WHERE c.id=? AND e.owner_id=? AND c.delivery_state='delivered' AND c.removed_at IS NULL",
       id,
       hostId,
     );
@@ -585,7 +597,7 @@ export class ReviewRepository {
   }
   bookCards(eventId) {
     return this.all(
-      "SELECT * FROM cards WHERE event_id=? AND consent=1 AND hidden=0 AND removed_at IS NULL ORDER BY created_at",
+      "SELECT * FROM cards WHERE event_id=? AND delivery_state='delivered' AND consent=1 AND hidden=0 AND removed_at IS NULL ORDER BY created_at",
       eventId,
     ).map((row) => this.card(row));
   }
@@ -609,7 +621,7 @@ export class ReviewRepository {
       totals: {
         events: this.one("SELECT count(*) AS n FROM events").n,
         cards: this.one(
-          "SELECT count(*) AS n FROM cards WHERE removed_at IS NULL",
+          "SELECT count(*) AS n FROM cards WHERE delivery_state='delivered' AND removed_at IS NULL",
         ).n,
       },
       flags: this.flags(),

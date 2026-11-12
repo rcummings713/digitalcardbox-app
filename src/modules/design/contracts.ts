@@ -1,3 +1,5 @@
+import { premiumEditions } from "../cards/premium.ts";
+import type { PremiumEdition } from "../cards/premium.ts";
 import { templates, findGif } from "../media/catalog.ts";
 import type { TemplateId } from "../media/catalog.ts";
 import { eventTypes } from "../events/occasions.ts";
@@ -54,6 +56,12 @@ export const motionChoices = {
   drift: "Paper float",
 } as const;
 export type DesignMotion = keyof typeof motionChoices;
+export const motionSpeeds = {
+  standard: { label: "Standard", duration: 1800, stagger: 260 },
+  slow: { label: "Slow", duration: 3200, stagger: 450 },
+  relaxed: { label: "Very slow", duration: 5200, stagger: 700 },
+} as const;
+export type MotionSpeed = keyof typeof motionSpeeds;
 export type DesignVariant = "save-the-date";
 export interface DesignBlock {
   id: string;
@@ -84,6 +92,8 @@ export interface DesignDocument {
   variant?: DesignVariant;
   motion?: DesignMotion;
   artworkMotion?: DesignMotion;
+  motionSpeed?: MotionSpeed;
+  premiumEdition?: PremiumEdition;
 }
 const plain = (v: unknown): v is Record<string, unknown> =>
   !!v && typeof v === "object" && !Array.isArray(v);
@@ -113,6 +123,8 @@ export function validateDesign(
       "variant",
       "motion",
       "artworkMotion",
+      "motionSpeed",
+      "premiumEdition",
     ])
   )
     return invalid();
@@ -217,6 +229,11 @@ export function validateDesign(
         (typeof value[key] !== "string" ||
           !Object.hasOwn(motionChoices, String(value[key]))),
     ) ||
+    (value.motionSpeed !== undefined &&
+      !Object.hasOwn(motionSpeeds, String(value.motionSpeed))) ||
+    (value.premiumEdition !== undefined &&
+      (value.kind !== "card" ||
+        !premiumEditions.some((e) => e.id === value.premiumEdition))) ||
     length > 8000 ||
     (value.gif !== undefined &&
       (typeof value.gif !== "string" || !findGif(value.gif))) ||
@@ -236,6 +253,12 @@ export function validateDesign(
     ...(value.artId ? { artId: String(value.artId) } : {}),
     ...(value.variant ? { variant: "save-the-date" as const } : {}),
     ...(value.motion ? { motion: value.motion as DesignMotion } : {}),
+    ...(value.premiumEdition
+      ? { premiumEdition: value.premiumEdition as PremiumEdition }
+      : {}),
+    ...(value.motionSpeed
+      ? { motionSpeed: value.motionSpeed as MotionSpeed }
+      : {}),
     ...(value.artworkMotion
       ? { artworkMotion: value.artworkMotion as DesignMotion }
       : {}),
@@ -404,7 +427,8 @@ export function createDesign(
   value = applyTemplate(value, template);
   const item = templates.find((item) => item.id === template)!;
   const recipe = "textLayouts" in item ? item.textLayouts?.[kind] : undefined;
-  if (recipe) value = { ...value, blocks: recipe.map((block) => ({ ...block })) };
+  if (recipe)
+    value = { ...value, blocks: recipe.map((block) => ({ ...block })) };
   if (kind === "invitation" && variant === "save-the-date")
     value = {
       ...value,
@@ -440,7 +464,11 @@ function fitAnnouncement(value: DesignDocument): DesignDocument {
             y: Math.max(3, Math.min(block.y, titleY - 14)),
           }
         : block.id === "message"
-          ? { ...block, label: "Invitation note", size: Math.min(block.size, 14) }
+          ? {
+              ...block,
+              label: "Invitation note",
+              size: Math.min(block.size, 14),
+            }
           : block,
     ),
   };
@@ -454,8 +482,13 @@ export function applyTemplate(
   const previous = templates.find((item) => item.id === value.template)!;
   const previousRecipe =
     "textLayouts" in previous ? previous.textLayouts?.[value.kind] : undefined;
-  const recipe = "textLayouts" in item ? item.textLayouts?.[value.kind] : undefined;
-  const previousBase = createBaseDesign(value.kind, value.occasion, value.template);
+  const recipe =
+    "textLayouts" in item ? item.textLayouts?.[value.kind] : undefined;
+  const previousBase = createBaseDesign(
+    value.kind,
+    value.occasion,
+    value.template,
+  );
 
   const layout = "layout" in item ? item.layout : "portrait";
   const positions: Record<string, number[]> =
@@ -510,66 +543,79 @@ export function applyTemplate(
       .filter((block) => {
         const original = previousRecipe?.find((seed) => seed.id === block.id);
         return (
-          !original || original.text !== block.text ||
+          !original ||
+          original.text !== block.text ||
           (recipe || base.blocks).some((seed) => seed.id === block.id)
         );
       })
       .map((b): DesignBlock => {
-      const imported =
-        "textLayouts" in item
-          ? item.textLayouts?.[value.kind]?.find((seed) => seed.id === b.id)
-          : undefined;
-      if (imported) {
-        const original = previousRecipe?.find((seed) => seed.id === b.id) ||
-          previousBase.blocks.find((seed) => seed.id === b.id);
-        const unchangedAnnouncement = value.variant === "save-the-date" && b.id === "message" &&
-          b.text === "Keep a little space for a beautiful day.\nYour invitation will follow.";
-        return { ...imported, text: unchangedAnnouncement ? "Invitation to follow." :
-          b.text === original?.text ? imported.text : b.text };
-      }
-      const seed = base.blocks.find((seed) => seed.id === b.id);
-      if (!seed) return b;
-      const p = positions[b.id];
-      if (value.kind === "invitation") {
-        const index = ["heading", "title", "details", "message"].indexOf(b.id);
-        const ribbon = /ribbon|bow|pearls/.test(item.motif);
-        const y = ribbon ? [32, 44, 68, 85] : [26, 38, 64, 83];
-        const height = ribbon ? [8, 20, 13, 11] : [8, 22, 15, 11];
-        const size = [16, layout === "arch" ? 29 : 32, 16, 15];
-        if (index >= 0)
+        const imported =
+          "textLayouts" in item
+            ? item.textLayouts?.[value.kind]?.find((seed) => seed.id === b.id)
+            : undefined;
+        if (imported) {
+          const original =
+            previousRecipe?.find((seed) => seed.id === b.id) ||
+            previousBase.blocks.find((seed) => seed.id === b.id);
+          const unchangedAnnouncement =
+            value.variant === "save-the-date" &&
+            b.id === "message" &&
+            b.text ===
+              "Keep a little space for a beautiful day.\nYour invitation will follow.";
           return {
-            ...b,
-            x: layout === "arch" ? 16 : 11,
-            y: y[index],
-            width: layout === "arch" ? 68 : 78,
-            height: height[index],
-            size: size[index],
-            align: layout === "editorial" ? "left" : "center",
-            ...(layout === "editorial" && b.id === "details"
-              ? { font: "sans" as const }
-              : {}),
+            ...imported,
+            text: unchangedAnnouncement
+              ? "Invitation to follow."
+              : b.text === original?.text
+                ? imported.text
+                : b.text,
           };
-      }
-      return {
-        ...b,
-        ...(p
-          ? { x: p[0], y: p[1], width: p[2], height: p[3], size: p[4] }
-          : {
-              x: seed.x,
-              y: seed.y,
-              width: seed.width,
-              height: seed.height,
-              size: seed.size,
-            }),
-        ...(layout !== "portrait"
-          ? {
-              font: (b.id === "details"
-                ? "sans"
-                : "serif") as DesignBlock["font"],
-            }
-          : {}),
-      };
-    }),
+        }
+        const seed = base.blocks.find((seed) => seed.id === b.id);
+        if (!seed) return b;
+        const p = positions[b.id];
+        if (value.kind === "invitation") {
+          const index = ["heading", "title", "details", "message"].indexOf(
+            b.id,
+          );
+          const ribbon = /ribbon|bow|pearls/.test(item.motif);
+          const y = ribbon ? [32, 44, 68, 85] : [26, 38, 64, 83];
+          const height = ribbon ? [8, 20, 13, 11] : [8, 22, 15, 11];
+          const size = [16, layout === "arch" ? 29 : 32, 16, 15];
+          if (index >= 0)
+            return {
+              ...b,
+              x: layout === "arch" ? 16 : 11,
+              y: y[index],
+              width: layout === "arch" ? 68 : 78,
+              height: height[index],
+              size: size[index],
+              align: layout === "editorial" ? "left" : "center",
+              ...(layout === "editorial" && b.id === "details"
+                ? { font: "sans" as const }
+                : {}),
+            };
+        }
+        return {
+          ...b,
+          ...(p
+            ? { x: p[0], y: p[1], width: p[2], height: p[3], size: p[4] }
+            : {
+                x: seed.x,
+                y: seed.y,
+                width: seed.width,
+                height: seed.height,
+                size: seed.size,
+              }),
+          ...(layout !== "portrait"
+            ? {
+                font: (b.id === "details"
+                  ? "sans"
+                  : "serif") as DesignBlock["font"],
+              }
+            : {}),
+        };
+      }),
   };
   if (recipe) {
     const missing = recipe.filter(
@@ -577,7 +623,9 @@ export function applyTemplate(
     );
     next.blocks = [
       ...next.blocks,
-      ...missing.slice(0, 6 - next.blocks.length).map((block) => ({ ...block })),
+      ...missing
+        .slice(0, 6 - next.blocks.length)
+        .map((block) => ({ ...block })),
     ];
   }
   const fitted = value.variant && recipe ? fitAnnouncement(next) : next;

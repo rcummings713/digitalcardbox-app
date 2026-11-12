@@ -45,9 +45,9 @@ test("mobile creators type directly on a design, format, resize, undo, and reope
   await page.goto("/cards");
   await page.getByRole("button", { name: /Generic cards/ }).click();
   await page.getByLabel("Filter designs").selectOption("All designs");
-  expect(
-    await page.locator(".studio-template-grid>button").count(),
-  ).toBeGreaterThanOrEqual(100);
+  expect(await page.locator(".studio-template-grid>button").count()).toBe(12);
+  await page.getByRole("button", { name: /Show more templates/ }).click();
+  await expect(page.locator(".studio-template-grid>button")).toHaveCount(24);
   await page.getByLabel("Search templates", { exact: true }).fill("Porcelain");
   await expect(page.locator(".studio-template-grid>button")).toHaveCount(4);
   await page
@@ -257,6 +257,11 @@ test("page, artwork and text motion can be previewed, stopped and disabled by re
     .click();
   const layer = page.locator(".editor-stage .design-text-layer").first();
   await expect(layer).toHaveCSS("animation-name", "dcb-motion-rise");
+  await expect(layer).toHaveCSS("animation-duration", "3.2s");
+  await page
+    .getByLabel("Preview animation speed", { exact: true })
+    .selectOption("relaxed");
+  await expect(layer).toHaveCSS("animation-duration", "5.2s");
   await expect(page.locator(".editor-stage .design-artwork-layer")).toHaveCSS(
     "animation-name",
     "dcb-motion-drift",
@@ -400,26 +405,59 @@ test("host configures PayPal and guest sees an unconfirmed profile handoff with 
   ).toBe("unconfirmed");
 });
 
-test("mobile visitors personalize the new Canva invitations before account creation", async ({ page }) => {
+test("mobile visitors personalize the new Canva invitations before account creation", async ({
+  page,
+}) => {
   await page.setViewportSize({ width: 375, height: 812 });
   await page.emulateMedia({ reducedMotion: "reduce" });
   await page.goto("/invitations");
   await page.getByRole("button", { name: /Invitation templates/ }).click();
   await page.getByLabel("Filter designs").selectOption("All designs");
-  await expect(page.locator(".studio-template-grid>button")).toHaveCount(195);
-  await page.getByLabel("Search templates", { exact: true }).fill("Honeycomb Hello");
+  await expect(page.locator(".studio-template-grid>button")).toHaveCount(12);
+  await expect(
+    page.getByText("195 designs · personalize every text layer", {
+      exact: true,
+    }),
+  ).toBeVisible();
+  await page
+    .getByLabel("Search templates", { exact: true })
+    .fill("Honeycomb Hello");
   await expect(page.locator(".studio-template-grid>button")).toHaveCount(1);
-  await page.getByRole("button", { name: "Honeycomb Hello", exact: true }).click();
+  await page
+    .getByRole("button", { name: "Honeycomb Hello", exact: true })
+    .click();
   await typeOnDesign(page, "Event title", "Camille’s baby shower");
-  await page.getByLabel("Search templates", { exact: true }).fill("Cloud Cradle");
+  await page
+    .getByLabel("Search templates", { exact: true })
+    .fill("Cloud Cradle");
   await page.getByRole("button", { name: "Cloud Cradle", exact: true }).click();
-  await expect(page.getByRole("button", { name: "Edit Event title", exact: true })).toContainText("Camille’s baby shower");
+  await expect(
+    page.getByRole("button", { name: "Edit Event title", exact: true }),
+  ).toContainText("Camille’s baby shower");
   await page.reload();
-  await expect(page.locator(".editor-stage")).toContainText("Camille’s baby shower");
+  await expect(page.locator(".editor-stage")).toContainText(
+    "Camille’s baby shower",
+  );
   const image = page.locator('.editor-stage img[src^="/templates/imported/"]');
   await expect(image).toBeVisible();
-  expect(await image.evaluate((im: HTMLImageElement) => im.complete && im.naturalWidth >= 429)).toBe(true);
-  expect((await (await page.request.get("/api/session")).json()).account).toBeNull();
-  expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
-  expect((await new AxeBuilder({ page }).withTags(["wcag2a", "wcag2aa", "wcag21aa", "wcag22aa"]).analyze()).violations).toEqual([]);
+  expect(
+    await image.evaluate(
+      (im: HTMLImageElement) => im.complete && im.naturalWidth >= 429,
+    ),
+  ).toBe(true);
+  expect(
+    (await (await page.request.get("/api/session")).json()).account,
+  ).toBeNull();
+  expect(
+    await page.evaluate(
+      () => document.documentElement.scrollWidth <= innerWidth,
+    ),
+  ).toBe(true);
+  expect(
+    (
+      await new AxeBuilder({ page })
+        .withTags(["wcag2a", "wcag2aa", "wcag21aa", "wcag22aa"])
+        .analyze()
+    ).violations,
+  ).toEqual([]);
 });

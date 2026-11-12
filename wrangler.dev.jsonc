@@ -15,6 +15,7 @@
   "migrations": [{ "tag": "review-v1", "new_sqlite_classes": ["ReviewStore"] }],
   "vars": {
     "DCB_ENV": "dev",
+    "DCB_AUTH_ORIGIN": "https://digitalcardbox-app-dev.rcummings71300.workers.dev",
     "AI_CARDS_ENABLED": "true",
     "BILLING_ENABLED": "true",
     "BILLING_ALLOW_EARLY_BOOK_PREVIEW": "true",

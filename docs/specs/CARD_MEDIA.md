@@ -154,3 +154,6 @@ Sources checked for this implementation: [OpenAI image generation](https://devel
 ## Stable DEV main Worker — 11 November 2026
 
 For artwork testing on the stable `https://digitalcardbox-app-dev.rcummings71300.workers.dev` site, install its own private key with `npx wrangler secret put OPENAI_API_KEY --config wrangler.dev.jsonc --name digitalcardbox-app-dev`. Main Worker and named-preview secrets are independent. All request, moderation and budget limits above apply unchanged. The operator's private login is configured separately on the main Worker. No AI key is copied from a preview or read back from Cloudflare.
+
+
+11 November: artwork generation uses the existing fixed gpt-image-2-2026-04-21 request and shared moderation/budget pipeline, with Worker-supported manual redirects and all redirects rejected. Server-only key installation on the stable main DEV Worker is documented in ACCOUNT_AND_AI_SETUP.md. Tests use provider fixtures; no real image request is claimed until owner configuration and a successful provider response.

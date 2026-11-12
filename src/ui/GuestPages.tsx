@@ -1,3 +1,7 @@
+import { PremiumCardChoices } from "./PremiumCardChoices";
+import { premiumEditions } from "../modules/cards/premium";
+import type { PremiumEdition } from "../modules/cards/premium";
+import { request } from "./api";
 import { PurchasePanel } from "./Billing";
 import {
   DesignCanvas,
@@ -41,6 +45,8 @@ interface Draft {
   consent: boolean;
   reference: string;
   submitted: boolean;
+  premiumEdition?: PremiumEdition;
+  premiumDraftId?: string;
   receiptId?: string;
   handoff?: GiftHandoff;
   giftInput?: GiftIntentInput;
@@ -177,6 +183,24 @@ function GuestJourney({
   const [draft, setDraft] = useState<Draft>(() => loadDraft(event.token));
   const [error, setError] = useState("");
   const [premium, setPremium] = useState(false);
+  const [preparing, setPreparing] = useState(false);
+  useEffect(() => {
+    let active = true;
+    const id = draft.premiumDraftId || draft.receiptId;
+    if (mode === "server" && id)
+      void request<{ active: boolean }>(
+        `/api/invitations/${event.token}/billing/access/${id}`,
+      )
+        .then((r) => {
+          if (active) setPremium(r.active);
+        })
+        .catch(() => {
+          if (active) setPremium(false);
+        });
+    return () => {
+      active = false;
+    };
+  }, [draft.premiumDraftId, draft.receiptId, mode, event.token]);
   const [gifOpen, setGifOpen] = useState(false);
   const [playing, setPlaying] = useState(false);
   const [invitationPlaying, setInvitationPlaying] = useState(false);
@@ -288,11 +312,51 @@ function GuestJourney({
       setError("Your photo could not be read. Try another file.");
     reader.readAsDataURL(file);
   }
-  function review(e: FormEvent<HTMLFormElement>) {
+  async function review(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
     if (!draft.name.trim() || !draft.note.trim()) {
       setError("Add your name and a few words before continuing.");
       return;
+    }
+    if (draft.premiumEdition) {
+      if (mode !== "server") {
+        setError(
+          "Premium checkout is available on the connected DEV site. You can send a free card here.",
+        );
+        return;
+      }
+      setPreparing(true);
+      try {
+        const value = await request<{ entry: { id: string } }>(
+          `/api/invitations/${event.token}/card-drafts`,
+          {
+            method: "POST",
+            body: JSON.stringify({
+              requestKey: draft.id,
+              name: draft.name.trim(),
+              note: draft.note.trim(),
+              style: draft.style,
+              artId: draft.style === "ai-art" ? draft.artId : null,
+              gif: data.flags.gifs ? draft.gif : null,
+              consent: draft.consent,
+              design: draft.design
+                ? {
+                    ...cardDesignWithNote(draft.design, draft.note.trim()),
+                    gif: data.flags.gifs ? draft.gif : undefined,
+                  }
+                : null,
+              premiumEdition: draft.premiumEdition,
+            }),
+          },
+          actions.guestCsrf(event.token),
+        );
+        setDraft((d) => ({ ...d, premiumDraftId: value.entry.id }));
+      } catch (e) {
+        setError((e as Error).message);
+        return;
+      } finally {
+        setPreparing(false);
+      }
     }
     setPlaying(false);
     go(base + "/review");
@@ -323,7 +387,29 @@ function GuestJourney({
       createdAt: new Date().toISOString(),
     };
     if (mode === "server") {
-      const receipt = await actions.submitCard(event.token, entry);
+      let receipt;
+      if (draft.premiumEdition) {
+        if (!draft.premiumDraftId || !premium) {
+          setError("Complete checkout before sending your premium card.");
+          return;
+        }
+        setPreparing(true);
+        try {
+          const result = await request<{
+            entry: { id: string; createdAt: string };
+          }>(
+            `/api/invitations/${event.token}/card-drafts/${draft.premiumDraftId}/send`,
+            { method: "POST", body: "{}" },
+            actions.guestCsrf(event.token),
+          );
+          receipt = result.entry;
+        } catch (e) {
+          setError((e as Error).message);
+          return;
+        } finally {
+          setPreparing(false);
+        }
+      } else receipt = await actions.submitCard(event.token, entry);
       if (!receipt) return;
       setDraft((d) => ({ ...d, submitted: true, receiptId: receipt.id }));
       notify("Your card has been delivered to the host’s card box.");
@@ -663,14 +749,10 @@ function GuestJourney({
             <Card entry={{ ...draft, premium }} guestToken={event.token} />
           </div>
         )}
-        {mode === "server" && draft.submitted && draft.receiptId && (
-          <PurchasePanel
-            product="premium-card"
-            targetId={draft.receiptId}
-            prefix={"/api/invitations/" + event.token + "/billing"}
-            back={base + "/thanks"}
-            onAccess={setPremium}
-          />
+        {premium && (
+          <p className="small">
+            Your Signature edition is included with your delivered card.
+          </p>
         )}
         <Link to={base} className="secondary">
           Back to the occasion
@@ -845,11 +927,27 @@ function GuestJourney({
           <div className="live-card">
             <Card
               guestToken={event.token}
-              entry={{ ...draft, gif: data.flags.gifs ? draft.gif : undefined }}
+              entry={{
+                ...draft,
+                premium: !!draft.premiumEdition,
+                gif: data.flags.gifs ? draft.gif : undefined,
+              }}
             />
           </div>
           <section className="panel review-panel">
             <h2>Your words, just right.</h2>
+            {draft.premiumEdition && draft.premiumDraftId && (
+              <PurchasePanel
+                product="premium-card"
+                targetId={draft.premiumDraftId}
+                prefix={`/api/invitations/${event.token}/billing`}
+                back={base + "/review"}
+                beforeSend
+                onAccess={setPremium}
+              />
+            )}
+            {error && <p role="alert">{error}</p>}
+
             <p className="review-note">{draft.note}</p>
             <p>From {draft.name || "you"}</p>
             <p className="small">
@@ -859,7 +957,9 @@ function GuestJourney({
             </p>
             <p className="small">
               {mode === "server"
-                ? "Sending saves this card to the event’s test inbox. The host can read it from their own signed-in browser. No payment will be made."
+                ? draft.premiumEdition
+                  ? "Your draft stays private. After checkout is confirmed, choose Send to deliver it to the host."
+                  : "Send this free card directly to the host. No payment is required."
                 : "Sending adds this card to the card box on this device. Nothing is delivered to a server."}
             </p>
             <div className="buttons">
@@ -870,10 +970,16 @@ function GuestJourney({
               ) : (
                 <button
                   className="primary"
-                  disabled={busy || !draft.name.trim() || !draft.note.trim()}
+                  disabled={
+                    busy ||
+                    preparing ||
+                    (!!draft.premiumEdition && !premium) ||
+                    !draft.name.trim() ||
+                    !draft.note.trim()
+                  }
                   onClick={submit}
                 >
-                  {busy ? "Sending your card…" : "Send my card ↗"}
+                  {busy || preparing ? "Sending your card…" : "Send my card ↗"}
                 </button>
               )}
               <Link to={base + "/card"} className="secondary">
@@ -906,6 +1012,33 @@ function GuestJourney({
           <div className="composer-controls">
             <section className="panel">
               <p className="eyebrow">01 · Start with a little beauty</p>
+              <PremiumCardChoices
+                value={draft.premiumEdition}
+                onChange={(edition) => {
+                  const option = premiumEditions.find((e) => e.id === edition);
+                  update({
+                    premiumEdition: edition,
+                    ...(option
+                      ? {
+                          style: option.template,
+                          artId: undefined,
+                          design: draft.design
+                            ? {
+                                ...applyTemplate(draft.design, option.template),
+                                premiumEdition: edition,
+                              }
+                            : undefined,
+                        }
+                      : {
+                          id: uid(),
+                          premiumDraftId: undefined,
+                          design: draft.design
+                            ? { ...draft.design, premiumEdition: undefined }
+                            : undefined,
+                        }),
+                  });
+                }}
+              />
               <button
                 type="button"
                 className="secondary full"
@@ -919,6 +1052,7 @@ function GuestJourney({
                   }
                   update({
                     design: saved,
+                    premiumEdition: saved.premiumEdition,
                     style: saved.template,
                     gif: saved.gif,
                     note:
@@ -1229,7 +1363,9 @@ function GuestJourney({
                 or remove a photo to free space.
               </Notice>
             )}
-            <button className="primary full">Review my card ↗</button>
+            <button className="primary full" disabled={busy || preparing}>
+              {preparing ? "Preparing your card…" : "Review my card ↗"}
+            </button>
           </div>
           <aside className="card-preview-column">
             <div

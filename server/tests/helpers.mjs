@@ -1,3 +1,4 @@
+import { AuthService } from "../auth-service.mjs";
 import { BillingService } from "../billing-service.mjs";
 import { MediaService } from "../media-service.mjs";
 import assert from "node:assert/strict";
@@ -63,12 +64,13 @@ async function setup(t, options = {}) {
   const directory = await mkdtemp(join(tmpdir(), "dcb-api-"));
   const path = join(directory, "review.sqlite");
   const repo = new SqliteReviewRepository(path, { clock });
-  const { mediaOptions, billingOptions, ...httpOptions } = options;
+  const { mediaOptions, billingOptions, authOptions, ...httpOptions } = options;
   const media = new MediaService(repo, mediaOptions);
   const billing = new BillingService(repo, billingOptions);
+  const auth = new AuthService(repo, authOptions);
   const server = createApiServer(repo, {
     rateLimit: false,
-    services: { media, billing },
+    services: { media, billing, auth },
     ...httpOptions,
   });
   await new Promise((resolve) => server.listen(0, "127.0.0.1", resolve));
@@ -82,6 +84,7 @@ async function setup(t, options = {}) {
     repo,
     media,
     billing,
+    auth,
     server,
     base,
     path,
