@@ -128,7 +128,7 @@ evidence is recorded in the linked DEV workflow and related GitHub stories.
 Final local release checks: production build; **88 API**, **30 connected-browser**,
 **14 public UI/accessibility**, **7 native Worker** and **7 deployment-routing**
 checks passed (**146 total**), plus the planning check and Word XML validation.
-The 21 additions total 1,441,362 bytes, with the first 24 assets unchanged.
+The 21 additions total 1,438,232 bytes, with the first 24 assets unchanged.
 Deployment target: `dev` → stable `digitalcardbox-app-dev` Worker main deployment.
 No migration, binding, payment price, provider key or environment configuration
 changes are included. Hosted verification checks the deployed catalog/art and

@@ -452,7 +452,8 @@ export function studioArtwork(
       for (let y = 0; y < 580; y += 37)
         for (let x = 0; x < 420; x += 39) {
           const px = x + ((y / 37) % 2) * 18,
-            py = y + Math.sin(x * 0.1) * 6;
+            // Quantize trig output so retained SVG bytes match across CPU platforms.
+            py = Number((y + Math.sin(x * 0.1) * 6).toFixed(4));
           art += `<g transform="translate(${px} ${py}) rotate(${((x + y) % 63) - 31})"><path d="M-8-6Q-15-2-9 6M-5 9Q1 15 7 9M9 5Q14-1 7-7M3-9Q-2-13-6-9" fill="none" stroke="#33251f" stroke-width="4.5" stroke-linecap="round"/>${circle(0, 0, 5, "#9a6d4a")}</g>`;
         }
       art +=

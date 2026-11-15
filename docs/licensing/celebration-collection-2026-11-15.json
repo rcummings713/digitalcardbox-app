@@ -107,14 +107,14 @@
     },
     {
       "file": "public/templates/studio/leopard-ivory-v1.svg",
-      "bytes": 45013,
-      "sha256": "408f4d68e0988e30aeff28ccaff05cbbc5ff2795b7370a7b6c40679124da890b",
+      "bytes": 43448,
+      "sha256": "2669c9256079909fe2d6df6cc4da85abeb22e82c99338161a4d970acf2aaacc8",
       "medium": "original vector"
     },
     {
       "file": "public/templates/studio/leopard-noir-v1.svg",
-      "bytes": 45013,
-      "sha256": "1293afcba926ca1796e64e236a3be30b0152bbcdac3274e6de0f6f775fe74c01",
+      "bytes": 43448,
+      "sha256": "5ea68a99c7ab3ddff061b32d85bc776954cc367330a400b4cd3de1902a14439c",
       "medium": "original vector"
     },
     {
@@ -225,5 +225,6 @@
       "tool": "ChatGPT built-in image_gen",
       "prompt": "Original premium wedding stationery background, flat portrait5:7. A full-height vertical black-and-white photograph fills ONLY the left38%: a cropped bride's hand holding a textured white bouquet beside a groom's hand and dark suit sleeve, no faces, no identifiable people. Beautiful candid analog photography, fine film grain, rich blacks and delicate silk highlights. A thin ivory paper edge separates the photo from the remaining62% on the right. The ENTIRE right field x41%-98%, y0%-100% is blank warm ivory cotton paper, with absolutely no ornament or text, for editable invitation typography. Sophisticated split-page editorial composition. No letters, words, numbers, logo, watermark or mockup."
     }
-  ]
+  ],
+  "vectorPrecision": "Leopard-pattern vertical coordinates quantized to 0.0001px for identical SVG bytes on Mac ARM and Linux x86."
 }
