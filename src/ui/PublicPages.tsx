@@ -326,10 +326,10 @@ export function Informational({ page }: { page: string }) {
       "Your words deserve care.",
       [
         mode === "server"
-          ? "Test events and accepted cards are saved on this development server. Host and guest access use separate session cookies. Use fictional information; payments are disabled."
+          ? "Test events and accepted cards are saved on this development server. Host and guest access use separate session cookies. Use fictional information; product checkout uses Stripe’s sandbox without real charges. Guest gifts use separate external services."
           : "This design workspace stores fictional records and the changes you make in your browser’s local storage. It does not create an account, upload a photo, send a note to a server, or connect a payment service. Use fictional information while reviewing it.",
         mode === "server"
-          ? "Unsent card drafts stay in this browser tab. Accepted cards remain on the test server until removed by their host or the development database is reset. Clearing browser storage does not erase accepted cards. Private photo uploads are not connected yet. Downloads remain on the device where you save them."
+          ? "Anonymous studio drafts are saved on this device for up to seven days. Signed-in studio drafts stay in this tab until sign-out; event designs are saved to the owned card box. Guest card drafts stay in this tab, and premium card drafts are also saved privately on the server before Send. Accepted cards and retained server drafts remain in the development database; host removal hides a card but does not immediately erase its stored text or artwork. Clearing browser storage does not erase server records. Contact support about deletion while production retention and erasure procedures are being completed. Private photo uploads are not connected yet. Downloads remain on the device where you save them."
           : "Uploaded photos stay on this device. You can remove your card, clear your browser data, or reset the design workspace in Account settings. An exported file stays on the device where you download it.",
         "Contact drafts open in your own email app. Nothing is sent until you choose to send it there. No advertising trackers or external GIF searches are loaded by this interface.",
       ],

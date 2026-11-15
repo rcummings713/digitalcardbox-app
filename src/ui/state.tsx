@@ -9,6 +9,7 @@ import {
 import type { Dispatch, ReactNode, SetStateAction } from "react";
 import { initialStore, loadStore, STORAGE_KEY, uid } from "./model";
 import type { Destination, Entry, Feature, Occasion, Store } from "./model";
+import { clearDesignDrafts, setDesignDraftAccount } from "../modules/design/drafts";
 import {
   ApiError,
   initialConfiguration,
@@ -80,6 +81,10 @@ interface State {
   actions: Actions;
 }
 const Context = createContext<State | null>(null);
+const SESSION_CHANGE_KEY = "dcb-session-change-v1";
+function announceSessionChange() {
+  try { localStorage.setItem(SESSION_CHANGE_KEY, crypto.randomUUID()); } catch {}
+}
 function emptyStore(): Store {
   return {
     ...initialStore(),
@@ -117,9 +122,22 @@ export function StoreProvider({ children }: { children: ReactNode }) {
   const sessionGeneration = useRef(0);
   const refresh = useCallback(async () => {
     const generation = sessionGeneration.current;
-    const value = await workspaceRequest();
-    if (mounted.current && generation === sessionGeneration.current)
-      setData(value);
+    try {
+      const value = await workspaceRequest();
+      if (mounted.current && generation === sessionGeneration.current)
+        setData(value);
+    } catch (error) {
+      if (mounted.current && generation === sessionGeneration.current &&
+        error instanceof ApiError && error.status === 401 && error.code !== "reauthentication_required") {
+        sessionGeneration.current++;
+        csrf.current = null;
+        clearDesignDrafts();
+        setDesignDraftAccount(null);
+        setAccount(null);
+        setData(emptyStore());
+      }
+      throw error;
+    }
   }, []);
   async function perform<T>(work: () => Promise<T>): Promise<T | undefined> {
     setBusy(true);
@@ -137,10 +155,13 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       if (
         error instanceof ApiError &&
         error.status === 401 &&
-        error.code !== "guest_session_required"
+        error.code !== "guest_session_required" &&
+        error.code !== "reauthentication_required"
       ) {
         sessionGeneration.current++;
         csrf.current = null;
+        clearDesignDrafts();
+        setDesignDraftAccount(null);
         setAccount(null);
         setData(emptyStore());
       }
@@ -162,6 +183,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
           return;
         csrf.current = value.csrfToken;
         if (value.configuration) setConfiguration(value.configuration);
+        setDesignDraftAccount(value.account?.id ?? null);
         setAccount(value.account);
         setData((d) => ({ ...d, flags: value.flags }));
         if (value.account) await refresh();
@@ -175,6 +197,29 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     return () => {
       mounted.current = false;
     };
+  }, [refresh]);
+  useEffect(() => {
+    if (dataMode !== "server") return;
+    const sync = (event: StorageEvent) => {
+      if (event.key !== SESSION_CHANGE_KEY) return;
+      const generation = ++sessionGeneration.current;
+      // Clear private views immediately; another tab may have signed out or
+      // changed identity while this tab was in the background.
+      clearDesignDrafts();
+      setDesignDraftAccount(null);
+      setAccount(null);
+      setData(emptyStore());
+      void request<SessionResponse>("/api/session").then(async (value) => {
+        if (!mounted.current || generation !== sessionGeneration.current) return;
+        csrf.current = value.csrfToken;
+        setDesignDraftAccount(value.account?.id ?? null);
+        setAccount(value.account);
+        if (value.configuration) setConfiguration(value.configuration);
+        if (value.account) await refresh();
+      }).catch((error) => { if (mounted.current) setError(error.message); });
+    };
+    window.addEventListener("storage", sync);
+    return () => window.removeEventListener("storage", sync);
   }, [refresh]);
   useEffect(() => {
     if (dataMode !== "server" || !account) return;
@@ -223,8 +268,11 @@ export function StoreProvider({ children }: { children: ReactNode }) {
             method: "POST",
             body: "{}",
           });
+          sessionGeneration.current++;
           csrf.current = value.csrfToken;
+          setDesignDraftAccount(value.account?.id ?? null);
           setAccount(value.account);
+          announceSessionChange();
           if (value.configuration) setConfiguration(value.configuration);
           await refresh();
           return true;
@@ -261,7 +309,9 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       const value = await request<SessionResponse>("/api/session");
       sessionGeneration.current++;
       csrf.current = value.csrfToken;
+      setDesignDraftAccount(value.account?.id ?? null);
       setAccount(value.account);
+      announceSessionChange();
       if (value.configuration) setConfiguration(value.configuration);
       if (value.account) await refresh();
     },
@@ -273,7 +323,9 @@ export function StoreProvider({ children }: { children: ReactNode }) {
         });
         sessionGeneration.current++;
         csrf.current = value.csrfToken;
+        setDesignDraftAccount(value.account?.id ?? null);
         setAccount(value.account);
+        announceSessionChange();
         await refresh();
         return true;
       });
@@ -288,8 +340,11 @@ export function StoreProvider({ children }: { children: ReactNode }) {
         );
         sessionGeneration.current++;
         csrf.current = null;
+        clearDesignDrafts();
+        setDesignDraftAccount(null);
         setAccount(null);
         setData(emptyStore());
+        announceSessionChange();
       });
     },
     async refresh() {
@@ -399,6 +454,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
           },
           csrf.current,
         );
+        setDesignDraftAccount(value.account?.id ?? null);
         setAccount(value.account);
         await refresh();
         return true;

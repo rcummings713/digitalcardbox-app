@@ -81,7 +81,7 @@ export class AuthService {
   async login(input, session) {
     const creds = this.credentials(input);
     const tokens = await this.provider.call("token?grant_type=password", creds);
-    return this.finish(tokens, session);
+    return this.finish(tokens, session, false, true);
   }
   validateTokens(tokens) {
     if (
@@ -106,7 +106,7 @@ export class AuthService {
       expires_in: tokens.expires_in,
     };
   }
-  async finish(tokens, prior, recovery = false) {
+  async finish(tokens, prior, recovery = false, passwordAuthenticated = false) {
     tokens = this.validateTokens(tokens);
     const user = await this.provider.verifiedUser(tokens.access_token);
     return this.repo.transaction(() => {
@@ -203,6 +203,12 @@ export class AuthService {
         csrfToken,
         new Date(this.repo.clock().getTime() + 7 * 86400000).toISOString(),
       );
+      if (passwordAuthenticated && !recovery)
+        this.repo.run(
+          "UPDATE host_sessions SET authenticated_at=? WHERE token_hash=?",
+          this.repo.now(),
+          hash(token),
+        );
       this.repo.run(
         "INSERT INTO auth_sessions VALUES(?,?,?,?,?,?,?)",
         hash(token),
@@ -216,6 +222,73 @@ export class AuthService {
         Number(recovery),
       );
       return { token, csrfToken, account: publicHost(this.repo.host(host.id)) };
+    });
+  }
+  async reauthenticate(app, session, input) {
+    const host = app.requireHost(session);
+    keys(input, ["password"]);
+    const password = input.password;
+    if (typeof password !== "string" || !password || password.length > 200)
+      fail(422, "Enter your current password.");
+    const bridge = this.repo.one(
+      "SELECT * FROM auth_sessions WHERE token_hash=?",
+      session.token_hash,
+    );
+    let tokens;
+    if (bridge) {
+      if (bridge.recovery || bridge.issuer !== this.provider.origin)
+        fail(401, "Sign in to your verified account again.", "invalid_credentials");
+      tokens = this.validateTokens(
+        await this.provider.call("token?grant_type=password", {
+          email: host.email,
+          password,
+        }),
+      );
+      const user = await this.provider.verifiedUser(tokens.access_token);
+      if (user.id !== bridge.subject)
+        fail(403, "Confirm the password for the account currently open.");
+    } else {
+      const verified = app.identity.authenticate(host.email, password);
+      if (!verified || verified.id !== host.id)
+        fail(
+          401,
+          "Confirm your current account password. Temporary workspaces must first be linked to a verified account.",
+          "invalid_credentials",
+        );
+    }
+    return this.repo.transaction(() => {
+      // The provider call occurs outside the transaction. Recheck that the
+      // original local session still exists and belongs to the same actor.
+      const current = this.repo.hostSession(session.token_hash);
+      if (!current || current.host_id !== host.id)
+        fail(401, "Your session ended. Sign in again.", "sign_in_required");
+      if (bridge) {
+        const currentBridge = this.repo.one(
+          "SELECT issuer,subject,recovery FROM auth_sessions WHERE token_hash=?",
+          session.token_hash,
+        );
+        if (
+          !currentBridge ||
+          currentBridge.recovery ||
+          currentBridge.issuer !== bridge.issuer ||
+          currentBridge.subject !== bridge.subject
+        )
+          fail(401, "Your session changed. Sign in again.", "sign_in_required");
+        this.repo.run(
+          "UPDATE auth_sessions SET tokens_ciphertext=?,access_expires_at=?,checked_at=? WHERE token_hash=?",
+          this.repo.encrypt(JSON.stringify(tokens)),
+          new Date(this.repo.clock().getTime() + tokens.expires_in * 1000).toISOString(),
+          this.repo.now(),
+          session.token_hash,
+        );
+      }
+      this.repo.run(
+        "UPDATE host_sessions SET authenticated_at=? WHERE token_hash=?",
+        this.repo.now(),
+        session.token_hash,
+      );
+      this.repo.audit(host.id, "Sensitive action authentication confirmed.");
+      return { authenticated: true };
     });
   }
   async resolve(app, token) {

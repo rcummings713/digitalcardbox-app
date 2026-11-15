@@ -418,10 +418,12 @@ test("guest cookies cannot cross events and scheduled or closed events reject su
     date: "2020-01-01",
   });
   const closedPath = "/api/invitations/" + closed.data.event.token;
-  assert.equal((await f.guest.call(closedPath)).data.window, "closed");
+  const closedLanding = await f.guest.call(closedPath);
+  assert.equal(closedLanding.data.window, "closed");
+  assert.equal(closedLanding.response.headers.get("set-cookie"), null);
   assert.equal(
     (await f.guest.call(closedPath + "/cards", "POST", card())).status,
-    409,
+    401,
   );
   assert.equal(
     (await f.guest.call(`/api/host/events/${event.id}/book`)).status,

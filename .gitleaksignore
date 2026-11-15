@@ -1,0 +1,6 @@
+# Reviewed historical synthetic request-id fixture, not a credential.
+400b283213696ef71ce24b8a5e62ae5784881525:server/tests/stationery.test.mjs:generic-api-key:406
+# Fixed invitation tokens in the sample-only browser review model, not server links.
+de4277253bd01eaf916bf516456217b5820d609b:src/ui/model.ts:generic-api-key:164
+de4277253bd01eaf916bf516456217b5820d609b:src/ui/model.ts:generic-api-key:259
+de4277253bd01eaf916bf516456217b5820d609b:src/ui/model.ts:generic-api-key:271

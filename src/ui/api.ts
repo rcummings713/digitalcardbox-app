@@ -1,6 +1,7 @@
 import type { BillingConfiguration } from "../modules/billing/public";
 import { emptyBilling } from "../modules/billing/public";
 import { gifStore } from "../modules/media/catalog";
+import { requestReauthentication } from "./reauthentication";
 import type { GiftHandoff } from "../modules/gifts/routing";
 import type { Feature, Gift, Occasion, Service, Store } from "./model";
 export const dataMode =
@@ -50,6 +51,7 @@ export async function request<T>(
   path: string,
   init: RequestInit = {},
   csrfToken?: string | null,
+  retryAuthentication = true,
 ): Promise<T> {
   const headers = new Headers(init.headers);
   if (init.method && init.method !== "GET") {
@@ -82,6 +84,10 @@ export async function request<T>(
       "The card server is unavailable. Start the connected development server and try again.",
     );
   }
+  if (response.status === 401 && value.error?.code === "reauthentication_required" &&
+    retryAuthentication && path !== "/api/auth/reauthenticate" &&
+    await requestReauthentication(csrfToken))
+    return request<T>(path, init, csrfToken, false);
   if (!response.ok)
     throw new ApiError(
       response.status,
@@ -90,7 +96,41 @@ export async function request<T>(
     );
   return value as T;
 }
-export const workspaceRequest = () => request<Store>("/api/host/workspace");
+type WorkspaceGroup = "events" | "entries" | "gifts";
+interface WorkspacePage extends Store {
+  pagination?: {
+    totals: Record<WorkspaceGroup, number>;
+    next: Record<WorkspaceGroup, string | null>;
+  };
+}
+export async function workspaceRequest(): Promise<Store> {
+  const first = await request<WorkspacePage>("/api/host/workspace");
+  const result: Store = { ...first, events: [...first.events], entries: [...first.entries], gifts: [...first.gifts] };
+  const groups: WorkspaceGroup[] = ["events", "entries", "gifts"];
+  const seenPages = new Set<string>();
+  let next = first.pagination?.next;
+  while (next && groups.some((group) => next![group])) {
+    const query = new URLSearchParams(groups.map((group) => [group, next![group] ?? "end"]));
+    if (seenPages.has(query.toString()))
+      throw new ApiError(502, "incomplete_workspace", "Your workspace could not be loaded completely. Please refresh.");
+    seenPages.add(query.toString());
+    const page = await request<WorkspacePage>("/api/host/workspace?" + query);
+    if (!page.pagination || groups.some((group) => page.pagination!.totals[group] !== first.pagination!.totals[group]))
+      throw new ApiError(409, "incomplete_workspace", "Your workspace changed while loading. Please refresh to load it completely.");
+    for (const group of groups) {
+      const ids = new Set(result[group].map((item) => item.id));
+      // Stable keyset ordering can overlap during concurrent reads. Publish
+      // only the finished aggregation; never replace state with a partial page.
+      if (group === "events") result.events.push(...page.events.filter((item) => !ids.has(item.id)));
+      if (group === "entries") result.entries.push(...page.entries.filter((item) => !ids.has(item.id)));
+      if (group === "gifts") result.gifts.push(...page.gifts.filter((item) => !ids.has(item.id)));
+    }
+    next = page.pagination?.next;
+  }
+  if (first.pagination && groups.some((group) => result[group].length !== first.pagination!.totals[group]))
+    throw new ApiError(409, "incomplete_workspace", "Your workspace changed while loading. Please refresh to load it completely.");
+  return result;
+}
 const eventFields = [
   "title",
   "hosts",

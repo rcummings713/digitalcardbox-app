@@ -1,5 +1,7 @@
 import { test, expect } from "@playwright/test";
 import AxeBuilder from "@axe-core/playwright";
+
+
 let preservedHostCookies:
   | Awaited<ReturnType<import("@playwright/test").BrowserContext["cookies"]>>
   | undefined;
@@ -373,4 +375,45 @@ test("premium editions are chosen before sending and unpaid drafts never appear 
   await expect(
     page.getByRole("button", { name: /^Send my card/ }),
   ).toBeEnabled();
+});
+
+test("private event and signed-in studio designs cannot be restored after logout on the same browser", async ({ page }) => {
+  await page.goto("/");
+  // Reuse the suite's real host session when available so the browser suite
+  // remains below the application's shared-IP sign-in abuse limit.
+  if (preservedHostCookies) await page.context().addCookies(preservedHostCookies);
+  else {
+    const login = await page.request.post("/api/session", {
+      headers: { Origin: "http://127.0.0.1:4175", "X-DCB-Request": "1" },
+      data: { email: "host@digitalcardbox.test", password: "CardBoxReview!2026" },
+    });
+    expect(login.ok()).toBe(true);
+  }
+  await page.goto("/workspace/events/test-baby-shower/invitation");
+  await page.getByRole("button", { name: "Edit Opening line", exact: true }).click();
+  await page.getByLabel("Text layer", { exact: true }).selectOption("title");
+  await page.getByLabel("Event title", { exact: true }).fill("Private address for account A only");
+  await expect(page.locator(".editor-stage")).toContainText("Private address for account A only");
+  expect(await page.evaluate(() => Object.values(localStorage).join(" "))).not.toContain("Private address for account A only");
+
+  await page.goto("/cards");
+  await page.getByRole("button", { name: "Generic cards", exact: false }).click();
+  await page.getByLabel("Filter designs").selectOption("Earlier collection");
+  await page.getByLabel("Search templates", { exact: true }).fill("Pressed Peony");
+  await page.getByRole("button", { name: "Pressed Peony", exact: true }).click();
+  await page.getByRole("button", { name: "Edit Heading", exact: true }).click();
+  await page.getByLabel("Text layer", { exact: true }).selectOption("message");
+  await page.getByLabel("Your message", { exact: true }).fill("Private signed-in studio words");
+  await page.reload();
+  await expect(page.locator(".editor-stage")).toContainText("Private signed-in studio words");
+  expect(await page.evaluate(() => Object.values(localStorage).join(" "))).not.toContain("Private signed-in studio words");
+
+  await page.goto("/workspace");
+  await page.getByRole("button", { name: "Sign out", exact: true }).click();
+  await expect.poll(async () => (await (await page.request.get("/api/session")).json()).account).toBeNull();
+  await page.goto("/invitations");
+  await expect(page.locator(".editor-stage")).not.toContainText("Private address for account A only");
+  await page.goto("/cards");
+  await expect(page.locator(".editor-stage")).not.toContainText("Private signed-in studio words");
+  expect(await page.evaluate(() => Object.values(sessionStorage).join(" "))).not.toContain("Private signed-in studio words");
 });

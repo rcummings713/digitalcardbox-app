@@ -1,5 +1,7 @@
 # DEV accounts and AI setup
 
+15 November security update: publishing, destination changes and private exports require authentication within fifteen minutes. The app asks for the current TheDigitalCardBox password while retaining the open form; it never asks for a Google/Apple password. OAuth SSO does not establish fresh password evidence. Social-account users can set a TheDigitalCardBox password through the existing managed recovery flow before these actions. Provider-native step-up and production operator MFA remain separate acceptance work. See [ADR 0015](../adr/0015-security-remediation.md).
+
 The application uses Supabase Auth for verified email/password, Google and Apple. Its existing DEV event/card database remains in Cloudflare; creating this Auth project does not move or erase those records. No customer password is stored in the app. Keep test and production projects separate. This guide enables DEV only.
 
 ## 1. Create the DEV Auth project

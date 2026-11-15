@@ -12,7 +12,9 @@ import {
   initialStore,
   uid,
 } from "./model";
-import type { Destination, Occasion, Service } from "./model";
+import type { Destination, Entry, Occasion, Service } from "./model";
+import { request } from "./api";
+import type { SessionResponse } from "./api";
 import {
   Card,
   Empty,
@@ -691,7 +693,7 @@ function Share({ event }: { event: Occasion }) {
   );
 }
 function CardsInbox({ event }: { event: Occasion }) {
-  const { data, actions, notify, busy } = useStore();
+  const { data, actions, notify, busy, mode } = useStore();
   const [query, setQuery] = useState("");
   const [filter, setFilter] = useState("all");
   const [opened, setOpened] = useState("");
@@ -706,12 +708,42 @@ function CardsInbox({ event }: { event: Occasion }) {
         (filter === "hidden" && x.hidden)),
   );
   async function exportCards() {
-    const cards = data.entries.filter(
-      (x) => x.eventId === event.id && !x.hidden,
-    );
     setExporting(true);
     setExportError("");
     try {
+      let cards = data.entries.filter(
+        (x) => x.eventId === event.id && !x.hidden,
+      );
+      if (mode === "server") {
+        const session = await request<SessionResponse>("/api/session");
+        cards = [];
+        let cursor: string | null = null;
+        let expected: number | undefined;
+        const seen = new Set<string>();
+        const cursors = new Set<string>();
+        do {
+          const page: { entries: Entry[]; total: number; nextCursor: string | null } =
+            await request(`/api/host/events/${event.id}/export`, {
+              method: "POST",
+              body: JSON.stringify(cursor ? { cursor } : {}),
+            }, session.csrfToken);
+          if (expected !== undefined && expected !== page.total)
+            throw new Error("The card box changed. Start the export again.");
+          expected = page.total;
+          for (const entry of page.entries) {
+            if (entry.eventId !== event.id || seen.has(entry.id))
+              throw new Error("Your export could not be completed. Please try again.");
+            seen.add(entry.id);
+            cards.push(entry);
+          }
+          cursor = page.nextCursor;
+          if (cursor && (cursors.has(cursor) || page.entries.length === 0))
+            throw new Error("Your export could not be completed. Please try again.");
+          if (cursor) cursors.add(cursor);
+        } while (cursor);
+        if (cards.length !== expected)
+          throw new Error("Your export is incomplete. Please try again.");
+      }
       const saved = await cardArchive(event.title, cards);
       download(
         "TheDigitalCardBox-CardVault.json",

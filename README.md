@@ -1,5 +1,7 @@
 # TheDigitalCardBox
 
+Security: the [15 November remediation record](docs/security/SECURITY_REMEDIATION_2026-11-15.md) tracks the six confirmed defect fixes, CI/dependency/header hardening and production requirements that remain open. [ADR 0015](docs/adr/0015-security-remediation.md) records authentication freshness, private draft storage, complete export retrieval and migration compatibility.
+
 Digital cards, private event invitations and two event-book styles. Current work
 is on `feature/compact-mobile-layout`, authorized for commit/push and its isolated
 DEV preview on 20 October 2026. TEST/PROD promotion is separate.

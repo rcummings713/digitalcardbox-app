@@ -368,7 +368,7 @@ test("migration 005 preserves all v4 destination ciphertext, versions, notes, in
     );
   f.repo.transaction(() => {
     f.repo.db.exec(
-      `ALTER TABLE events DROP COLUMN save_the_date_json; CREATE TABLE old_destinations(event_id TEXT NOT NULL REFERENCES events(id),service TEXT NOT NULL CHECK(service IN ('Cash App','Venmo','Zelle')),recipient TEXT NOT NULL,identifier TEXT NOT NULL,version INTEGER NOT NULL DEFAULT 1,enabled INTEGER NOT NULL CHECK(enabled IN(0,1)),confirmed INTEGER NOT NULL CHECK(confirmed IN(0,1)),preview_only INTEGER NOT NULL DEFAULT 1 CHECK(preview_only IN(0,1)),PRIMARY KEY(event_id,service)) STRICT; INSERT INTO old_destinations SELECT * FROM gift_destinations; DROP TABLE gift_destinations; ALTER TABLE old_destinations RENAME TO gift_destinations; DELETE FROM review_schema_versions WHERE version=5;`,
+      `ALTER TABLE events DROP COLUMN save_the_date_json; CREATE TABLE old_destinations(event_id TEXT NOT NULL REFERENCES events(id),service TEXT NOT NULL CHECK(service IN ('Cash App','Venmo','Zelle')),recipient TEXT NOT NULL,identifier TEXT NOT NULL,version INTEGER NOT NULL DEFAULT 1,enabled INTEGER NOT NULL CHECK(enabled IN(0,1)),confirmed INTEGER NOT NULL CHECK(confirmed IN(0,1)),preview_only INTEGER NOT NULL DEFAULT 1 CHECK(preview_only IN(0,1)),PRIMARY KEY(event_id,service)) STRICT; INSERT INTO old_destinations SELECT * FROM gift_destinations; DROP TABLE gift_destinations; ALTER TABLE old_destinations RENAME TO gift_destinations; ALTER TABLE host_sessions DROP COLUMN authenticated_at; DELETE FROM review_schema_versions WHERE version IN(5,8);`,
     );
   });
   for (let i = 0; i < 2; i++) {
@@ -386,7 +386,7 @@ test("migration 005 preserves all v4 destination ciphertext, versions, notes, in
       );
       assert.equal(
         reopened.one("SELECT max(version) AS n FROM review_schema_versions").n,
-        7,
+        8,
       );
       assert.deepEqual(reopened.all("PRAGMA foreign_key_check"), []);
       assert.equal(reopened.one("PRAGMA quick_check").quick_check, "ok");

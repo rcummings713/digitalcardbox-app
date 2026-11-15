@@ -151,7 +151,7 @@ export function validateEvent(input, current, now) {
   )
     fail(
       409,
-      "The event date, occasion and time zone are locked after the first card.",
+      "The event date, occasion and time zone are locked after the first card or gift attempt.",
     );
   if (result.type === "One-off occasion" && !current?.locked_at) {
     const today = dayInZone(now, result.timezone);

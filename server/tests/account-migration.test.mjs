@@ -5,7 +5,7 @@ import { stripeFixture } from "./billing-fixture.mjs";
 import { SqliteReviewRepository } from "../adapters/sqlite.mjs";
 import { BillingService } from "../billing-service.mjs";
 
-test("migration 007 preserves version-6 accepted cards, paid purchases, destinations and the existing encryption key", async (t) => {
+test("migrations 007–008 preserve version-6 cards, purchases, destinations, sessions and the existing encryption key", async (t) => {
   const stripe = stripeFixture(),
     f = await setup(t, {
       billingOptions: { ...stripe.options, fetcher: stripe.fetcher },
@@ -41,17 +41,20 @@ test("migration 007 preserves version-6 accepted cards, paid purchases, destinat
     destinations: f.repo.all(
       "SELECT * FROM gift_destinations ORDER BY event_id,service",
     ),
+    sessions: f.repo.all(
+      "SELECT token_hash,host_id,csrf_token,expires_at FROM host_sessions ORDER BY token_hash",
+    ),
     key: Buffer.from(f.repo.key),
   };
   f.repo.db.exec(
-    "DROP TABLE auth_flows;DROP TABLE auth_sessions;DROP TABLE auth_subjects;DROP INDEX cards_delivery;ALTER TABLE cards DROP COLUMN premium_edition;ALTER TABLE cards DROP COLUMN delivery_state;DELETE FROM review_schema_versions WHERE version=7;",
+    "DROP TABLE auth_flows;DROP TABLE auth_sessions;DROP TABLE auth_subjects;DROP INDEX cards_delivery;ALTER TABLE cards DROP COLUMN premium_edition;ALTER TABLE cards DROP COLUMN delivery_state;ALTER TABLE host_sessions DROP COLUMN authenticated_at;DELETE FROM review_schema_versions WHERE version>=7;",
   );
   for (let run = 0; run < 2; run++) {
     const reopened = new SqliteReviewRepository(f.path, { seed: false });
     try {
       assert.equal(
         reopened.one("SELECT max(version) AS n FROM review_schema_versions").n,
-        7,
+        8,
       );
       assert.deepEqual(
         reopened.all(
@@ -74,6 +77,11 @@ test("migration 007 preserves version-6 accepted cards, paid purchases, destinat
         before.destinations,
       );
       assert.deepEqual(reopened.key, before.key);
+      assert.deepEqual(
+        reopened.all("SELECT token_hash,host_id,csrf_token,expires_at FROM host_sessions ORDER BY token_hash"),
+        before.sessions,
+      );
+      assert.ok(reopened.all("SELECT authenticated_at FROM host_sessions").every((row) => row.authenticated_at === null));
       assert.equal(
         reopened.one("SELECT delivery_state FROM cards WHERE id=?", id)
           .delivery_state,

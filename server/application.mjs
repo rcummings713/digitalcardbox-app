@@ -45,6 +45,11 @@ export class ReviewApplication {
       this.repo.clock().getTime() + 8 * 3600000,
     ).toISOString();
     this.repo.putHostSession(hash(token), host.id, csrf, expires);
+    this.repo.run(
+      "UPDATE host_sessions SET authenticated_at=? WHERE token_hash=?",
+      this.repo.now(),
+      hash(token),
+    );
     return {
       token,
       account: publicHost(host),
@@ -77,6 +82,11 @@ export class ReviewApplication {
         csrf,
         new Date(this.repo.clock().getTime() + 7 * 86400000).toISOString(),
       );
+      this.repo.run(
+        "UPDATE host_sessions SET authenticated_at=? WHERE token_hash=?",
+        this.repo.now(),
+        hash(token),
+      );
       return {
         token,
         account: publicHost(this.repo.host(id)),
@@ -93,6 +103,19 @@ export class ReviewApplication {
   requireHost(session) {
     if (!session)
       fail(401, "Sign in to open your card boxes.", "sign_in_required");
+    return session.host;
+  }
+  requireRecentAuthentication(session) {
+    this.requireHost(session);
+    const row = session.token_hash && this.repo.hostSession(session.token_hash);
+    const authenticated = Date.parse(row?.authenticated_at);
+    const age = this.repo.clock().getTime() - authenticated;
+    if (!Number.isFinite(authenticated) || age < 0 || age >= 15 * 60000)
+      fail(
+        401,
+        "Confirm your password before publishing, changing gift destinations or exporting private cards.",
+        "reauthentication_required",
+      );
     return session.host;
   }
   requireOperator(session) {
@@ -121,6 +144,7 @@ export class ReviewApplication {
     const host = this.requireHost(session);
     if (!this.repo.flags().newEvents) fail(409, "New card boxes are paused.");
     const value = validateEvent(input, null, this.repo.clock());
+    if (value.status === "published") this.requireRecentAuthentication(session);
     if (
       (value.invitation?.gif || value.saveTheDate?.gif) &&
       !this.repo.flags().gifs
@@ -149,6 +173,8 @@ export class ReviewApplication {
           : null,
       };
       const value = validateEvent(input, current, this.repo.clock());
+      if (value.status === "published" && row.status !== "published")
+        this.requireRecentAuthentication(session);
       if (
         value.invitation?.gif &&
         value.invitation.gif !== current.invitation?.gif &&
@@ -190,14 +216,43 @@ export class ReviewApplication {
   invitation(token, cookieToken) {
     const event = this.repo.resolveLink(hash(token));
     if (!event) fail(404, "Your invitation is not available.");
+    const window = windowFor(event, this.repo.clock());
+    const flags = this.repo.flags();
+    // A closed landing must not serialize/decrypt private designs or payees.
+    if (["closed", "paused"].includes(window))
+      return {
+        event: {
+          id: event.id,
+          token,
+          title: "Your invitation",
+          hosts: "",
+          type: "",
+          date: "",
+          timezone: "UTC",
+          location: "",
+          welcome: "",
+          status: event.status,
+          cover: "celebration",
+          bookLayout: "editorial",
+          destinations: [],
+        },
+        window,
+        flags,
+        csrfToken: "",
+      };
+    const presentation = this.repo.event(event, { guest: true });
+    // Scheduled save-the-dates keep their approved details; gift identifiers
+    // are disclosed only while the event and gift feature allow a handoff.
+    if (!["open", "gift-only"].includes(window) || !flags.gifts)
+      presentation.destinations = [];
     const existing =
       cookieToken &&
       this.repo.guestSession(hash(cookieToken), event.id, event.share_id);
     if (existing)
       return {
-        event: this.repo.event(event, { guest: true }),
-        window: windowFor(event, this.repo.clock()),
-        flags: this.repo.flags(),
+        event: presentation,
+        window,
+        flags,
         csrfToken: existing.csrf_token,
       };
     const newToken = secret();
@@ -215,9 +270,9 @@ export class ReviewApplication {
       ),
     );
     return {
-      event: this.repo.event(event, { guest: true }),
-      window: windowFor(event, this.repo.clock()),
-      flags: this.repo.flags(),
+      event: presentation,
+      window,
+      flags,
       csrfToken: csrf,
       cookieToken: newToken,
     };
@@ -334,6 +389,7 @@ export class ReviewApplication {
   saveDestination(session, id, input, expected) {
     return this.repo.transaction(() => {
       const event = this.ownedEvent(session, id);
+      this.requireRecentAuthentication(session);
       this.revision(event, expected);
       keys(input, [
         "service",

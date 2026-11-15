@@ -1,5 +1,7 @@
 # October private MVP acceptance
 
+15 November security regressions: verify stale authentication and token refresh cannot authorize publishing/destination edits/private export; same-subject password confirmation preserves the pending form and rejects cancellation/replay/account changes. Verify inactive-link JSON/artwork minimization, sign-out across tabs, expired studio sessions with retained artwork, first-gift lifecycle locking, and exports/workspaces beyond 100 events/1,000 cards/gifts with tied timestamps and concurrent moderation. [ADR 0015](../adr/0015-security-remediation.md) and the [remediation record](../security/SECURITY_REMEDIATION_2026-11-15.md) identify local/DEV evidence and outstanding production gates.
+
 **Target:** Saturday, 31 October 2026. The date is a planning target. A failed gate moves the private release; do not remove a safety check to meet the date.
 
 | Gate | Evidence to collect before release |

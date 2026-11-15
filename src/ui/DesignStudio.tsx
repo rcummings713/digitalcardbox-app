@@ -14,7 +14,6 @@ import {
   withDesignGif,
   templatePalette,
   invitationTemplates,
-  draftKey,
 } from "../modules/design/contracts";
 import type {
   DesignDocument,
@@ -33,6 +32,7 @@ import { Heading, Link, go, download } from "./shared";
 import { GifPicker } from "./GifPicker";
 import { useStore } from "./state";
 import { request } from "./api";
+import { writeDesignDraft } from "../modules/design/drafts";
 
 function seedInvitation(event: Occasion, variant?: DesignVariant) {
   const value = createDesign(
@@ -56,6 +56,28 @@ function seedInvitation(event: Occasion, variant?: DesignVariant) {
   return value;
 }
 export function DesignStudio({
+  kind,
+  event,
+  variant,
+}: {
+  kind: DesignKind;
+  event?: Occasion;
+  variant?: DesignVariant;
+}) {
+  const { account, mode, ready } = useStore();
+  if (mode === "server" && !ready)
+    return <p role="status">Opening your design studio…</p>;
+  return (
+    <DesignStudioEditor
+      key={`${account?.id || "anonymous"}:${event?.id || "public"}:${kind}:${variant || ""}`}
+      kind={kind}
+      event={event}
+      variant={variant}
+    />
+  );
+}
+
+function DesignStudioEditor({
   kind,
   event,
   variant,
@@ -110,15 +132,18 @@ export function DesignStudio({
     motif: "Flowers and leaves",
   });
   useEffect(() => {
+    // Owned event designs are saved through the authenticated event API only.
+    // They must never replace a publicly restorable anonymous browser draft.
+    if (event) return;
     try {
-      localStorage.setItem(draftKey(kind, variant), JSON.stringify(value));
+      writeDesignDraft(value);
       setStorageError("");
     } catch {
       setStorageError(
         "Your browser could not save this draft. Keep this page open while you edit.",
       );
     }
-  }, [value, kind, variant]);
+  }, [value, event]);
   function edit(next: DesignDocument) {
     setValue(next);
     setSaved(false);
@@ -723,7 +748,9 @@ export function DesignStudio({
           <p>
             {kind === "invitation"
               ? "Your design stays with you through setup. A live guest link and QR become available after you create and publish an event and card box."
-              : "Your draft is saved in this browser. Open the invitation from your host, then choose “Use my saved card design” to send it."}
+              : account
+                ? "Your draft stays in this tab until you sign out. Open the invitation from your host, then choose “Use my saved card design” to send it. Export an editable file to keep a device copy."
+                : "Your draft is saved on this device for up to seven days. Open the invitation from your host, then choose “Use my saved card design” to send it."}
           </p>
         </div>
         {kind === "invitation" ? (
@@ -764,7 +791,11 @@ export function DesignStudio({
             <p className="small">
               {saved
                 ? "Design saved."
-                : "Draft saved on this browser. Sharing requires an event."}
+                : event
+                  ? "Save to your card box to keep these changes. Sharing requires a published event."
+                  : account
+                    ? "Draft stays in this tab until sign-out. Save it to a card box or export a private copy to keep it."
+                    : "Draft saved on this device for up to seven days. Sharing requires an event."}
             </p>
           </div>
         ) : (
@@ -775,7 +806,9 @@ export function DesignStudio({
               onClick={() => {
                 setSaved(true);
                 notify(
-                  "Your card design is saved in this browser. Open your host’s invitation when you’re ready to send.",
+                  account
+                    ? "Your card design stays in this tab until sign-out. Open your host’s invitation when you’re ready to send."
+                    : "Your card design is saved on this device for up to seven days. Open your host’s invitation when you’re ready to send.",
                 );
               }}
             >

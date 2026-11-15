@@ -1,5 +1,7 @@
 # TheDigitalCardBox product specification
 
+15 November security implementation: [ADR 0015](../adr/0015-security-remediation.md) and the [remediation record](../security/SECURITY_REMEDIATION_2026-11-15.md) fix recent authentication, inactive invitation disclosures, private draft persistence, studio expiry capacity, gift-first lifecycle locking and complete CardVault retrieval in local/DEV. Production release gates and live-payment boundaries remain unchanged.
+
 **Version:** 13 October 2026. **Target:** private external-wallet MVP by 31 October 2026.
 
 The product name is **TheDigitalCardBox**. See [ADR 0004](../adr/0004-product-name.md) for repository and backlog naming.

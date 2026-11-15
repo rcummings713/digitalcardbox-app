@@ -1,14 +1,16 @@
 import { request } from "./api";
+import type { SessionResponse } from "./api";
 import type { Entry } from "./model";
 import { templates, findGif, gifCreditText } from "../modules/media/catalog";
 export async function savePaidBook(
   endpoint: string,
   layout: "editorial" | "collage",
 ) {
+  const session = await request<SessionResponse>("/api/session");
   const book = await request<{
     event: { title: string; hosts: string; date: string };
     entries: Entry[];
-  }>(endpoint);
+  }>(endpoint, {}, session.csrfToken);
   const escape = (value: string) =>
     value.replace(
       /[&<>"']/g,

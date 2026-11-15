@@ -1,0 +1,23 @@
+[
+  {
+    "file": "TheDigitalCardBox System Design and Flowcharts.docx",
+    "valid_xml": true,
+    "unchanged_package_parts": 28,
+    "original_document_sha256": "90d07602c4dcacac32ebcf5e3267ee619c1f38f0ddb233cce2618b0b189c063f",
+    "all_other_parts_preserved_byte_for_byte": true
+  },
+  {
+    "file": "TheDigitalCardBox Questions and Draft Answers.docx",
+    "valid_xml": true,
+    "unchanged_package_parts": 17,
+    "original_document_sha256": "764c7e1a9ec7f0be407cce46f84ebc69293b555e5bc427867792f41528f187df",
+    "all_other_parts_preserved_byte_for_byte": true
+  },
+  {
+    "file": "TheDigitalCardBox User Journey and Economics.docx",
+    "valid_xml": true,
+    "unchanged_package_parts": 19,
+    "original_document_sha256": "4ec755acc066f985935b740074f1ec3a4b8926d38f4991796cc56a38027430b2",
+    "all_other_parts_preserved_byte_for_byte": true
+  }
+]

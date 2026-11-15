@@ -582,12 +582,14 @@ export class BillingService {
       !this.view(order).entitled
     )
       fail(403, "This digital edition needs a confirmed product purchase.");
+    app.requireRecentAuthentication(session);
     const current = app.book(session, order.event_id);
     const ids = this.repo.all(
       "SELECT card_id FROM book_snapshot_entries WHERE snapshot_id=? ORDER BY position",
       order.snapshot_id,
     );
     const entries = new Map(current.entries.map((entry) => [entry.id, entry]));
+    this.repo.audit(session.host.id, "Private paid book export requested.", order.event_id);
     return {
       event: {
         title: current.event.title,

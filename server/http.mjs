@@ -1,4 +1,5 @@
 import { CardDraftService } from "./card-drafts.mjs";
+import { VaultService } from "./vault-service.mjs";
 import { AuthService } from "./auth-service.mjs";
 import { authHttp } from "./auth-http.mjs";
 import { BillingService } from "./billing-service.mjs";
@@ -68,6 +69,7 @@ export function createApiHandler(
   const cardDrafts = new CardDraftService(repository, app, (id) =>
     billing.premiumCardStatus(id),
   );
+  const vault = new VaultService(repository);
   const buckets = new Map();
   function throttle(key, max, period = 60000) {
     if (!rateLimit) return;
@@ -88,6 +90,8 @@ export function createApiHandler(
     response.setHeader("Cache-Control", "no-store");
     response.setHeader("X-Content-Type-Options", "nosniff");
     response.setHeader("Referrer-Policy", "no-referrer");
+    if (secureCookies)
+      response.setHeader("Strict-Transport-Security", "max-age=31536000");
     response.setHeader(
       "Content-Security-Policy",
       "default-src 'none'; frame-ancestors 'none'",
@@ -396,7 +400,11 @@ export function createApiHandler(
         return send(200, { ok: true });
       }
       if (path === "/api/host/workspace" && read) {
-        return send(200, repository.workspace(app.requireHost(session)));
+        const query = new URL(request.url, "http://local.invalid").searchParams;
+        if ([...query.keys()].some((key) => !["events", "entries", "gifts"].includes(key)) ||
+          [...query.keys()].some((key) => query.getAll(key).length !== 1))
+          fail(422, "Choose a valid workspace page.");
+        return send(200, repository.workspace(app.requireHost(session), Object.fromEntries(query)));
       }
       if (path === "/api/host/profile" && method === "PATCH") {
         requireCsrf();
@@ -411,7 +419,13 @@ export function createApiHandler(
           event: app.createEvent(session, await body(request), jar.dcb_studio),
         });
       }
-      let match = path.match(/^\/api\/host\/events\/([^/]+)\/destinations$/);
+      let match = path.match(/^\/api\/host\/events\/([^/]+)\/export$/);
+      if (match && method === "POST") {
+        requireCsrf();
+        throttle(`export:${session.host.id}`, 120);
+        return send(200, vault.exportPage(app, session, match[1], await body(request)));
+      }
+      match = path.match(/^\/api\/host\/events\/([^/]+)\/destinations$/);
       if (match && method === "PATCH") {
         requireCsrf();
         return send(200, {

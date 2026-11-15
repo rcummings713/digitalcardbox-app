@@ -1,6 +1,6 @@
 import { randomUUID } from "node:crypto";
 import { hash, secret } from "./domain/identity.mjs";
-import { fail, keys, dayInZone } from "./domain/events.mjs";
+import { fail, keys, dayInZone, windowFor } from "./domain/events.mjs";
 import { cardChoices, consume, AI_POLICY } from "./media-service.mjs";
 export class StudioService {
   constructor(repo, media) {
@@ -23,7 +23,14 @@ export class StudioService {
         dayInZone(this.repo.clock(), "America/New_York"),
         20,
       );
-      if (this.repo.one("SELECT count(*) AS n FROM studio_sessions").n >= 2000)
+      // Expiring browser identity must not erase referenced accepted artwork.
+      // Unused sessions can be removed; referenced expired sessions are retained
+      // for artwork history but never consume active visitor capacity.
+      this.repo.run(
+        "DELETE FROM studio_sessions WHERE expires_at<=? AND NOT EXISTS(SELECT 1 FROM studio_jobs WHERE session_hash=studio_sessions.token_hash)",
+        this.repo.now(),
+      );
+      if (this.repo.one("SELECT count(*) AS n FROM studio_sessions WHERE expires_at>?", this.repo.now()).n >= 2000)
         fail(
           429,
           "The design studio is busy. Manual designs remain available.",
@@ -221,6 +228,9 @@ export class StudioService {
       session.guest_id,
     );
     if (!row) fail(404, "Design artwork not found.");
+    if (row.kind === "invitation" &&
+      ["closed", "paused"].includes(windowFor(event, this.repo.clock())))
+      fail(404, "Design artwork not found.");
     return row;
   }
 }

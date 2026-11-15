@@ -1,5 +1,7 @@
 # Production security assessment — 15 November 2026
 
+**Subsequent implementation:** see [15 November remediation](SECURITY_REMEDIATION_2026-11-15.md) for fixes to A01–A06 and D01–D03. This report and its original probes describe the earlier vulnerable snapshot; outstanding production gates remain open.
+
 **Release recommendation: do not launch the connected application to production yet.** Six application defects were reproduced, and several existing production acceptance gates remain open. Passing the current regression suite does not establish production readiness.
 
 This assessment covers the working tree at commit `6724b0a` on `feature/premium-stationery-collection`, including the owner's existing uncommitted changes. It adds documentation and synthetic assessment evidence only. It makes no deployment, account, payment, schema, or production behavior changes.

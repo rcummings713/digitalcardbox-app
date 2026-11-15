@@ -1,6 +1,7 @@
 import { HostedReviewIdentity } from "../server/adapters/hosted-review-identity.mjs";
 import { AuthService, authOptions } from "../server/auth-service.mjs";
 import migration7 from "../server/migrations/007-managed-accounts-card-drafts.sql";
+import migration8 from "../server/migrations/008-recent-authentication.sql";
 import { BillingService } from "../server/billing-service.mjs";
 import { billingOptions } from "../server/billing-options.mjs";
 import migration6 from "../server/migrations/006-product-checkout.sql";
@@ -53,6 +54,7 @@ export class ReviewStore extends DurableObject {
           migration5,
           migration6,
           migration7,
+          migration8,
         ],
         transactionRunner: (work) => ctx.storage.transactionSync(work),
         passwordHasher: () => "00".repeat(64),
@@ -143,6 +145,8 @@ export default {
     const response = new Response(asset.body, asset);
     response.headers.set("Referrer-Policy", "no-referrer");
     response.headers.set("X-Content-Type-Options", "nosniff");
+    response.headers.set("Strict-Transport-Security", "max-age=31536000");
+    response.headers.set("Permissions-Policy", "camera=(), microphone=(), geolocation=()");
     response.headers.set(
       "Content-Security-Policy",
       "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self'; connect-src 'self'; object-src 'none'; base-uri 'self'; frame-ancestors 'none'; form-action 'self'",

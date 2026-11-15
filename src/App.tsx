@@ -10,6 +10,7 @@ import { Admin } from "./ui/AdminPages";
 import { InstagramLink, Link, Logo } from "./ui/shared";
 import { StoreProvider, useStore } from "./ui/state";
 import { SignIn } from "./ui/AuthPages";
+import { ReauthenticationDialog } from "./ui/ReauthenticationDialog";
 
 function locationKey() {
   return location.pathname + location.search;
@@ -249,6 +250,7 @@ export default function App() {
   return (
     <StoreProvider>
       <Shell />
+      <ReauthenticationDialog />
     </StoreProvider>
   );
 }

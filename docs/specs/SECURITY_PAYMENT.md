@@ -1,5 +1,7 @@
 # Authentication and external gift rules
 
+15 November remediation: [ADR 0015](../adr/0015-security-remediation.md) implements fifteen-minute server-enforced authentication freshness for publishing, all destination saves/disables and private export retrieval in the existing review adapters. Password confirmation is same-subject and session/CSRF-bound; refresh/SSO never renews freshness. Inactive invitation responses minimize personal data, private drafts clear on sign-out/account changes, and complete audited export pages reject stale/tampered continuation. Static/Worker security headers and CI dependency/secret checks apply. These fixes do not satisfy production PostgreSQL, external-key, operator-MFA, durable-alert or recovery gates; see the [remediation record](../security/SECURITY_REMEDIATION_2026-11-15.md).
+
 The October MVP handles **gift directions**, not gift money. Cash App, Venmo, Zelle or PayPal handle transfers outside TheDigitalCardBox. A host supplied handle, email or phone can still be personal information and must be protected. Neither a disclaimer nor a private repository makes a wrong destination harmless.
 
 ## Authentication and authorization

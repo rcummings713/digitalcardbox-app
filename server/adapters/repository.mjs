@@ -10,6 +10,31 @@ import {
   scryptSync,
 } from "node:crypto";
 import { hash, secret } from "../domain/identity.mjs";
+import { fail } from "../domain/events.mjs";
+
+const workspaceGroups = ["events", "entries", "gifts"];
+function decodeWorkspaceCursor(value) {
+  if (value === undefined || value === "") return null;
+  if (value === "end") return "end";
+  if (typeof value !== "string" || value.length > 400 || !/^[A-Za-z0-9_-]+$/.test(value))
+    fail(422, "Choose a valid workspace page.");
+  try {
+    const decoded = JSON.parse(Buffer.from(value, "base64url").toString("utf8"));
+    if (
+      !Array.isArray(decoded) || decoded.length !== 2 ||
+      typeof decoded[0] !== "string" ||
+      !/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z$/.test(decoded[0]) ||
+      !Number.isFinite(Date.parse(decoded[0])) ||
+      typeof decoded[1] !== "string" || !/^[A-Za-z0-9_-]{1,100}$/.test(decoded[1])
+    ) throw new Error();
+    return decoded;
+  } catch {
+    fail(422, "Choose a valid workspace page.");
+  }
+}
+function encodeWorkspaceCursor(row) {
+  return Buffer.from(JSON.stringify([row.created_at, row.id])).toString("base64url");
+}
 export class ReviewRepository {
   constructor(
     db,
@@ -54,6 +79,10 @@ export class ReviewRepository {
               row.rowid,
             );
         }
+      // Repair gift-first events accepted before the lifecycle lock was applied.
+      this.run(
+        "UPDATE events SET locked_at=(SELECT min(created_at) FROM gift_intents WHERE event_id=events.id),revision=revision+1 WHERE locked_at IS NULL AND EXISTS(SELECT 1 FROM gift_intents WHERE event_id=events.id)",
+      );
     });
   }
   now() {
@@ -288,6 +317,11 @@ export class ReviewRepository {
       +destination.previewOnly,
       this.now(),
     );
+    this.run(
+      "UPDATE events SET locked_at=coalesce(locked_at,?),revision=revision+1 WHERE id=?",
+      this.now(),
+      eventId,
+    );
     return this.one("SELECT * FROM gift_intents WHERE id=?", id);
   }
   ownedGift(hostId, id) {
@@ -297,23 +331,38 @@ export class ReviewRepository {
       id,
     );
   }
-  workspace(host) {
-    const rows = this.all(
-      "SELECT * FROM events WHERE owner_id=? ORDER BY created_at DESC LIMIT 100",
-      host.id,
-    );
-    const cards = this.all(
-      "SELECT c.* FROM cards c JOIN events e ON e.id=c.event_id WHERE e.owner_id=? AND c.delivery_state='delivered' AND c.removed_at IS NULL ORDER BY c.created_at DESC LIMIT 1000",
-      host.id,
-    );
+  workspace(host, cursors = {}) {
+    if (!cursors || typeof cursors !== "object" || Array.isArray(cursors) ||
+      Object.keys(cursors).some((key) => !workspaceGroups.includes(key)))
+      fail(422, "Choose a valid workspace page.");
+    const definitions = {
+      events: { from: "events e", where: "e.owner_id=?", alias: "e", limit: 100, map: (row) => this.event(row) },
+      entries: { from: "cards c JOIN events e ON e.id=c.event_id", where: "e.owner_id=? AND c.delivery_state='delivered' AND c.removed_at IS NULL", alias: "c", limit: 1000, map: (row) => this.card(row) },
+      gifts: { from: "gift_intents g JOIN events e ON e.id=g.event_id", where: "e.owner_id=?", alias: "g", limit: 1000, map: (row) => this.gift(row) },
+    };
+    const pages = {}, totals = {}, next = {};
+    for (const group of workspaceGroups) {
+      const { from, where, alias, limit, map } = definitions[group];
+      const cursor = decodeWorkspaceCursor(cursors[group]);
+      totals[group] = this.one(`SELECT count(*) AS n FROM ${from} WHERE ${where}`, host.id).n;
+      if (cursor === "end") {
+        pages[group] = [];
+        next[group] = null;
+        continue;
+      }
+      const after = cursor ? ` AND (${alias}.created_at < ? OR (${alias}.created_at = ? AND ${alias}.id < ?))` : "";
+      const values = cursor ? [host.id, cursor[0], cursor[0], cursor[1]] : [host.id];
+      const rows = this.all(`SELECT ${alias}.* FROM ${from} WHERE ${where}${after} ORDER BY ${alias}.created_at DESC,${alias}.id DESC LIMIT ?`, ...values, limit + 1);
+      const page = rows.slice(0, limit);
+      pages[group] = page.map(map);
+      next[group] = rows.length > limit ? encodeWorkspaceCursor(page.at(-1)) : null;
+    }
     return {
       version: 1,
-      events: rows.map((row) => this.event(row)),
-      entries: cards.map((row) => this.card(row)),
-      gifts: this.all(
-        "SELECT g.* FROM gift_intents g JOIN events e ON e.id=g.event_id WHERE e.owner_id=? ORDER BY g.created_at DESC LIMIT 1000",
-        host.id,
-      ).map((row) => this.gift(row)),
+      events: pages.events,
+      entries: pages.entries,
+      gifts: pages.gifts,
+      pagination: { totals, next },
       flags: this.flags(),
       profile: {
         name: host.name,
@@ -324,6 +373,19 @@ export class ReviewRepository {
         "SELECT action FROM audit WHERE actor_id=? ORDER BY created_at DESC LIMIT 50",
         host.id,
       ).map((row) => row.action),
+    };
+  }
+  exportCardsPage(eventId, after, limit = 500) {
+    const eligible = "event_id=? AND delivery_state='delivered' AND removed_at IS NULL AND hidden=0";
+    const total = this.one(`SELECT count(*) AS n FROM cards WHERE ${eligible}`, eventId).n;
+    const condition = after ? " AND (created_at > ? OR (created_at = ? AND id > ?))" : "";
+    const values = after ? [eventId, after[0], after[0], after[1]] : [eventId];
+    const rows = this.all(`SELECT * FROM cards WHERE ${eligible}${condition} ORDER BY created_at,id LIMIT ?`, ...values, limit + 1);
+    const page = rows.slice(0, limit);
+    return {
+      entries: page.map((row) => this.card(row)),
+      total,
+      next: rows.length > limit ? [page.at(-1).created_at, page.at(-1).id] : null,
     };
   }
   seed() {
@@ -459,7 +521,7 @@ export class ReviewRepository {
   putHostSession(tokenHash, hostId, csrf, expires) {
     this.run("DELETE FROM host_sessions WHERE expires_at<=?", this.now());
     this.run(
-      "INSERT INTO host_sessions VALUES(?,?,?,?)",
+      "INSERT INTO host_sessions (token_hash,host_id,csrf_token,expires_at) VALUES(?,?,?,?)",
       tokenHash,
       hostId,
       csrf,
@@ -594,6 +656,10 @@ export class ReviewRepository {
         action === "hide" ? 1 : 0,
         id,
       );
+    this.run(
+      "UPDATE events SET revision=revision+1 WHERE id=(SELECT event_id FROM cards WHERE id=?)",
+      id,
+    );
   }
   bookCards(eventId) {
     return this.all(

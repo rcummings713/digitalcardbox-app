@@ -27,6 +27,15 @@ export async function authHttp({
   let value;
   if (operation === "register") value = await auth.register(input);
   else if (operation === "login") value = await auth.login(input, session);
+  else if (operation === "reauthenticate") {
+    app.requireHost(session);
+    if (
+      !request.headers["x-csrf-token"] ||
+      request.headers["x-csrf-token"] !== session.csrf_token
+    )
+      fail(403, "Refresh this page before confirming your password.", "csrf_failed");
+    value = await auth.reauthenticate(app, session, input);
+  }
   else if (operation === "oauth") {
     const flow = await auth.begin(input, session);
     response.setHeader(

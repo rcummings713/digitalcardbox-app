@@ -7,22 +7,19 @@ import {
   palettes,
   motionChoices,
   motionSpeeds,
-  draftKey,
   withDesignGif,
-  validateDesign,
 } from "../modules/design/contracts";
 import type {
   DesignBlock,
   DesignDocument,
-  DesignKind,
   DesignMotion,
-  DesignVariant,
   MotionSpeed,
 } from "../modules/design/contracts";
 import { findGif, templates } from "../modules/media/catalog";
 import { TemplateArt } from "./TemplateArt";
 import { GifCredit } from "./GifCredit";
 import { useReducedMotion } from "./KeepsakeCard";
+export { readDesignDraft } from "../modules/design/drafts";
 
 export function designArtworkUrl(
   value: DesignDocument,
@@ -1055,16 +1052,4 @@ export function DesignEditor({
       </div>
     </section>
   );
-}
-export function readDesignDraft(
-  kind: DesignKind,
-  variant?: DesignVariant,
-): DesignDocument | null {
-  try {
-    const raw = localStorage.getItem(draftKey(kind, variant));
-    if (!raw) return null;
-    return validateDesign(JSON.parse(raw), kind);
-  } catch {
-    return null;
-  }
 }

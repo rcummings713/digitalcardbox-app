@@ -1,5 +1,15 @@
 # Local host and guest API
 
+## 15 November security additions
+
+See [ADR 0015](../adr/0015-security-remediation.md). `POST /api/auth/reauthenticate` accepts only `{password}` with the current host's CSRF and Origin headers; it confirms that same provider subject and refreshes the fifteen-minute sensitive-action timestamp without rotating cookie/CSRF. A denied publishing, destination or private export action returns `401 reauthentication_required`; the client confirms the password and retries once without discarding the form. OAuth SSO and token refresh never renew freshness.
+
+`GET /api/host/workspace` includes `pagination: {totals, next}` for `events`, `entries`, and `gifts`. Each group accepts its continuation in an identically named query parameter; `end` skips a completed group. Ordering is stable by created time and ID. The client loads all pages before replacing state and rejects inconsistent counts.
+
+`POST /api/host/events/:id/export` requires ownership, CSRF and recent authentication. Send `{}` initially or `{cursor}` to continue. Responses contain `entries`, `eventTitle`, `total`, and `nextCursor`. Opaque encrypted cursors expire after five minutes and bind actor/event/revision; expiry, moderation/content changes, wrong scope and tampering reject the export. A private export request is audited. Paid album retrieval also requires recent authentication and audits successful export. These are current-adapter retrieval APIs; production signed private-object exports remain open under #49.
+
+Closed/paused invitation reads return only safe landing fields, no CSRF authority/new guest cookie, no payees or private design/location. Scheduled save-the-dates retain their approved details but omit payees until gift actions are available. Session capacity counts only active studio sessions; referenced expired artwork is retained.
+
 **Scope:** ADR 0008 and ADR 0009, updated 21 October 2026. Local and isolated hosted DEV review; no production identity, transaction-data API
 or payment execution. JSON request/response bodies, `/api` same-origin
 proxy, no CORS grant. Errors are `{ error: { code, message } }` without stack,

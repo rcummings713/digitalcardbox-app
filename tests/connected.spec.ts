@@ -269,7 +269,7 @@ test("public pages reflow on phones, keep exact About copy and Instagram, and pr
       }));
       expect(size.pageWidth, route).toBeLessThanOrEqual(size.width);
       // Readable comparison panels, the full requested process copy and real editors
-      // intentionally scroll; short informational tabs retain their compact layout.
+      // and the complete privacy disclosure intentionally scroll; short tabs stay compact.
       if (
         ![
           "/",
@@ -277,6 +277,7 @@ test("public pages reflow on phones, keep exact About copy and Instagram, and pr
           "/invitations",
           "/save-the-dates",
           "/how-it-works",
+          "/privacy",
         ].includes(route)
       )
         expect(size.pageHeight, route).toBeLessThanOrEqual(size.height);

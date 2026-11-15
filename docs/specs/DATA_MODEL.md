@@ -1,5 +1,7 @@
 # Database design and module ownership
 
+15 November DEV hardening: migration 008 adds nullable `host_sessions.authenticated_at`; prior sessions keep ordinary access but require password confirmation for sensitive retrieval/mutation. Tokens, accepted content, billing records and encryption keys are preserved. The adapter repairs existing gift-first event locks idempotently, prunes only unreferenced expired studio sessions, exposes bounded workspace pages, and uses authenticated five-minute export continuation. This is not installation of the PostgreSQL schema or the production export/retention contracts below. [ADR 0015](../adr/0015-security-remediation.md) records the exact compatibility boundary.
+
 **Version:** 13 October 2026. **Decision:** [ADR 0005](../adr/0005-database-design.md).
 
 Use one managed PostgreSQL database per environment and private object storage for photos and exports. Evaluate Supabase first because it already appears in the financial reference; the provider, PostgreSQL version, identity integration and connection adapter must pass the deployment spike in [ADR 0001](../adr/0001-production-stack.md). This is a production design contract, not an installed database. Implementation belongs to DCB-E18 and the existing domain stories; the UI remains sample-only.

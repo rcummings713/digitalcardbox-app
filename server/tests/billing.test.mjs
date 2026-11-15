@@ -351,6 +351,35 @@ test("books quote frozen eligible membership, never client prices; finalization,
   );
   assert.deepEqual(f.repo.all("PRAGMA foreign_key_check"), []);
 });
+test("paid book exports require recent authentication without weakening buyer scope or changing entitlements", async (t) => {
+  const f = await ready(t, { allowEarlyBooks: true });
+  const quoted = await f.host.call("/api/billing/quotes", "POST", {
+    product: "event-book",
+    eventId: f.event.id,
+    requestKey: "fresh-paid-book-export-1",
+    preview: true,
+  });
+  assert.equal(quoted.status, 201);
+  const order = quoted.data.order;
+  assert.equal((await f.host.call("/api/billing/orders/" + order.id + "/checkout", "POST", {})).status, 200);
+  assert.equal((await f.stripe.webhook(f.base, "checkout.session.completed", f.stripe.pay())).status, 200);
+  const path = "/api/billing/orders/" + order.id + "/book";
+  f.repo.run("UPDATE host_sessions SET authenticated_at='2000-01-01T00:00:00Z'");
+  const stale = await f.host.call(path);
+  assert.equal(stale.status, 401);
+  assert.equal(stale.data.error.code, "reauthentication_required");
+  assert.ok(!("entries" in stale.data));
+  assert.equal((await f.host.call("/api/billing/orders/" + order.id)).data.order.entitled, true);
+  await f.other.login("other@digitalcardbox.test");
+  assert.equal((await f.other.call(path)).status, 404);
+  assert.equal((await f.host.call("/api/auth/reauthenticate", "POST", { password: "CardBoxReview!2026" })).status, 200);
+  const restored = await f.host.call(path);
+  assert.equal(restored.status, 200);
+  assert.ok(restored.data.entries.some((entry) => entry.id === f.cardId));
+  const audit = f.repo.all("SELECT action FROM audit WHERE event_id=?", f.event.id);
+  assert.ok(audit.some((row) => row.action === "Private paid book export requested."));
+  assert.ok(!JSON.stringify(audit).includes(card().note));
+});
 test("operator pause blocks new provider sessions while signed payments still settle and private billing stays operator-only", async (t) => {
   const f = await ready(t);
   const order = await quote(f);
