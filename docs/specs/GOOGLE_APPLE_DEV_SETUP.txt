@@ -1,0 +1,80 @@
+TheDigitalCardBox — DEV Google and Apple sign-in setup
+Prepared 15 November 2026. The site already implements both provider flows. Live DEV currently reports Google and Apple disabled. This guide configures DEV only; provider credentials stay in Supabase.
+
+SHARED VALUES
+Supabase project: khisehiglabbldatbmpl
+DEV application origin: https://digitalcardbox-app-dev.rcummings71300.workers.dev
+Provider callback / redirect URI (Google and Apple):
+https://khisehiglabbldatbmpl.supabase.co/auth/v1/callback
+
+In Supabase Authentication -> URL Configuration, retain the stable DEV Site URL and this redirect allowlist entry:
+https://digitalcardbox-app-dev.rcummings71300.workers.dev/auth/callback**
+The callback URI entered at Google/Apple is the Supabase URL above. Supabase then returns the browser to the application's callback using the existing S256 PKCE flow.
+
+GOOGLE — COMPLETE NOW
+Open https://console.cloud.google.com/ and create/select the business's DEV project. Suggested project name: TheDigitalCardBox DEV.
+
+Open Google Auth Platform -> Overview / Get Started (or Branding if already initialized).
+App name: TheDigitalCardBox DEV
+User support email: choose an email you control in the console.
+Audience: External
+Contact email: an email you control.
+Complete Google's required account/policy steps yourself.
+
+Under Audience, retain Testing for DEV and add your and the owner's Google-account email addresses as Test users.
+
+Under Data Access, configure only the identity scopes required by Supabase:
+openid
+https://www.googleapis.com/auth/userinfo.email
+https://www.googleapis.com/auth/userinfo.profile
+
+Under Clients -> Create client:
+Application type: Web application
+Name: TheDigitalCardBox DEV Web
+Authorized JavaScript origins:
+https://digitalcardbox-app-dev.rcummings71300.workers.dev
+Authorized redirect URIs:
+https://khisehiglabbldatbmpl.supabase.co/auth/v1/callback
+
+Create the client and retain its Client ID and Client Secret privately.
+Open https://supabase.com/dashboard/project/khisehiglabbldatbmpl/auth/providers -> Google.
+Enable Google. Paste the Web application's Client ID and Client Secret into their fields. Retain nonce/security checks and the verified-email requirement; save.
+The app does not need those credentials in Cloudflare or browser code. Do not paste the secret into chat.
+
+Wait about a minute, refresh the DEV sign-in page, and select Continue with Google. Complete consent with your own Google account. Verify that it returns to the host workspace; sign out and sign in again. Cancel one sign-in attempt to verify graceful return. Provider enabled status alone does not prove an actual Google login.
+
+APPLE — ENROLLMENT PENDING
+The owner confirmed there is no active Apple Developer Program membership yet. Apple currently lists US$99 per membership year, with local pricing/eligibility handled during enrollment:
+https://developer.apple.com/programs/enroll/
+Have the owner enroll using the appropriate owner/business account before configuring Apple. No membership purchase or Apple provider activation has been performed by this task.
+
+After enrollment, use Certificates, Identifiers & Profiles. Use an eligible existing primary App ID with Sign in with Apple enabled, or register a dedicated App ID. Suggested explicit Bundle ID, if available: com.thedigitalcardbox.dev.
+Register a Services ID, if available: com.thedigitalcardbox.dev.web.
+Enable Sign in with Apple for that Services ID, associate the primary App ID, and configure Website URLs:
+Domains and Subdomains: khisehiglabbldatbmpl.supabase.co
+Return URL: https://khisehiglabbldatbmpl.supabase.co/auth/v1/callback
+Save the configuration. Leave the unsupported server-to-server notification URL blank.
+
+Create a Sign in with Apple signing key associated with the primary App ID. Retain its Key ID, the account Team ID, and the downloaded AuthKey_*.p8 privately outside the repository.
+Use the client-secret generator on the official Supabase Apple guide in Chrome/Firefox:
+https://supabase.com/docs/guides/auth/social-sign-in/auth-apple
+Enter the Team ID, Key ID, Services ID and private signing key in that local browser tool. The guide states keys do not leave the browser. Paste the GENERATED JWT secret into Supabase; the .p8 contents or Key ID are not the Client Secret.
+
+Supabase -> Authentication -> Sign In / Providers -> Apple:
+Client IDs: com.thedigitalcardbox.dev.web (use the actual Services ID you registered; keep it first).
+Secret: the generated client-secret JWT.
+Enable and save. Replace the secret before its expiry, at most six months; retain the private signing key for renewal.
+
+For Hide My Email, register your authentication email source under Apple Developer -> Services -> Sign in with Apple for Email Communication:
+auth-dev.thedigitalcardbox.com
+no-reply@auth-dev.thedigitalcardbox.com
+Preserve the existing Resend DNS authentication. Test relay delivery with an Apple Hide My Email login after configuration.
+
+Refresh DEV after about a minute. Test Continue with Apple with the account owner's consent, including sign-out/re-entry, cancellation and Hide My Email. A real provider login remains an acceptance step.
+
+SOURCES
+https://supabase.com/docs/guides/auth/social-sign-in/auth-google
+https://developers.google.com/workspace/guides/configure-oauth-consent
+https://supabase.com/docs/guides/auth/social-sign-in/auth-apple
+https://developer.apple.com/help/account/capabilities/configure-sign-in-with-apple-for-the-web
+https://developer.apple.com/programs/enroll/

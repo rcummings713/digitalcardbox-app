@@ -1,0 +1,199 @@
+{
+  "collection": "TheDigitalCardBox Studio",
+  "version": 1,
+  "created": "2026-11-15",
+  "creator": "TheDigitalCardBox project authoring",
+  "referenceUse": "Public supplier pages consulted for design principles; no supplier artwork used as generation input or shipped.",
+  "vectorSource": "src/modules/media/studio-art.ts",
+  "templateSource": "src/modules/media/studio-collection.ts",
+  "paintedTool": "ChatGPT built-in image_gen; no application API key used",
+  "optimization": "cwebp quality 88, method 6; no cropping or baked-in text",
+  "assets": [
+    {
+      "file": "public/templates/studio/black-tie-v1.svg",
+      "bytes": 8575,
+      "sha256": "2c821bccde566e33cbca8404a1a4fd38a210ee316a443a07c4e9a8637355b338",
+      "medium": "original vector"
+    },
+    {
+      "file": "public/templates/studio/candle-v1.svg",
+      "bytes": 7747,
+      "sha256": "0de739aa6509f923028e88fc920d389d71a2fa3274173f6e20a4c57084169e6d",
+      "medium": "original vector"
+    },
+    {
+      "file": "public/templates/studio/cherry-v1.svg",
+      "bytes": 5825,
+      "sha256": "031266f6eceb0f214b5129020074adf0a5ccbddf406bcdff8c283ddddc4bc4c8",
+      "medium": "original vector"
+    },
+    {
+      "file": "public/templates/studio/citrus-v1.webp",
+      "bytes": 157900,
+      "sha256": "a332f09c4e159c3b1f10624cbce20ff8f9cdd85d6aa94fdb6c73aef51f863b40",
+      "medium": "AI-assisted original painting",
+      "dimensions": {
+        "width": 1060,
+        "height": 1484
+      }
+    },
+    {
+      "file": "public/templates/studio/cloud-nine-v1.svg",
+      "bytes": 2104,
+      "sha256": "4584c18e3b4e70cc3c622c949f43e41f98d646bb2040c3d4c5ba7c20206b15ff",
+      "medium": "original vector"
+    },
+    {
+      "file": "public/templates/studio/coastal-v1.svg",
+      "bytes": 3130,
+      "sha256": "1e336c091791c07259f6b724fc5660f4e73ce860190e8f812d4f470112edbe4a",
+      "medium": "original vector"
+    },
+    {
+      "file": "public/templates/studio/confetti-v1.svg",
+      "bytes": 4435,
+      "sha256": "b024a214104da70b8a5c9d1e50e34c73ffd3da712730a2fbfb2d800913e8fa78",
+      "medium": "original vector"
+    },
+    {
+      "file": "public/templates/studio/disco-v1.svg",
+      "bytes": 8625,
+      "sha256": "0b67fe52d95f4969bcdc90ca061495bebccddcccd6e21561580015ee7a975970",
+      "medium": "original vector"
+    },
+    {
+      "file": "public/templates/studio/fiesta-v1.svg",
+      "bytes": 35145,
+      "sha256": "66f477a62fc210e38434dae0cec24ca08eb915ab8bb09fb083844b0ffa02038a",
+      "medium": "original vector"
+    },
+    {
+      "file": "public/templates/studio/golden-hour-v1.svg",
+      "bytes": 4290,
+      "sha256": "bd79fd616d324cdcfd71f75f30bab7c5b15b8890e3aea0319d80e6c8746c85b2",
+      "medium": "original vector"
+    },
+    {
+      "file": "public/templates/studio/graduate-v1.svg",
+      "bytes": 1663,
+      "sha256": "5d7a87a7d1d46cb6b9d13942c027740d5d9d458f19740a220e44d6c5e3c0d85a",
+      "medium": "original vector"
+    },
+    {
+      "file": "public/templates/studio/homecoming-v1.svg",
+      "bytes": 4846,
+      "sha256": "78cd62e689d5317a065d60f17eb5996051074708ab8dd0085976f70fb5709b26",
+      "medium": "original vector"
+    },
+    {
+      "file": "public/templates/studio/laurel-v1.svg",
+      "bytes": 11187,
+      "sha256": "fcc3a70ea0abe046035d3c8e4a5b87511de58219e21b907299967f9a792086a6",
+      "medium": "original vector"
+    },
+    {
+      "file": "public/templates/studio/linen-v1.svg",
+      "bytes": 1631,
+      "sha256": "82d8a1a172dbfaed35613a3ab8bd6dca16579df745a2f53c157ff8a3ec3f2050",
+      "medium": "original vector"
+    },
+    {
+      "file": "public/templates/studio/little-meadow-v1.webp",
+      "bytes": 211372,
+      "sha256": "e9df68eb559b2bc6230cf518b63ce6d1c993702af22474ddb4554198d9d8b104",
+      "medium": "AI-assisted original painting",
+      "dimensions": {
+        "width": 1060,
+        "height": 1484
+      }
+    },
+    {
+      "file": "public/templates/studio/moon-baby-v1.svg",
+      "bytes": 4972,
+      "sha256": "4fd062a838bd0c81d6959526614c64b150f2befb20c66fe6411e4e36ab90acae",
+      "medium": "original vector"
+    },
+    {
+      "file": "public/templates/studio/night-garden-v1.webp",
+      "bytes": 84916,
+      "sha256": "5a476a83ca2d7cc159eb1501d669d0b4505c86e6215945c4ce3b72a0d9bf9bb6",
+      "medium": "AI-assisted original painting",
+      "dimensions": {
+        "width": 1060,
+        "height": 1484
+      }
+    },
+    {
+      "file": "public/templates/studio/pearl-v1.svg",
+      "bytes": 5944,
+      "sha256": "e67a57e5b3ea5ce7769c339cc8e9efc9fc8b333efdb0cf12135202c9964bc368",
+      "medium": "original vector"
+    },
+    {
+      "file": "public/templates/studio/porcelain-v1.svg",
+      "bytes": 92598,
+      "sha256": "2e16929958f7c96ae4dab12855a21d3d0b37e58500931a857366312f49656002",
+      "medium": "original vector"
+    },
+    {
+      "file": "public/templates/studio/ribbon-v1.svg",
+      "bytes": 6038,
+      "sha256": "68aa167f7cca89b463173835a631ee4993a5fafe4907a707d6bf853f8989d8a5",
+      "medium": "original vector"
+    },
+    {
+      "file": "public/templates/studio/rosewater-v1.webp",
+      "bytes": 157780,
+      "sha256": "026752c984426de416b8d22507e181061658a9b5a842884780ec8d62cde21e10",
+      "medium": "AI-assisted original painting",
+      "dimensions": {
+        "width": 1060,
+        "height": 1484
+      }
+    },
+    {
+      "file": "public/templates/studio/sage-press-v1.svg",
+      "bytes": 12483,
+      "sha256": "f4de9d78be3cf2aec0bf86c9103b43b62959bb08323512b512619c29fa9f7782",
+      "medium": "original vector"
+    },
+    {
+      "file": "public/templates/studio/sunshine-v1.svg",
+      "bytes": 5899,
+      "sha256": "049f6d1c10453a6d5534b3854e8c4be64e85082dddfedf73552670ad41f95c84",
+      "medium": "original vector"
+    },
+    {
+      "file": "public/templates/studio/teddy-v1.svg",
+      "bytes": 18593,
+      "sha256": "6586de3707c70b84ae6f4fe250ca696c2be191cf0a6bb93a8e7e5649d984b2b6",
+      "medium": "original vector"
+    }
+  ],
+  "finalPromptSet": [
+    {
+      "asset": "rosewater-v1.webp",
+      "source": "exec-6b8dbf2f-3457-419e-83f7-53f272e25c26.png",
+      "method": "built-in image_gen edit of original generated peony artwork",
+      "finalPrompt": "Edit this original peony stationery background. Preserve the exquisite watercolor and pencil style, exact warm ivory paper, blush and sage palette, and upper-left peony composition. Change only the bottom-right floral cluster: make it smaller and shift it far down into the corner, cropped naturally by the bottom and right edges. ALL lower petals and leaves must be below 85% of canvas height. Any connecting stem higher than that must stay in the outermost 6% of the right edge. We need a genuinely empty ivory text area spanning x=15% to85% and y=29% to84%. Do not add text, letters, logos, watermark, frame or shadows. Preserve 5:7 portrait proportions."
+    },
+    {
+      "asset": "citrus-v1.webp",
+      "source": "exec-1b04bd78-9137-4bb5-9cfd-a6a9b9995d26.png",
+      "method": "built-in image_gen edit of original generated citrus artwork",
+      "finalPrompt": "Edit this original lemon gouache invitation background. Preserve its exact ivory paper, painted blue outline, rich leaf colors and tactile brushwork. Reposition and scale the two botanical clusters to create an uninterrupted central writing area: all upper-right lemons and leaves must be above 27% of canvas height, and all bottom-left lemons and leaves must be below 85% of canvas height. Crop the branches attractively into their corners, keeping the lush premium illustration and blue border. Leave x=15% to85%, y=29% to84% blank ivory. No text or lettering, logos, watermark, shadows or mockup. Keep portrait5:7 proportions."
+    },
+    {
+      "asset": "night-garden-v1.webp",
+      "source": "exec-7263ef98-0643-4cc7-b746-115912c37231.png",
+      "method": "built-in image_gen edit of original generated midnight artwork",
+      "finalPrompt": "Edit this original navy botanical stationery background. Preserve exact midnight navy color, beautiful original hand-painted white anemones and brushwork in the top-left corner. Move ALL bottom-right flowers, buds and leaves far down and toward the right corner; reduce their scale so every lower decoration is entirely below 85% of canvas height. Make the whole middle rectangle spanning x=15% to85%, y=29% to84% completely clear uninterrupted navy. No flower or leaf inside this text area. Outside it only tiny fine edge stems may remain. Keep a refined hand-painted feel and portrait5:7 proportions. No text, lettering, watermark, shadow, envelope or new border."
+    },
+    {
+      "asset": "little-meadow-v1.webp",
+      "source": "exec-7455f122-ca44-46ca-bfcb-59733d7aeffd.png",
+      "method": "built-in image_gen generation",
+      "finalPrompt": "Original illustrated baby shower stationery background, portrait 5:7, flat edge-to-edge artwork. Heirloom storybook illustration using delicate watercolor and colored pencil on warm ivory cotton paper. An endearing realistic small brown rabbit beside a tiny wildflower meadow at the bottom, a second small bird in a flowering branch at the top left. Small butter-yellow and dusty-blue flowers, sage greenery, subtle visible pencil texture. Charming and carefully painted rather than cartoon clip-art. Keep the central 72% width clear and the entire area between 19% and 78% height blank ivory for editable invitation text. No text, lettering, logos, watermark, borders, envelope, shadows or mockup. Original composition."
+    }
+  ]
+}

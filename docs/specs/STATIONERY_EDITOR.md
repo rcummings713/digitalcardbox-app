@@ -84,3 +84,23 @@ The pre-migration local database/key backup remains private and ignored. This is
 ## 6 November 2026 one-time invitation collection
 
 The public invitation and save-the-date galleries now contain 195 choices, including all 100 Canva-account designs across Wedding (18), Everyday (18), Celebration (12), Baby (12), Birthday (14), Graduation (10), Remembrance (8) and Thanks (8). Guest greeting cards retain their 106 dedicated choices. New invitations appear first, support search/recommendations, and use lazy-loaded same-origin artwork. Selected-design credits and portable archives retain source notices. Native text is adapted to the site’s fonts and checked for clipping/overlap; the imported decorative artwork is a single background, not individually editable Canva objects. No new API key or runtime Canva account is required. See the licensing review for actual raster dimensions and print limitations.
+
+
+## 15 November 2026 Studio collection review
+
+The primary gallery now presents 24 original, versioned Studio designs with
+composed editable type, detailed illustrations and mobile-readable full previews.
+Earlier collection keeps the prior 106 card / 195 invitation choices and their
+accepted documents intact. Painted backgrounds use compatible ink palettes;
+vector art follows the selected palette. New free and Signature previews use the
+refreshed art. Actual Studio SVG/WebP bytes are retained in portable downloads.
+See [TEMPLATE_COLLECTION_REVIEW.md](TEMPLATE_COLLECTION_REVIEW.md) and
+[ADR 0014](../adr/0014-versioned-studio-collection.md). Local owner review;
+#24, #73 and #94 stay open / In Progress.
+
+
+15 November owner screenshot follow-up: 21 additional original Celebration
+designs join the Studio collection (45 current designs). New arrivals filters
+them; earlier designs remain available. Photo, newspaper and split-panel text
+regions, editable monograms/milestones and GIF placement use the existing native
+document. See TEMPLATE_COLLECTION_REVIEW.md for the new review sheet and provenance.

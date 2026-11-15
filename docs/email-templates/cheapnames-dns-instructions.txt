@@ -1,0 +1,30 @@
+Please add four DNS records in Cheapnames.com so TheDigitalCardBox DEV site can send account-confirmation and password-reset emails.
+
+Open thedigitalcardbox.com, select DNS beside Overview, then DNS Records and Add New Record.
+
+Use TTL: 1 Hour (or leave the default) for all four. Enter each Name exactly as shown; the domain is added automatically. Keep every existing record unchanged.
+
+RECORD A
+Type: TXT
+Name: resend._domainkey.auth-dev
+Value: p=MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQCY7nXedBnpeEOKSGphcKSg+U4v2DYcs5MuJtUUg1RU+p8hlSSLG+2ZyHb13SPqORyMp1rLmCZ8nNuoopmMechwbahIeX64dCC/UBrIeyvR3eYKBGMwf4160REChxZXcQyPRDiOkHK7Hgi3uD2DtEvMRtS2kVG4JQyF1FSS98MfxwIDAQAB
+
+RECORD B
+Type: MX
+Name: send.auth-dev
+Value: feedback-smtp.us-east-1.amazonses.com
+Priority: 10
+
+RECORD C
+Type: TXT
+Name: send.auth-dev
+Value: v=spf1 include:amazonses.com ~all
+
+RECORD D
+Type: CNAME
+Name: rsend.auth-dev
+Value: send.forge.rmta.net
+
+Copy Record A as one continuous value without extra spaces or quotation marks. Save each record and complete any account-verification prompt.
+Keep the current nameservers, website and email records. No transfer or new subscription is needed.
+Let me know when all four records are saved so I can verify DNS and continue the email setup.

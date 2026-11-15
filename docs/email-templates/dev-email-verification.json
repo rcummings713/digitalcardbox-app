@@ -1,0 +1,40 @@
+{
+  "result": "passed",
+  "date": "2026-11-15 America/New_York",
+  "qaAddress": "delivered+dcb-auth-5a393cb95805@resend.dev",
+  "checks": {
+    "signup": true,
+    "confirmationMail": {
+      "correctSender": true,
+      "correctSubject": true,
+      "correctAppLink": true,
+      "lastEvent": "delivered",
+      "id": "01a1dd9e-0261-747b-8099-1b700e244427"
+    },
+    "emailConfirmed": true,
+    "login": true,
+    "accountId": "7284568c-379c-438a-8e54-ae2d60c18832",
+    "secureSession": true,
+    "signOut": true,
+    "recoveryMail": {
+      "correctSender": true,
+      "correctSubject": true,
+      "correctAppLink": true,
+      "lastEvent": "delivered",
+      "id": "01a1dda0-4de5-701a-b3c8-9d77ea498154"
+    },
+    "passwordReset": true,
+    "sameAccountAfterReset": true,
+    "signedInAfterReset": true,
+    "finalSignOut": true
+  },
+  "deliveryScope": "Resend simulated delivery recipient; no real inbox tested",
+  "eventsCreated": 0,
+  "providerConfiguration": {
+    "email": true,
+    "emailConfirmationRequired": true,
+    "google": false,
+    "apple": false
+  },
+  "privateCredentialFileRemoved": true
+}

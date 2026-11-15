@@ -1,3 +1,4 @@
+import { readFileSync } from "node:fs";
 import { test, expect } from "@playwright/test";
 import AxeBuilder from "@axe-core/playwright";
 import { readFile } from "node:fs/promises";
@@ -170,4 +171,49 @@ test("a paid premium draft returns through the invitation-scoped receipt to revi
   await expect(
     page.getByText("Your card is already delivered.", { exact: false }),
   ).toHaveCount(0);
+});
+
+test("portable books retain original Studio SVG and painted artwork as offline bytes", async ({
+  page,
+}) => {
+  await page.route("**/api/host/studio-book-review", (route) =>
+    route.fulfill({
+      json: {
+        event: {
+          title: "A Studio celebration",
+          hosts: "Maya & Oliver",
+          date: "June 12, 2027",
+        },
+        entries: [
+          {
+            id: "review-vector",
+            name: "Avery",
+            note: "A note to keep.",
+            style: "studio-linen-v1",
+          },
+          {
+            id: "review-painting",
+            name: "Riley",
+            note: "With love, always.",
+            style: "studio-rosewater-v1",
+          },
+        ],
+      },
+    }),
+  );
+  await page.goto("/invitations");
+  const downloading = page.waitForEvent("download");
+  await page.evaluate(async () => {
+    const { savePaidBook } = await import("/src/ui/paid-book.ts");
+    await savePaidBook("/api/host/studio-book-review", "editorial");
+  });
+  const download = await downloading;
+  const saved = readFileSync((await download.path())!, "utf8");
+  for (const file of ["linen-v1.svg", "rosewater-v1.webp"])
+    expect(saved).toContain(
+      readFileSync("public/templates/studio/" + file).toString("base64"),
+    );
+  expect(saved).toContain("data:image/svg+xml;base64,");
+  expect(saved).toContain("data:image/webp;base64,");
+  expect(saved).not.toContain('src="/templates/studio/');
 });

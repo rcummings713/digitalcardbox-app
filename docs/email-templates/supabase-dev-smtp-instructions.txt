@@ -1,0 +1,41 @@
+TheDigitalCardBox DEV — finish Supabase authentication emails
+
+The four DNS records are installed and match publicly. Wait until the prepared Resend domain shows Verified before enabling it for email:
+https://resend.com/domains/bf674e71-47e1-4677-a793-af3d00f09fef
+
+Open the DEV project's SMTP settings:
+https://supabase.com/dashboard/project/khisehiglabbldatbmpl/auth/smtp
+
+Enable custom SMTP and fill these fields:
+Sender email: no-reply@auth-dev.thedigitalcardbox.com
+Sender name: TheDigitalCardBox
+Host: smtp.resend.com
+Port: 465
+Username: resend
+Password: the prepared domain-restricted Resend sending key
+
+On this Mac, copy that prepared password privately by running this in Terminal:
+security find-generic-password -s 'TheDigitalCardBox DEV Resend SMTP' -a 'auth-dev.thedigitalcardbox.com' -w | pbcopy
+
+Paste the clipboard directly into Supabase's SMTP Password field, then Save changes. macOS may ask you to allow Keychain access. Do not paste the password into chat. Keep the initial email rate limit unchanged.
+
+Under Authentication -> URL Configuration, verify this Site URL:
+https://digitalcardbox-app-dev.rcummings71300.workers.dev
+
+Add these Redirect URLs if missing; keep other existing entries:
+https://digitalcardbox-app-dev.rcummings71300.workers.dev/auth/callback**
+https://digitalcardbox-app-dev.rcummings71300.workers.dev/auth/confirmed
+https://digitalcardbox-app-dev.rcummings71300.workers.dev/auth/verify
+https://digitalcardbox-app-dev.rcummings71300.workers.dev/auth/recover
+
+Under Authentication -> Email -> Templates, paste the complete corresponding local HTML files (in the same folder as these instructions):
+Confirm sign up: confirm-signup.html
+Subject: Confirm your TheDigitalCardBox account
+Reset password: reset-password.html
+Subject: Reset your TheDigitalCardBox password
+
+Keep the Supabase variables in those files unchanged. Keep email confirmation enabled. Do not add the private Resend key to Cloudflare or browser code.
+
+Then open the DEV website and create an account with an email you control. Check the confirmation email, confirm it, sign in, and test Forgot password. Those real steps prove app delivery/confirmation/recovery; the successful SMTP login alone does not.
+
+Google and Apple remain separate provider-configuration steps.

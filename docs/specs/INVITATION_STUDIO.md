@@ -6,9 +6,10 @@
 
 `/cards` and `/invitations` are public design tools. Neither creates a host,
 event, card box, guest link or username on entry. The first start option offers
-AI artwork; the second opens the generic card or invitation templates. The current catalog has 106
-greeting-card designs and 195 invitation/save-the-date choices, including the owner’s
-one-time 100-design Canva collection. Invitations have separately editable
+AI artwork; the second opens the generic card or invitation templates. The current Studio collection leads with 24 original designs for cards,
+invitations and save-the-dates. Earlier collection retains the previous 106
+greeting-card and 195 invitation designs, including the owner’s one-time Canva
+collection (130/219 total backing choices). See TEMPLATE_COLLECTION_REVIEW.md. Invitations have separately editable
 opening, title, details, RSVP and optional occasion/message text. An occasion changes recommendations without restricting the
 full collection. The single home dropdown includes all 17 requested occasions,
 including engagement, baptism, Sweet 16, quinceañera and Bar Mitzvah, while
@@ -169,3 +170,10 @@ Official implementation references checked 30 October 2026:
 
 
 11 November owner update: the gallery shows whole portrait templates with no nested template/grid scrolling, one column on phones, twelve initial results and load-more/search across the complete collection. Selecting a template focuses the editor. Standard (1.8s), Slow (3.2s default) and Very slow (5.2s) entrance speeds include proportionate stagger, persist in the design and can be overridden in previews. Effects remain finite/stoppable; reduced motion and print remain still.
+
+
+15 November owner screenshot follow-up: 21 additional original Celebration
+designs join the Studio collection (45 current designs). New arrivals filters
+them; earlier designs remain available. Photo, newspaper and split-panel text
+regions, editable monograms/milestones and GIF placement use the existing native
+document. See TEMPLATE_COLLECTION_REVIEW.md for the new review sheet and provenance.

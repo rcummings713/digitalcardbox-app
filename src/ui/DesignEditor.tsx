@@ -191,8 +191,9 @@ export function DesignCanvas({
       <div
         key={replay}
         ref={frame}
-        className={`design-canvas design-font-${value.font}${imported ? " is-imported" : ""}${isEditable ? " is-editable" : ""}`}
+        className={`design-canvas design-font-${value.font}${imported ? " is-imported" : ""}${"collection" in template ? " is-studio-collection" : ""}${isEditable ? " is-editable" : ""}`}
         role="group"
+        data-design-kind={value.kind}
         aria-label={
           label ||
           `${value.variant ? "Save-the-date" : value.kind === "invitation" ? "Invitation" : "Card"} design preview`
@@ -209,7 +210,12 @@ export function DesignCanvas({
           className="design-artwork-layer"
           style={motionStyle(value.artworkMotion)}
         >
-          <TemplateArt id={value.template} accent={palette.accent} />
+          <TemplateArt
+            id={value.template}
+            accent={palette.accent}
+            paper={palette.paper}
+            ink={palette.ink}
+          />
           {artUrl && badArt !== artUrl && (
             <img
               className="design-ai-art"
@@ -233,7 +239,17 @@ export function DesignCanvas({
             height: `${block.height}%`,
             fontSize: `${block.size / 4}cqw`,
             textAlign: block.align,
-            ...(block.font ? { fontFamily: fonts[block.font] } : {}),
+            ...(block.font
+              ? {
+                  fontFamily:
+                    "collection" in template &&
+                    value.kind === "invitation" &&
+                    block.id === "heading" &&
+                    block.font === "sans"
+                      ? "var(--font-label)"
+                      : fonts[block.font],
+                }
+              : {}),
             fontWeight: block.bold ? 700 : 400,
             fontStyle: block.italic ? "italic" : "normal",
             textDecoration: block.underline ? "underline" : "none",
@@ -242,6 +258,7 @@ export function DesignCanvas({
           return editing?.id === block.id ? (
             <textarea
               key={block.id}
+              data-layer-id={block.id}
               className="design-text-layer design-inline-input"
               style={style}
               aria-label={`Type ${block.label} on design`}
@@ -270,6 +287,7 @@ export function DesignCanvas({
               type="button"
               className={`design-text-layer${selected === block.id ? " is-selected" : ""}`}
               key={block.id}
+              data-layer-id={block.id}
               style={style}
               aria-label={`Edit ${block.label}`}
               aria-pressed={selected === block.id}
@@ -331,6 +349,7 @@ export function DesignCanvas({
             <p
               className="design-text-layer"
               key={block.id}
+              data-layer-id={block.id}
               style={style}
               tabIndex={block.text.length > 180 ? 0 : undefined}
             >
@@ -341,6 +360,16 @@ export function DesignCanvas({
         {gif && (
           <img
             className="design-gif"
+            style={
+              "collection" in template && template.composition === "photo-split"
+                ? { left: "5%", top: "68%", width: "28%", height: "15%" }
+                : "collection" in template &&
+                    ["photo-top", "newspaper", "nocturne"].includes(
+                      template.composition,
+                    )
+                  ? { left: "68%", top: "20%", width: "22%", height: "13%" }
+                  : undefined
+            }
             src={(animate || motionPlaying) && !reduced ? gif.url : gif.poster}
             alt={gif.name}
             width="180"
@@ -661,11 +690,24 @@ export function DesignEditor({
                   })
                 }
               >
-                {Object.entries(palettes).map(([id, p]) => (
-                  <option value={id} key={id}>
-                    {p.name}
-                  </option>
-                ))}
+                {Object.entries(palettes)
+                  .filter(([id]) => {
+                    const item = templates.find(
+                      (t) => t.id === value.template,
+                    )!;
+                    return (
+                      !("collection" in item) ||
+                      item.medium !== "painted" ||
+                      (item.palette === "midnight"
+                        ? id === "midnight"
+                        : id !== "midnight")
+                    );
+                  })
+                  .map(([id, p]) => (
+                    <option value={id} key={id}>
+                      {p.name}
+                    </option>
+                  ))}
               </select>
             </div>
             <div>

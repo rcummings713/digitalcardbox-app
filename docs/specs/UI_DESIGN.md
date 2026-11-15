@@ -247,3 +247,23 @@ alternative text and keyboard focus/close behavior remain available.
 
 
 11 November DEV extension: hosted account entry now uses real managed email registration/login, confirmation/recovery and Google/Apple PKCE flows once the owner enables the providers. Account-free continuation remains. Invitation galleries use full portrait previews and page scrolling; motion speeds persist. Premium edition choice precedes private draft checkout and an explicit Send. See ADR 0013 and ACCOUNT_AND_AI_SETUP.md.
+
+
+## 15 November 2026 Studio collection review
+
+The primary gallery now presents 24 original, versioned Studio designs with
+composed editable type, detailed illustrations and mobile-readable full previews.
+Earlier collection keeps the prior 106 card / 195 invitation choices and their
+accepted documents intact. Painted backgrounds use compatible ink palettes;
+vector art follows the selected palette. New free and Signature previews use the
+refreshed art. Actual Studio SVG/WebP bytes are retained in portable downloads.
+See [TEMPLATE_COLLECTION_REVIEW.md](TEMPLATE_COLLECTION_REVIEW.md) and
+[ADR 0014](../adr/0014-versioned-studio-collection.md). Local owner review;
+#24, #73 and #94 stay open / In Progress.
+
+
+15 November owner screenshot follow-up: 21 additional original Celebration
+designs join the Studio collection (45 current designs). New arrivals filters
+them; earlier designs remain available. Photo, newspaper and split-panel text
+regions, editable monograms/milestones and GIF placement use the existing native
+document. See TEMPLATE_COLLECTION_REVIEW.md for the new review sheet and provenance.

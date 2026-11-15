@@ -21,6 +21,7 @@ test("visitors design a card without an account; text tools, undo, GIF and saved
   expect(await page.locator(".studio-template-grid>button").count()).toBe(12);
   await page.getByRole("button", { name: /Show more templates/ }).click();
   await expect(page.locator(".studio-template-grid>button")).toHaveCount(24);
+  await page.getByLabel("Filter designs").selectOption("Earlier collection");
   await page
     .getByLabel("Search templates", { exact: true })
     .fill("Pressed Peony");

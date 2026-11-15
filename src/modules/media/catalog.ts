@@ -1,3 +1,4 @@
+import { studioCollection } from "./studio-collection.ts";
 import { importedTemplates } from "./imported-catalog.ts";
 import { stationeryTemplates } from "./stationery-catalog.ts";
 import { eventTypes } from "../events/occasions.ts";
@@ -267,6 +268,7 @@ const originalTemplates = [
   },
 ] as const;
 export const templates = [
+  ...studioCollection,
   ...originalTemplates,
   ...stationeryTemplates,
   ...importedTemplates,

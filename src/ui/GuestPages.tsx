@@ -56,7 +56,7 @@ function freshDraft(): Draft {
     id: uid(),
     name: "",
     note: "",
-    style: "botanical",
+    style: "studio-rosewater-v1",
     consent: false,
     reference: reference(),
     submitted: false,
@@ -1143,7 +1143,31 @@ function GuestJourney({
                             artId: undefined,
                             design: draft.design
                               ? applyTemplate(draft.design, design.id)
-                              : undefined,
+                              : "collection" in design
+                                ? {
+                                    ...createDesign(
+                                      "card",
+                                      event.type,
+                                      design.id,
+                                    ),
+                                    blocks: createDesign(
+                                      "card",
+                                      event.type,
+                                      design.id,
+                                    ).blocks.map((b) =>
+                                      b.id === "message"
+                                        ? { ...b, text: draft.note }
+                                        : b.id === "signature"
+                                          ? {
+                                              ...b,
+                                              text:
+                                                "With love,\n" +
+                                                (draft.name || "Your name"),
+                                            }
+                                          : b,
+                                    ),
+                                  }
+                                : undefined,
                           })
                         }
                       />

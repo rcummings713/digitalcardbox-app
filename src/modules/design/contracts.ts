@@ -1,3 +1,5 @@
+import { studioCollection } from "../media/studio-collection.ts";
+import { studioTextBlocks } from "./studio-presets.ts";
 import { premiumEditions } from "../cards/premium.ts";
 import type { PremiumEdition } from "../cards/premium.ts";
 import { templates, findGif } from "../media/catalog.ts";
@@ -280,6 +282,17 @@ function createBaseDesign(
   template: TemplateId = "botanical",
 ): DesignDocument {
   const safe = eventTypes.includes(occasion) ? occasion : "Wedding";
+  const studio = studioCollection.find((item) => item.id === template);
+  if (studio)
+    return {
+      version: 1,
+      kind,
+      occasion: safe,
+      template,
+      palette: studio.palette,
+      font: "serif",
+      blocks: studioTextBlocks(kind, safe, studio.composition, studio.key),
+    };
   const remembrance = safe === "Wake / Celebration of Life";
   return {
     version: 1,
@@ -411,8 +424,9 @@ const originalInvitationTemplates = [
   .filter((id) => templates.some((t) => t.id === id))
   .map((id) => templates.find((t) => t.id === id)!);
 export const invitationTemplates = [
+  ...studioCollection,
   ...originalInvitationTemplates,
-  ...templates.filter((t) => "layout" in t),
+  ...templates.filter((t) => "layout" in t && !("collection" in t)),
 ];
 export const draftKey = (kind: DesignKind, variant?: DesignVariant) =>
   "dcb-design-studio-" + (variant || kind) + "-v1";
@@ -426,7 +440,12 @@ export function createDesign(
   let value = createBaseDesign(kind, occasion, template);
   value = applyTemplate(value, template);
   const item = templates.find((item) => item.id === template)!;
-  const recipe = "textLayouts" in item ? item.textLayouts?.[kind] : undefined;
+  const recipe =
+    "collection" in item
+      ? createBaseDesign(kind, occasion, template).blocks
+      : "textLayouts" in item
+        ? item.textLayouts?.[kind]
+        : undefined;
   if (recipe)
     value = { ...value, blocks: recipe.map((block) => ({ ...block })) };
   if (kind === "invitation" && variant === "save-the-date")
@@ -460,8 +479,10 @@ function fitAnnouncement(value: DesignDocument): DesignDocument {
         ? {
             ...block,
             size: Math.min(block.size, 22),
-            height: 12,
-            y: Math.max(3, Math.min(block.y, titleY - 14)),
+            height: value.template.startsWith("studio-") ? block.height : 12,
+            y: value.template.startsWith("studio-")
+              ? block.y
+              : Math.max(3, Math.min(block.y, titleY - 14)),
           }
         : block.id === "message"
           ? {
@@ -481,9 +502,17 @@ export function applyTemplate(
   const base = createBaseDesign(value.kind, value.occasion, template);
   const previous = templates.find((item) => item.id === value.template)!;
   const previousRecipe =
-    "textLayouts" in previous ? previous.textLayouts?.[value.kind] : undefined;
+    "collection" in previous
+      ? createBaseDesign(value.kind, value.occasion, value.template).blocks
+      : "textLayouts" in previous
+        ? previous.textLayouts?.[value.kind]
+        : undefined;
   const recipe =
-    "textLayouts" in item ? item.textLayouts?.[value.kind] : undefined;
+    "collection" in item
+      ? base.blocks
+      : "textLayouts" in item
+        ? item.textLayouts?.[value.kind]
+        : undefined;
   const previousBase = createBaseDesign(
     value.kind,
     value.occasion,
@@ -549,10 +578,7 @@ export function applyTemplate(
         );
       })
       .map((b): DesignBlock => {
-        const imported =
-          "textLayouts" in item
-            ? item.textLayouts?.[value.kind]?.find((seed) => seed.id === b.id)
-            : undefined;
+        const imported = recipe?.find((seed) => seed.id === b.id);
         if (imported) {
           const original =
             previousRecipe?.find((seed) => seed.id === b.id) ||
@@ -640,12 +666,33 @@ export function withDesignGif(
 ): DesignDocument {
   if (!gif) return { ...value, gif: undefined };
   if (value.gif) return { ...value, gif };
+  const studioTemplate = studioCollection.find((t) => t.id === value.template);
+  if (
+    studioTemplate &&
+    ["photo-top", "photo-split", "newspaper", "nocturne"].includes(
+      studioTemplate.composition,
+    )
+  )
+    return { ...value, gif };
   return {
     ...value,
     gif,
     blocks: value.blocks.map((b) => {
-      const positions =
-        value.kind === "invitation"
+      const studio = value.template.startsWith("studio-");
+      const positions = studio
+        ? value.kind === "invitation"
+          ? {
+              heading: [25, 8, 12],
+              title: [35, 18, 28],
+              details: [53, 12, 13],
+              message: [83, 9, 13],
+            }
+          : {
+              heading: [26, 14, 24],
+              message: [42, 20, 17],
+              signature: [82, 12, 16],
+            }
+        : value.kind === "invitation"
           ? {
               heading: [26, 8, 14],
               title: [36, 16, 27],
