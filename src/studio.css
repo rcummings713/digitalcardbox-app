@@ -1214,3 +1214,105 @@ html[data-motion="reduce"] .little-star-cover {
 .premium-card-finish[class*="premium-edition-"] .premium-card-seal {
   color: var(--premium-ink, #5b431f);
 }
+
+/* The Studio collection has generous art and a deliberate typographic hierarchy. */
+.studio-collection-note {
+  margin: 18px 0 8px;
+  font-size: 13px;
+  max-width: 64ch;
+  color: var(--muted);
+}
+.studio-collection-note > span {
+  display: block;
+  margin-bottom: 4px;
+  color: var(--ink);
+  font: 11px/1.5 var(--font-label);
+  letter-spacing: 0.13em;
+  text-transform: uppercase;
+}
+.studio-template-grid > button {
+  padding: 10px 10px 14px;
+  transition:
+    background-color 0.2s,
+    border-color 0.2s;
+}
+.studio-template-grid > button:hover {
+  background: #f1e7df;
+}
+.studio-template-grid strong {
+  margin-top: 12px;
+  font: 19px/1.25 var(--font-heading);
+}
+.studio-template-style {
+  display: block;
+  margin-top: 4px;
+  color: var(--muted);
+  font-size: 11px;
+  line-height: 1.4;
+}
+.is-studio-collection {
+  border-radius: 1px;
+  box-shadow:
+    0 12px 28px #4933291b,
+    0 0 0 1px #80615318;
+}
+.is-studio-collection .design-text-layer {
+  background: none;
+  line-height: 1.2;
+  overflow-wrap: anywhere;
+}
+.is-studio-collection[data-design-kind="invitation"] [data-layer-id="heading"] {
+  letter-spacing: 0.13em;
+  text-transform: uppercase;
+  line-height: 1.5;
+}
+.is-studio-collection [data-layer-id="details"] {
+  line-height: 1.55;
+  letter-spacing: 0.015em;
+}
+.is-studio-collection [data-layer-id="message"] {
+  line-height: 1.5;
+}
+.is-studio-collection [data-layer-id="signature"] {
+  line-height: 1.5;
+}
+@media (prefers-reduced-motion: reduce) {
+  .studio-template-grid > button {
+    transition: none;
+  }
+}
+
+.premium-choice-art {
+  container-type: inline-size;
+  aspect-ratio: 5 / 7;
+  border-width: 1px;
+}
+.premium-choice-art .card-art {
+  opacity: 1;
+}
+.premium-preview-caption {
+  inset: 37% 17% auto;
+  font-size: 11cqw;
+  line-height: 1.2;
+}
+.premium-preview-caption em {
+  display: inline-block;
+  margin-top: 14px;
+  font-size: 6.5cqw;
+}
+/* Keep the editable face in the same position as its gallery/guest preview. */
+.is-studio-collection button.design-text-layer {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  justify-content: flex-start;
+}
+.is-studio-collection [data-layer-id="masthead"] {
+  text-transform: uppercase;
+  letter-spacing: 0.025em;
+  line-height: 1.2;
+}
+.is-studio-collection [data-layer-id="monogram"],
+.is-studio-collection [data-layer-id="milestone"] {
+  line-height: 1.2;
+}

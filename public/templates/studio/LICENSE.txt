@@ -1,0 +1,13 @@
+TheDigitalCardBox Studio collection v1 — 15 November 2026
+
+Original vector illustrations and AI-assisted painted backgrounds created for
+TheDigitalCardBox. Editable personal text is separate from the artwork.
+
+These assets support creating and personalizing cards, invitations and
+save-the-dates within TheDigitalCardBox, and retaining/sharing those personalized
+outputs and the selected artwork in the application's portable archives.
+
+The vector sources, painted-art prompts, retained-file hashes and provenance
+records are included in the project's Studio collection documentation. Third-party
+stationery sites were consulted as design references; their artwork is not
+included. Existing imported designs retain their own separate source notices.

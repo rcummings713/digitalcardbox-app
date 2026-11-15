@@ -14,7 +14,9 @@ export async function cardArchive<T extends CardRecord>(
   async function embed(path: string) {
     if (
       !path.startsWith("/gifs/") &&
-      !/^\/templates\/imported\/[a-z0-9-]+\.(png|jpg|webp)$/.test(path)
+      !/^\/templates\/(?:imported\/[a-z0-9-]+\.(?:png|jpg|webp)|studio\/[a-z0-9-]+\.(?:svg|webp))$/.test(
+        path,
+      )
     )
       throw new Error("Unknown media asset.");
     const response = await fetcher(path, {
@@ -77,8 +79,14 @@ export async function cardArchive<T extends CardRecord>(
     if (item && "artwork" in item)
       backgrounds.push({
         id: item.id,
-        credit: item.credit,
-        licenseUrl: item.licenseUrl,
+        credit:
+          "credit" in item
+            ? item.credit
+            : "Original TheDigitalCardBox Studio artwork",
+        licenseUrl:
+          "licenseUrl" in item
+            ? item.licenseUrl
+            : "/templates/studio/LICENSE.txt",
         image: await embed(item.artwork),
       });
   }

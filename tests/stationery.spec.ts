@@ -48,7 +48,10 @@ test("mobile creators type directly on a design, format, resize, undo, and reope
   expect(await page.locator(".studio-template-grid>button").count()).toBe(12);
   await page.getByRole("button", { name: /Show more templates/ }).click();
   await expect(page.locator(".studio-template-grid>button")).toHaveCount(24);
-  await page.getByLabel("Search templates", { exact: true }).fill("Porcelain");
+  await page.getByLabel("Filter designs").selectOption("Earlier collection");
+  await page
+    .getByLabel("Search templates", { exact: true })
+    .fill("Porcelain Blue");
   await expect(page.locator(".studio-template-grid>button")).toHaveCount(4);
   await page
     .getByRole("button", { name: "Porcelain Blue · Arch", exact: true })
@@ -412,7 +415,7 @@ test("mobile visitors personalize the new Canva invitations before account creat
   await page.emulateMedia({ reducedMotion: "reduce" });
   await page.goto("/invitations");
   await page.getByRole("button", { name: /Invitation templates/ }).click();
-  await page.getByLabel("Filter designs").selectOption("All designs");
+  await page.getByLabel("Filter designs").selectOption("Earlier collection");
   await expect(page.locator(".studio-template-grid>button")).toHaveCount(12);
   await expect(
     page.getByText("195 designs · personalize every text layer", {
@@ -460,4 +463,133 @@ test("mobile visitors personalize the new Canva invitations before account creat
         .analyze()
     ).violations,
   ).toEqual([]);
+});
+
+test("Studio designs preserve personal invitation wording across original and earlier artwork, fonts and reload", async ({
+  page,
+}) => {
+  await page.setViewportSize({ width: 375, height: 812 });
+  await page.emulateMedia({ reducedMotion: "reduce" });
+  await page.goto("/invitations");
+  await page.getByRole("button", { name: /Invitation templates/ }).click();
+  await expect(
+    page.locator(".studio-template-grid>button").first(),
+  ).toHaveAccessibleName("Rosewater Peony");
+  await page.getByLabel("Filter designs").selectOption("All designs");
+  await page.getByLabel("Search templates", { exact: true }).fill("Botanical");
+  await expect(page.locator(".studio-template-grid>button")).toHaveCount(4);
+  await page.getByLabel("Search templates", { exact: true }).fill("");
+  await page.getByRole("button", { name: "Linen & Ink", exact: true }).click();
+  await typeOnDesign(page, "Event title", "Maya & Oliver");
+  await page
+    .getByLabel("Every occasion", { exact: true })
+    .selectOption("Baby shower");
+  await expect(
+    page.getByRole("button", { name: "Edit Opening line", exact: true }),
+  ).toContainText("A little joy is on the way");
+  await expect(
+    page.getByRole("button", { name: "Edit Event title", exact: true }),
+  ).toContainText("Maya & Oliver");
+  await page.getByLabel("Typography", { exact: true }).selectOption("sans");
+  await expect(
+    page.getByRole("button", { name: "Edit Event title", exact: true }),
+  ).toHaveCSS("font-family", /Hanken Grotesk/);
+  await page
+    .getByRole("button", { name: "Citrus Terrace", exact: true })
+    .click();
+  await expect(
+    page.getByRole("button", { name: "Edit Event title", exact: true }),
+  ).toContainText("Maya & Oliver");
+  const canvas = page.locator(".editor-stage .design-canvas");
+  await expect
+    .poll(() =>
+      canvas
+        .locator("img.card-art")
+        .evaluate((image) => (image as HTMLImageElement).naturalWidth),
+    )
+    .toBeGreaterThan(800);
+  await page.getByLabel("Filter designs").selectOption("Earlier collection");
+  await page
+    .getByLabel("Search templates", { exact: true })
+    .fill("Pressed Peony");
+  await page
+    .getByRole("button", { name: "Pressed Peony", exact: true })
+    .click();
+  await expect(
+    page.getByRole("button", { name: "Edit Event title", exact: true }),
+  ).toContainText("Maya & Oliver");
+  await page.reload();
+  await expect(page.locator(".editor-stage")).toContainText("Maya & Oliver");
+  expect(
+    (await (await page.request.get("/api/session")).json()).account,
+  ).toBeNull();
+  const a11y = await new AxeBuilder({ page }).include("main").analyze();
+  expect(a11y.violations).toEqual([]);
+});
+
+test("new arrivals include editable newspaper, monogram and milestone designs with GIFs outside the text", async ({
+  page,
+}) => {
+  await page.setViewportSize({ width: 375, height: 812 });
+  await page.emulateMedia({ reducedMotion: "reduce" });
+  await page.goto("/invitations");
+  await page.getByRole("button", { name: /Invitation templates/ }).click();
+  await page.getByLabel("Filter designs").selectOption("New arrivals");
+  await expect(
+    page.getByText("21 designs · personalize every text layer", {
+      exact: true,
+    }),
+  ).toBeVisible();
+  await page
+    .getByRole("button", { name: "The Wedding Edit", exact: true })
+    .click();
+  await typeOnDesign(page, "Newspaper masthead", "The Rivera Wedding");
+  await typeOnDesign(page, "Event title", "Amelia & Mateo");
+  await page.getByRole("button", { name: "Add a GIF", exact: true }).click();
+  await page.getByLabel("Find a little feeling").fill("heart face");
+  await page.getByRole("button", { name: "Heart Face", exact: true }).click();
+  const overlap = await page
+    .locator(".editor-stage .design-canvas")
+    .evaluate((canvas) => {
+      const gif = canvas.querySelector(".design-gif")!.getBoundingClientRect();
+      return [...canvas.querySelectorAll(".design-text-layer")].some((el) => {
+        const text = el.getBoundingClientRect();
+        return (
+          gif.left < text.right &&
+          gif.right > text.left &&
+          gif.top < text.bottom &&
+          gif.bottom > text.top
+        );
+      });
+    });
+  expect(overlap).toBe(false);
+  await page.reload();
+  await expect(page.locator(".editor-stage")).toContainText(
+    "The Rivera Wedding",
+  );
+  await expect(page.locator(".editor-stage")).toContainText("Amelia & Mateo");
+  await page.getByRole("button", { name: /Invitation templates/ }).click();
+  await page.getByLabel("Filter designs").selectOption("New arrivals");
+  await page
+    .getByLabel("Search templates", { exact: true })
+    .fill("Olive Initials");
+  await page
+    .getByRole("button", { name: "Olive Initials", exact: true })
+    .click();
+  await typeOnDesign(page, "Your monogram", "A & M");
+  await expect(page.locator(".editor-stage")).toContainText("A & M");
+  // Remove the two deliberately personalized extra layers before choosing a
+  // different design's extra field; the shared document has a six-layer limit.
+  await page.getByText("Position, size & layers", { exact: true }).click();
+  await page.getByRole("button", { name: "Remove text", exact: true }).click();
+  await page.getByLabel("Text layer", { exact: true }).selectOption("masthead");
+  await page.getByRole("button", { name: "Remove text", exact: true }).click();
+  await page
+    .getByLabel("Search templates", { exact: true })
+    .fill("Birthday in Blush");
+  await page
+    .getByRole("button", { name: "Birthday in Blush", exact: true })
+    .click();
+  await typeOnDesign(page, "Age or initial", "40");
+  await expect(page.locator(".editor-stage")).toContainText("40");
 });

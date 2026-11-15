@@ -1,0 +1,229 @@
+{
+  "collection": "TheDigitalCardBox Celebration collection",
+  "version": 1,
+  "created": "2026-11-15",
+  "inspiration": "Three owner-supplied Canva template-gallery screenshots. General styles referenced; no screenshot imagery, Canva template export or supplier stock is embedded.",
+  "scope": "21 additional originals, alongside the existing 24 Studio and all earlier templates.",
+  "vectorSource": "src/modules/media/studio-art.ts",
+  "optimization": "Nine original scenes generated using ChatGPT built-in image_gen, optimized with cwebp quality86/method6.",
+  "assets": [
+    {
+      "file": "public/templates/studio/birthday-glam-v1.svg",
+      "bytes": 1977,
+      "sha256": "af58213432b458ada14f8876cc4a0cc860c39d3fe4952cf658d72c36c7977a53",
+      "medium": "original vector"
+    },
+    {
+      "file": "public/templates/studio/ceremony-arch-v1.webp",
+      "bytes": 229936,
+      "sha256": "069013fcbcccd21bf399a013f7a6240e61623201e79c1ca0def0b2e34217b35c",
+      "medium": "AI-assisted original scene",
+      "dimensions": {
+        "width": 1060,
+        "height": 1484
+      }
+    },
+    {
+      "file": "public/templates/studio/champagne-nocturne-v1.webp",
+      "bytes": 77500,
+      "sha256": "9f344df28d654e1d18f86ded1b798a385b668b8b28d8dfc45ecdc275cb2b75d6",
+      "medium": "AI-assisted original scene",
+      "dimensions": {
+        "width": 1060,
+        "height": 1484
+      }
+    },
+    {
+      "file": "public/templates/studio/crimson-toast-v1.svg",
+      "bytes": 6536,
+      "sha256": "fdc2a590a0747eee9df73b76daafe45619f75bc34f77ba6e70029800a697ccb1",
+      "medium": "original vector"
+    },
+    {
+      "file": "public/templates/studio/embossed-cameo-v1.svg",
+      "bytes": 2802,
+      "sha256": "23372af26341ca9fee6a0edc65d66e46c6e3f686dad1e79c694fd43bed4bd360",
+      "medium": "original vector"
+    },
+    {
+      "file": "public/templates/studio/filigree-v1.svg",
+      "bytes": 10248,
+      "sha256": "ac20ca8318253854d3516e334983b744b3a94644f3da2bec197b80fd1bb4b8ab",
+      "medium": "original vector"
+    },
+    {
+      "file": "public/templates/studio/folk-fiesta-v1.svg",
+      "bytes": 82833,
+      "sha256": "93da5b5984c146b1145052cb0ff765c6cb1765e7221fd3209f01df4af39c053c",
+      "medium": "original vector"
+    },
+    {
+      "file": "public/templates/studio/galentines-v1.svg",
+      "bytes": 2443,
+      "sha256": "4a07f3a99c2977ca76ff85b312a0c5f90c049585eddf6114534e0f9d139e5b4b",
+      "medium": "original vector"
+    },
+    {
+      "file": "public/templates/studio/garden-collage-v1.webp",
+      "bytes": 182934,
+      "sha256": "d0f01b0865f372b44339c50dfad5a71b204ae4924eb5cbe8745f2f2a9bc625ec",
+      "medium": "AI-assisted original scene",
+      "dimensions": {
+        "width": 1060,
+        "height": 1484
+      }
+    },
+    {
+      "file": "public/templates/studio/gilded-vows-v1.webp",
+      "bytes": 197018,
+      "sha256": "b19b534245dbe86cb5c275b223292dec05dad89eb91131f96851bf4969da4732",
+      "medium": "AI-assisted original scene",
+      "dimensions": {
+        "width": 1060,
+        "height": 1484
+      }
+    },
+    {
+      "file": "public/templates/studio/grand-bouquet-v1.svg",
+      "bytes": 61574,
+      "sha256": "5a2b1dc44d8748be368f7bddc2852659450051da7507100c9845c16fae541a33",
+      "medium": "original vector"
+    },
+    {
+      "file": "public/templates/studio/hydrangea-vows-v1.webp",
+      "bytes": 151862,
+      "sha256": "2f9ec6711d06289cafb0db2d9ef7072ee29cb135d0a654c484ea5242db9c9632",
+      "medium": "AI-assisted original scene",
+      "dimensions": {
+        "width": 1060,
+        "height": 1484
+      }
+    },
+    {
+      "file": "public/templates/studio/just-married-v1.svg",
+      "bytes": 22697,
+      "sha256": "63e67e9889bbd67344608925647196068c25533c99930e249e4fc010fd8ed1dd",
+      "medium": "original vector"
+    },
+    {
+      "file": "public/templates/studio/leopard-ivory-v1.svg",
+      "bytes": 45013,
+      "sha256": "408f4d68e0988e30aeff28ccaff05cbbc5ff2795b7370a7b6c40679124da890b",
+      "medium": "original vector"
+    },
+    {
+      "file": "public/templates/studio/leopard-noir-v1.svg",
+      "bytes": 45013,
+      "sha256": "1293afcba926ca1796e64e236a3be30b0152bbcdac3274e6de0f6f775fe74c01",
+      "medium": "original vector"
+    },
+    {
+      "file": "public/templates/studio/newsroom-v1.webp",
+      "bytes": 122910,
+      "sha256": "c7ff473df70290b3225f91a523c4744db08bb680ae37f617dc01ba9d12f5359f",
+      "medium": "AI-assisted original scene",
+      "dimensions": {
+        "width": 1060,
+        "height": 1484
+      }
+    },
+    {
+      "file": "public/templates/studio/noir-bow-v1.svg",
+      "bytes": 3357,
+      "sha256": "d8458584f92ab6be22e315ce1ca4c9d61f9b335584d170b35d293315cbb0fa82",
+      "medium": "original vector"
+    },
+    {
+      "file": "public/templates/studio/olive-monogram-v1.svg",
+      "bytes": 21483,
+      "sha256": "1868abdc68f355bb5a0edf78c4cebf982c65c0f25b32f31660e5c3311492fcb5",
+      "medium": "original vector"
+    },
+    {
+      "file": "public/templates/studio/portrait-linen-v1.webp",
+      "bytes": 68036,
+      "sha256": "081b9d3be657f501e258c113ead38582c503c70e7c9e12ef19af2854c4b1b0ae",
+      "medium": "AI-assisted original scene",
+      "dimensions": {
+        "width": 1060,
+        "height": 1484
+      }
+    },
+    {
+      "file": "public/templates/studio/silk-whisper-v1.webp",
+      "bytes": 39392,
+      "sha256": "fca9b28220cdcca793fccb6585b4a1093d2ec6394ea561b4072c98d1e658e847",
+      "medium": "AI-assisted original scene",
+      "dimensions": {
+        "width": 1060,
+        "height": 1484
+      }
+    },
+    {
+      "file": "public/templates/studio/vows-film-v1.webp",
+      "bytes": 65798,
+      "sha256": "aac9f0e508b4f22717a0b3d3d8df3554a7fe78d91be1651ac52d9e7593ca5f77",
+      "medium": "AI-assisted original scene",
+      "dimensions": {
+        "width": 1060,
+        "height": 1484
+      }
+    }
+  ],
+  "finalPromptSet": [
+    {
+      "asset": "vows-film-v1.webp",
+      "source": "exec-49a06196-5ddc-43bc-83ae-39c779d89639.png",
+      "tool": "ChatGPT built-in image_gen",
+      "prompt": "Original premium wedding stationery background, flat portrait 5:7 artwork, no mockup. Upper 43% contains an exquisite black-and-white film photograph of a bride and groom's hands loosely entwined, wedding rings and soft silk fabric, cropped at the wrists, no faces. The photograph fills the width, with a subtle ivory torn-paper edge transitioning into a completely blank warm ivory lower 55%. Elegant authentic fine-grain analog photography, natural window light and quiet emotion, no exaggerated AI sheen. Keep entire lower area y46% to97% clean ivory for native editable typography. No text, letters, numbers, logos, watermarks or frame shadows."
+    },
+    {
+      "asset": "newsroom-v1.webp",
+      "source": "exec-5f249e9f-3a9d-45ae-ba2d-11a7de4e4410.png",
+      "tool": "ChatGPT built-in image_gen",
+      "prompt": "Original wedding newspaper stationery BACKGROUND ONLY, flat portrait5:7 layout. Warm off-white uncoated paper. Fine black hairline rules near y4% and y16%, margin10%. A beautifully composed black-and-white documentary-style photograph occupying x10% to90%, y20% to46%: an outdoor wedding table with a loose bouquet, two champagne coupes, rumpled linen and old stone garden architecture in the background. No people. A fine horizontal rule at y48%. Leave y5% to15% and y50% to96% blank off-white for all newspaper headlines and details to be rendered separately. Tactile understated editorial photography with rich blacks. Absolutely no words, letters, numbers, simulated newspaper text, logos, watermark or mockup."
+    },
+    {
+      "asset": "garden-collage-v1.webp",
+      "source": "exec-0479e9c9-6b84-482e-af4f-733bf2558037.png",
+      "tool": "ChatGPT built-in image_gen",
+      "prompt": "Original luxury wedding stationery background, flat5:7 portrait. Upper42% has a curated overlapping collage of three real-looking analog color photographs in thin ivory paper mounts, on warm ivory cotton paper: a white rose bouquet with olive branches, gold wedding bands on textured linen, and a sunlit Mediterranean garden doorway. Photos overlap with subtle natural paper depth, beautifully art-directed and restrained. Small olive leaves at the top corner only. Keep the lower56% perfectly blank warm ivory for editable text, with NO decorative objects below y44%. Premium candid editorial photography, muted sage, cream, champagne and copper. No people, text, numbers, lettering, logo, watermark or outer drop shadow."
+    },
+    {
+      "asset": "champagne-nocturne-v1.webp",
+      "source": "exec-5527ed99-8377-4590-be79-5c65e66629b8.png",
+      "tool": "ChatGPT built-in image_gen",
+      "prompt": "Original sophisticated wedding invitation background, portrait5:7 edge-to-edge flat artwork. Top35% is a moody cinematic photograph of two champagne coupes, a white orchid, and candlelight on a midnight-blue linen dinner table, softly illuminated with warm amber light. The real photographic scene fades smoothly into an uninterrupted uniform deep navy #263b50 field by y39%. Entire central and lower area x10%-90%, y41%-96% is clear navy for editable ivory invitation typography. Luxurious intimate editorial photography, real glass highlights and delicate grain; no human figures or faces. No text, lettering, numbers, logos, watermark or mockup."
+    },
+    {
+      "asset": "ceremony-arch-v1.webp",
+      "source": "exec-83f6d892-8c43-49dc-910c-f392659fa4a3.png",
+      "tool": "ChatGPT built-in image_gen",
+      "prompt": "Original premium wedding invitation background, flat portrait5:7. An elegantly arched photograph occupies x12%-88% and y3%-43% on an ivory cotton-paper field. Photograph: a sunlit coastal ceremony aisle with white hydrangeas, roses, olive branches, empty white chairs, distant blue sea, no people. Beautiful natural editorial photography, airy but detailed, fine film grain. The arch has a smoothly rounded top and a straight bottom, with a very fine muted gold contour. The entire lower54% must remain absolutely blank warm ivory for separately editable invitation text. No text, letters, numbers, logo, watermark, mockup, envelope or floating-card shadow."
+    },
+    {
+      "asset": "silk-whisper-v1.webp",
+      "source": "exec-af4c356b-256c-4337-b853-ce4b523ab7b3.png",
+      "tool": "ChatGPT built-in image_gen",
+      "prompt": "Original minimal luxury invitation background, portrait5:7 flat edge-to-edge composition. Rich warm ivory silk with delicate folds across the upper left corner, a small understated golden wedding band and an olive tip near the upper edge, and a soft drape restricted to the bottom outer corner. The central78% width from y22% to92% is an uninterrupted creamy ivory field, gently tactile and luminous but no objects or fold shadows behind the writing area. Beautiful real still-life editorial photography with understated satin texture. Restrained, quiet and sophisticated. No people, text, lettering, numbers, logo, watermark, card mockup or cast outer shadow."
+    },
+    {
+      "asset": "gilded-vows-v1.webp",
+      "source": "exec-fcb6a11c-bff0-4777-b9ba-b856e4790afd.png",
+      "tool": "ChatGPT built-in image_gen",
+      "prompt": "Original ornate wedding stationery background, flat portrait5:7. An exquisite fine-engraved botanical frame of ivory roses, tiny white blossoms, pale olive leaves and delicate antique gold filigree around the outermost12% of the edges. Two interlocking gold wedding rings form a small crest at x50%, y12%. Elegant hand-painted botanical illustration with authentic fine ink detail and soft watercolor, on warm white cotton paper. More intricate and formal than sparse minimalist stationery, with carefully balanced corner clusters. Keep rectangle x18%-82%, y26%-94% COMPLETELY CLEAR white/ivory for separately editable text. Lower decorative flowers stay along sides and below95% height. No text, letters, numbers, monograms, logo, watermark, envelope or mockup. Original composition, not a reproduction of any existing designer's work."
+    },
+    {
+      "asset": "hydrangea-vows-v1.webp",
+      "source": "exec-5749c770-2459-4feb-bd57-d092896c1d17.png",
+      "tool": "ChatGPT built-in image_gen",
+      "prompt": "Original luxurious blue-and-white floral wedding stationery background, flat portrait5:7. Delicately painted powder-blue hydrangeas, white garden roses and fine sage eucalyptus frame the outer edges. A thin antique-gold rectangular line at6% inset, interrupted naturally by flowers in the top-left and bottom-right corners. Detailed watercolor and botanical pencil texture with graceful natural flowers, premium bespoke stationery on softly textured ivory paper. Reserve the central65% width and y26%-93% as an absolutely clear ivory writing area. Bottom-right flowers must remain in outer15% of width or below94% height; upper-left flowers remain above22% height. No text, letters, numbers, monogram, logo, watermark, mockup or exterior shadow."
+    },
+    {
+      "asset": "portrait-linen-v1.webp",
+      "source": "exec-2636ef00-b7f3-4bcc-b276-62356faa0411.png",
+      "tool": "ChatGPT built-in image_gen",
+      "prompt": "Original premium wedding stationery background, flat portrait5:7. A full-height vertical black-and-white photograph fills ONLY the left38%: a cropped bride's hand holding a textured white bouquet beside a groom's hand and dark suit sleeve, no faces, no identifiable people. Beautiful candid analog photography, fine film grain, rich blacks and delicate silk highlights. A thin ivory paper edge separates the photo from the remaining62% on the right. The ENTIRE right field x41%-98%, y0%-100% is blank warm ivory cotton paper, with absolutely no ornament or text, for editable invitation typography. Sophisticated split-page editorial composition. No letters, words, numbers, logo, watermark or mockup."
+    }
+  ]
+}

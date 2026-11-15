@@ -35,7 +35,12 @@ import { useStore } from "./state";
 import { request } from "./api";
 
 function seedInvitation(event: Occasion, variant?: DesignVariant) {
-  const value = createDesign("invitation", event.type, "botanical", variant);
+  const value = createDesign(
+    "invitation",
+    event.type,
+    "studio-rosewater-v1",
+    variant,
+  );
   value.blocks = value.blocks.map((b) =>
     b.id === "title"
       ? { ...b, text: event.title }
@@ -78,7 +83,7 @@ export function DesignStudio({
     return createDesign(
       kind,
       eventTypes.includes(requested) ? requested : "Wedding",
-      "botanical",
+      "studio-rosewater-v1",
       variant,
     );
   });
@@ -171,10 +176,15 @@ export function DesignStudio({
             : "Everyday";
   const filtered = items.filter(
     (t) =>
-      (category === "All designs" ||
-        t.category === desiredCategory ||
-        t.category === "Everyday") &&
-      `${t.name} ${t.description} ${t.category}`
+      ((category === "All designs" && "collection" in t) ||
+        (category === "New arrivals" &&
+          "collection" in t &&
+          t.series === "celebration") ||
+        (category === "Earlier collection" && !("collection" in t)) ||
+        (category === "Recommended" &&
+          "collection" in t &&
+          (t.category === desiredCategory || t.category === "Everyday"))) &&
+      `${t.name} ${t.description} ${t.category} ${"style" in t ? t.style : ""}`
         .toLowerCase()
         .includes(query.toLowerCase().trim()),
   );
@@ -304,7 +314,35 @@ export function DesignStudio({
               id={`studio-occasion-${kind}`}
               value={value.occasion}
               onChange={(e) => {
-                edit({ ...value, occasion: e.target.value });
+                const previous = createDesign(
+                  kind,
+                  value.occasion,
+                  value.template,
+                  variant,
+                );
+                const next = createDesign(
+                  kind,
+                  e.target.value,
+                  value.template,
+                  variant,
+                );
+                edit({
+                  ...value,
+                  occasion: e.target.value,
+                  blocks: value.blocks.map((block) => {
+                    const original = previous.blocks.find(
+                      (b) => b.id === block.id,
+                    );
+                    const replacement = next.blocks.find(
+                      (b) => b.id === block.id,
+                    );
+                    return original &&
+                      replacement &&
+                      block.text === original.text
+                      ? { ...block, text: replacement.text }
+                      : block;
+                  }),
+                });
                 setReference(crypto.randomUUID());
               }}
             >
@@ -460,6 +498,8 @@ export function DesignStudio({
               >
                 <option>Recommended</option>
                 <option>All designs</option>
+                <option>New arrivals</option>
+                <option>Earlier collection</option>
               </select>
               <label htmlFor="template-search">Search templates</label>
               <input
@@ -469,6 +509,16 @@ export function DesignStudio({
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
               />
+              <p className="studio-collection-note">
+                <span>
+                  {category === "Earlier collection"
+                    ? "The earlier collection"
+                    : "The Studio Collection"}
+                </span>
+                {category === "Earlier collection"
+                  ? "Explore the original library and find a familiar favorite."
+                  : "Painted florals, tailored classics, and playful illustrated stories."}
+              </p>
               <p className="small">
                 {filtered.length} designs · personalize every text layer
               </p>
@@ -477,6 +527,7 @@ export function DesignStudio({
                   <button
                     key={t.id}
                     type="button"
+                    aria-label={t.name}
                     aria-pressed={value.template === t.id && !value.artId}
                     onClick={() => {
                       edit(applyTemplate(value, t.id));
@@ -506,6 +557,11 @@ export function DesignStudio({
                       />
                     </div>
                     <strong>{t.name}</strong>
+                    {"collection" in t && (
+                      <small className="studio-template-style">
+                        {t.style} · Studio original
+                      </small>
+                    )}
                   </button>
                 ))}
               </div>

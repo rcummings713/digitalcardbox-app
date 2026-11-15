@@ -1,3 +1,4 @@
+import { studioArtwork } from "../modules/media/studio-art";
 import { StationeryArt } from "./StationeryArt";
 import { useId } from "react";
 import type { TemplateId } from "../modules/media/catalog";
@@ -6,12 +7,33 @@ import { templates } from "../modules/media/catalog";
 export function TemplateArt({
   id,
   accent,
+  paper,
+  ink,
 }: {
   id: TemplateId;
   accent?: string;
+  paper?: string;
+  ink?: string;
 }) {
   const gradient = useId();
   const design = templates.find((item) => item.id === id)!;
+  if ("collection" in design && design.medium === "vector")
+    return (
+      <img
+        className="card-art template-art studio-illustration"
+        src={`data:image/svg+xml,${encodeURIComponent(
+          studioArtwork(design.key, {
+            paper: paper || design.paper,
+            ink: ink || design.ink,
+            accent: accent || design.accent,
+          }),
+        )}`}
+        width={400}
+        height={560}
+        alt=""
+        decoding="async"
+      />
+    );
   if ("artwork" in design)
     return (
       <img

@@ -10,8 +10,8 @@ import { cardArchive } from "../../src/modules/media/archive.ts";
 test("the one-time Canva collection retains 100 real backgrounds with editable invitation and save-the-date recipes", () => {
   const records = JSON.parse(readFileSync(new URL("../../docs/licensing/template-imports.json", import.meta.url)));
   assert.equal(importedTemplates.length, 100);
-  assert.equal(invitationTemplates.length, 195);
-  assert.equal(cardTemplates.length, 106);
+  assert.equal(invitationTemplates.filter((t) => !("collection" in t)).length, 195);
+  assert.equal(cardTemplates.filter((t) => !("collection" in t)).length, 106);
   assert.equal(new Set(importedTemplates.map((item) => item.category)).size, 8);
   for (const item of importedTemplates) {
     assert.deepEqual(item.kinds, ["invitation"]);

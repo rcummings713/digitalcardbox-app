@@ -35,7 +35,7 @@ export async function savePaidBook(
   async function embed(path: string) {
     if (assets.has(path)) return bounded(assets.get(path)!);
     if (
-      !/^\/(?:gifs\/[a-zA-Z0-9_/-]+\.(?:gif|webp|png)|templates\/imported\/[a-z0-9-]+\.png|api\/host\/(?:art|studio-art)\/[a-f0-9-]{36})$/.test(
+      !/^\/(?:gifs\/[a-zA-Z0-9_/-]+\.(?:gif|webp|png)|templates\/(?:imported\/[a-z0-9-]+\.png|studio\/[a-z0-9-]+\.(?:svg|webp))|api\/host\/(?:art|studio-art)\/[a-f0-9-]{36})$/.test(
         path,
       )
     )
@@ -47,9 +47,13 @@ export async function savePaidBook(
     const mime = response.headers.get("Content-Type")?.split(";")[0];
     if (
       !response.ok ||
-      !["image/png", "image/webp", "image/gif", "image/jpeg"].includes(
-        mime || "",
-      )
+      ![
+        "image/png",
+        "image/webp",
+        "image/gif",
+        "image/jpeg",
+        "image/svg+xml",
+      ].includes(mime || "")
     )
       throw new Error(
         "Artwork could not be saved. Your purchase is still available; please retry the download.",
