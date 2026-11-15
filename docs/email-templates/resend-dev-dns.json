@@ -1,0 +1,72 @@
+{
+  "domain": "auth-dev.thedigitalcardbox.com",
+  "domainId": "bf674e71-47e1-4677-a793-af3d00f09fef",
+  "region": "us-east-1",
+  "status": "verified",
+  "senderName": "TheDigitalCardBox",
+  "senderEmail": "no-reply@auth-dev.thedigitalcardbox.com",
+  "dashboard": "https://resend.com/domains/bf674e71-47e1-4677-a793-af3d00f09fef",
+  "records": [
+    {
+      "type": "TXT",
+      "name": "resend._domainkey.auth-dev",
+      "value": "p=MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQCY7nXedBnpeEOKSGphcKSg+U4v2DYcs5MuJtUUg1RU+p8hlSSLG+2ZyHb13SPqORyMp1rLmCZ8nNuoopmMechwbahIeX64dCC/UBrIeyvR3eYKBGMwf4160REChxZXcQyPRDiOkHK7Hgi3uD2DtEvMRtS2kVG4JQyF1FSS98MfxwIDAQAB",
+      "ttl": "Auto",
+      "verificationStatus": "verified"
+    },
+    {
+      "type": "MX",
+      "name": "send.auth-dev",
+      "value": "feedback-smtp.us-east-1.amazonses.com",
+      "priority": 10,
+      "ttl": "Auto",
+      "verificationStatus": "verified"
+    },
+    {
+      "type": "TXT",
+      "name": "send.auth-dev",
+      "value": "v=spf1 include:amazonses.com ~all",
+      "ttl": "Auto",
+      "verificationStatus": "verified"
+    },
+    {
+      "type": "CNAME",
+      "name": "rsend.auth-dev",
+      "value": "send.forge.rmta.net",
+      "ttl": "Auto",
+      "verificationStatus": "verified"
+    }
+  ],
+  "existingDNS": {
+    "nameservers": [
+      "ns45.domaincontrol.com",
+      "ns46.domaincontrol.com"
+    ],
+    "mailMX": "thedigitalcardbox-com.mail.protection.outlook.com",
+    "rootSPF": "v=spf1 include:secureserver.net -all",
+    "rootDMARC": "v=DMARC1; p=quarantine; adkim=r; aspf=r; rua=mailto:dmarc_rua@onsecureserver.net;",
+    "registryRegistrar": "Wild West Domains, LLC",
+    "authoritativeDNSProvider": "GoDaddy (ns45.domaincontrol.com / ns46.domaincontrol.com)",
+    "checkedDate": "2026-11-14 America/New_York"
+  },
+  "notes": [
+    "Owner installed the four reviewed records. Values match both authoritative nameservers and public resolvers; do not add duplicates.",
+    "Keep root Microsoft 365 mail, SPF, existing DMARC and website DNS intact.",
+    "Existing root DMARC applies to this subdomain; do not weaken it with a new p=none override.",
+    "Sending only; receiving, click tracking and open tracking disabled.",
+    "Live DEV signup/confirmation/login/recovery verified on 15 November using Resend simulated delivery; real personal-inbox delivery and Google/Apple remain separate.",
+    "Cheapnames.com management is confirmed. Use the domain DNS tab to add the four records; preserve all existing records, nameservers and mail settings."
+  ],
+  "ownerReportedDomainProvider": "Cheapnames.com; confirmed by owner-provided domain dashboard",
+  "dnsInstalledByOwner": true,
+  "dnsPublishedValuesMatch": true,
+  "dnsCheckedDate": "2026-11-14 America/New_York",
+  "smtpAuthenticationCheck": {
+    "result": "passed",
+    "code": 235,
+    "tlsVerified": true,
+    "messageSent": false
+  },
+  "supabaseSMTPInstallation": "verified through live DEV email/password workflow on 2026-11-15; raw dashboard configuration not inspected",
+  "emailWorkflowVerification": "dev-email-verification.json"
+}

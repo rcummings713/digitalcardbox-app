@@ -1,0 +1,133 @@
+{
+  "assessment_date": "2026-11-15",
+  "commit": "6724b0a",
+  "branch": "feature/premium-stationery-collection",
+  "includes_existing_uncommitted_changes": true,
+  "validation": {
+    "build": "pass",
+    "api": {
+      "passed": 88,
+      "failed": 0
+    },
+    "worker": {
+      "passed": 7,
+      "failed": 0
+    },
+    "ui": {
+      "passed": 14,
+      "failed": 0
+    },
+    "connected_browser": {
+      "passed": 28,
+      "failed": 0
+    },
+    "deployment_routing": {
+      "passed": 7,
+      "failed": 0
+    },
+    "planning": "pass"
+  },
+  "auth_probe_results": [
+    {
+      "proof": "six-day-old managed session publishes and changes destination",
+      "sessionAgeDays": 6,
+      "publishStatus": 200,
+      "destinationStatus": 200,
+      "grants": [
+        "password",
+        "refresh"
+      ]
+    },
+    {
+      "proof": "DEV anonymous session publishes without verified identity",
+      "registered": false,
+      "createStatus": 201,
+      "eventStatus": "published"
+    },
+    {
+      "proof": "inactive invitation exposes configured payee and event location",
+      "eventWindow": "closed",
+      "readStatus": 200,
+      "identifierExposed": true,
+      "locationExposed": true,
+      "guestWriteStatus": 409,
+      "invitationBearerRequired": true
+    },
+    {
+      "proof": "inactive invitation exposes configured payee and event location",
+      "eventWindow": "scheduled",
+      "readStatus": 200,
+      "identifierExposed": true,
+      "locationExposed": true,
+      "guestWriteStatus": 409,
+      "invitationBearerRequired": true
+    },
+    {
+      "proof": "inactive invitation exposes configured payee and event location",
+      "eventWindow": "paused",
+      "readStatus": 200,
+      "identifierExposed": true,
+      "locationExposed": true,
+      "guestWriteStatus": 409,
+      "invitationBearerRequired": true
+    }
+  ],
+  "data_probe_results": [
+    {
+      "probe": "gift-first lifecycle lock",
+      "reproduced": true,
+      "giftCreated": true,
+      "lockedAt": null,
+      "oldDate": "2026-11-20",
+      "newDate": "2027-04-15",
+      "oldType": "Wedding",
+      "newType": "Baby shower",
+      "unexpectedUpdateAllowed": true
+    },
+    {
+      "probe": "expired studio session exhaustion",
+      "reproduced": true,
+      "total": 2000,
+      "active": 0,
+      "status": 429,
+      "message": "The design studio is busy. Manual designs remain available."
+    },
+    {
+      "probe": "CardVault export source truncation",
+      "reproduced": true,
+      "storedHostCards": 1004,
+      "returnedWorkspaceCards": 1000,
+      "missingCards": 4,
+      "hasPaginationMetadata": false
+    }
+  ],
+  "draft_probe_output": [
+    "Private draft available without account/session context: true",
+    "Storage key: dcb-design-studio-invitation-v1",
+    "Evidence: actual application draft reader restores synthetic private text from a global browser key.",
+    "Limit: this is a unit-level runtime probe; account logout/public routing are source-reviewed separately."
+  ],
+  "live_headers": {
+    "prod": {
+      "status": 200,
+      "content_security_policy": false,
+      "referrer_policy": false,
+      "nosniff": false,
+      "hsts": false
+    },
+    "dev": {
+      "status": 200,
+      "content_security_policy": true,
+      "referrer_policy": "no-referrer",
+      "nosniff": true,
+      "hsts": false
+    }
+  },
+  "limitations": [
+    "Public live checks were homepage reads only.",
+    "No private production database, real guest data or live payment tested.",
+    "Identity and payment behavioral evidence uses synthetic fixtures.",
+    "Secret scanning was bounded and pattern-based.",
+    "No production behavior was changed."
+  ]
+}
